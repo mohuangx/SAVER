@@ -29,7 +29,8 @@ calc.post <- function(y, mu, sf) {
   post.alpha <- prior.alpha + y
   post.beta <- prior.beta + sf
   lambda.hat <- post.alpha/post.beta
-  return(list(lambda.hat = ceiling(lambda.hat*1000)/1000,
+  return(list(estimate = ceiling(lambda.hat*1000)/1000,
               alpha = ceiling(post.alpha*1000)/1000,
-              beta = ceiling(post.beta*1000)/1000))
+              beta = ceiling(post.beta*1000)/1000,
+              predicted = ceiling(mu*1000)/1000))
 }
