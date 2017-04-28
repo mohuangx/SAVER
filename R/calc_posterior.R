@@ -1,5 +1,5 @@
 
-calc.post <- function(y, mu, sf) {
+calc.post <- function(y, mu, sf, scale.sf) {
   n <- length(y)
   if (length(mu) == 1) {
     mu <- rep(mu, n)
@@ -29,8 +29,8 @@ calc.post <- function(y, mu, sf) {
   post.alpha <- prior.alpha + y
   post.beta <- prior.beta + sf
   lambda.hat <- post.alpha/post.beta
-  return(list(estimate = ceiling(lambda.hat*1000)/1000,
+  return(list(estimate = ceiling(lambda.hat*1000/scale.sf)/1000,
               alpha = ceiling(post.alpha*1000)/1000,
-              beta = ceiling(post.beta*1000)/1000,
-              predicted = ceiling(mu*1000)/1000))
+              beta = ceiling(post.beta*1000*scale.sf)/1000,
+              predicted = ceiling(mu*1000/scale.sf)/1000))
 }

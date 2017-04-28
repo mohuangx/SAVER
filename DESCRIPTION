@@ -1,14 +1,19 @@
 Package: SAVER
 Type: Package
-Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Single-cell RNA-seq Gene Expression Recovery
+Description: This package implements a regularized regression prediction and 
+    empirical Bayes method to recover the true gene expression profile in 
+    noisy and sparse single-cell RNA-seq data. 
+Author: Mo Huang
+Maintainer: Mo Huang <mohuang@wharton.upenn.edu>
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.3)
 Imports:
     glmnet,
     foreach
+Suggest:
+    doParallel
+RoxygenNote: 6.0.1
