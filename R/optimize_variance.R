@@ -1,5 +1,5 @@
 
-
+#' @importFrom  stats optimize ppoints uniroot var
 calc.a <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -8,8 +8,8 @@ calc.a <- function(y, mu, sf) {
   if (length(sf) == 1) {
     sf <- rep(sf, n)
   }
-  a.vec <- optimize(calc.loglik.a, interval = c(0, var(y/sf)/mean(y/sf)^2), y = y,
-                    mu = mu, sf = sf)
+  a.vec <- optimize(calc.loglik.a, interval = c(0, var(y/sf)/mean(y/sf)^2),
+                    y = y, mu = mu, sf = sf)
   a <- a.vec$minimum
   a.loglik <- a.vec$objective
   min.a <- -calc.loglik.a(1e-05, y, mu, sf)
