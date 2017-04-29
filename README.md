@@ -8,7 +8,7 @@ You can install SAVER from github with:
 
 ```R
 # install.packages("devtools")
-devtools::install_github("SAVER/mohuangx")
+devtools::install_github("mohuangx/SAVER")
 ```
 
 ## Example
