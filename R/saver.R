@@ -38,7 +38,7 @@
 #' @param nfolds Number of folds to be used in cross validation. Default is 5.
 #'
 #' @return A list with the following components
-#' \item{\code{estimate}}{SAVER estimate}
+#' \item{\code{estimate}}{Recovered normalized expression}
 #' \item{\code{alpha}}{Posterior Gamma shape parameter}
 #' \item{\code{beta}}{Posterior Gamma rate parameter}
 #' \item{\code{predicted}}{Regression prediction}
