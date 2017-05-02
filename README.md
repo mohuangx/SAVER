@@ -35,4 +35,4 @@ registerDoParallel(cores = 4)
 saver4 <- saver(linnarsson, parallel = TRUE)
 ```
 
-SAVER estimates are stored in the ```estimate``` element of the list returned by ```saver```.
+Recovered normalized expression estimates are stored in the ```estimate``` element of the list returned by ```saver```.
