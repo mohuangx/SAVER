@@ -114,9 +114,11 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   cvt <- expr.predict(t(x.est[-pred.genes[1], ]), x[pred.genes[1], ]/sf,
                       dfmax, nfolds)
   t2 <- Sys.time()
+  t.diff <- t2-t1
+  units(t.diff) <- "secs"
   if (parallel) {
     nworkers <- foreach::getDoParWorkers()
-    t3 <- (t2-t1)*1.1*npred/nworkers + 0.01*ngenes
+    t3 <- t.diff*1.1*npred/nworkers + 0.01*ngenes
     units(t3) <- "mins"
     message("Approximate finish time: ", t2+t3)
     if (nworkers == 1) {
@@ -143,7 +145,7 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     }
 
   } else {
-    t3 <- (t2-t1)*npred + 0.01*ngenes
+    t3 <- t.diff*npred + 0.01*ngenes
     units(t3) <- "mins"
     message("Approximate finish time: ", t2+t3)
     mu.par <- matrix(0, npred, ncells)
