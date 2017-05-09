@@ -36,13 +36,3 @@ constant Fano factor.
 \code{calc.loglik.k} returns the shifted negative log-likelihood under
 constant variance.
 }
-\examples{
-y <- rpois(100, 5)
-mu <- y + rnorm(100)
-sf <- rlnorm(100, 0, 0.5)
-
-calc.loglik.a(1, y, mu, sf)
-calc.loglik.b(1, y, mu, sf)
-calc.loglik.k(1, y, mu, sf)
-
-}

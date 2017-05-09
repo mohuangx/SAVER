@@ -35,10 +35,3 @@ distribution will be
 \deqn{Gamma(y + \alpha, sf + \beta),}
 where y is the observed gene count and sf is the size factor.
 }
-\examples{
-y <- rpois(100, 5)
-mu <- y + rnorm(100)
-sf <- rlnorm(100, 0, 0.5)
-
-post <- calc.post(y, mu, sf, 1)
-}

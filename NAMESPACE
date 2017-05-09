@@ -3,5 +3,6 @@
 export(saver)
 importFrom(stats,optimize)
 importFrom(stats,ppoints)
+importFrom(stats,qgamma)
 importFrom(stats,uniroot)
 importFrom(stats,var)

@@ -33,13 +33,3 @@ coefficient of variation. \code{calc.b} returns a prior beta parameter
 assuming constant Fano factor. \code{calc.k} returns a prior variance
 parameter assuming constant variance.
 }
-\examples{
-y <- rpois(100, 5)
-mu <- y + rnorm(100)
-sf <- rlnorm(100, 0, 0.5)
-
-calc.a(y, mu, sf)
-calc.b(y, mu, sf)
-calc.k(y, mu, sf)
-
-}

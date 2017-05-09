@@ -25,14 +25,7 @@
 #' \item{\code{lower.95}}{Lower 95\% confidence interval}
 #' \item{\code{upper.95}}{Upper 95\% confidence interval}
 #'
-#' @examples
-#' y <- rpois(100, 5)
-#' mu <- y + rnorm(100)
-#' sf <- rlnorm(100, 0, 0.5)
-#'
-#' post <- calc.post(y, mu, sf, 1)
-
-
+#' @importFrom stats qgamma
 calc.post <- function(y, mu, sf, scale.sf) {
   n <- length(y)
   if (length(mu) == 1) {

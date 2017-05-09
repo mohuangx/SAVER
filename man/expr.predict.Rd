@@ -35,16 +35,3 @@ the LASSO Poisson regression. The model with the lowest cross-validation
 error is chosen and the fitted response values are returned and used as the
 SAVER prediction.
 }
-\examples{
-data("linnarsson")
-
-# library size normalization
-sf <- colSums(linnarsson)/mean(colSums(linnarsson))
-linnarsson.norm <- sweep(linnarsson, 2, sf, "/")
-linnarsson.est <- log(sweep(linarsson.norm, 2, 1/sf, "+"))
-
-# predicting 1st gene
-x <- t(linnarsson.est[-1, ])
-y <- linnarsson.norm[1, ]
-pred <- expr.predict(x, y, seed = 1)
-}

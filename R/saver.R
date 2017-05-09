@@ -68,8 +68,6 @@
 #' }
 #'
 #' @export
-
-
 saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
                   nfolds = 5) {

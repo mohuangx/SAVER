@@ -17,14 +17,6 @@
 #' @return A vector with the optimized parameter and the negative
 #' log-likelihood.
 #'
-#' @examples
-#' y <- rpois(100, 5)
-#' mu <- y + rnorm(100)
-#' sf <- rlnorm(100, 0, 0.5)
-#'
-#' calc.a(y, mu, sf)
-#' calc.b(y, mu, sf)
-#' calc.k(y, mu, sf)
 #'
 #' @importFrom  stats optimize ppoints uniroot var
 #' @rdname optimize_variance

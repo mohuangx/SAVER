@@ -20,18 +20,8 @@
 #'
 #' @return A shifted negative marginal log-likelihood.
 #'
-#' @examples
-#' y <- rpois(100, 5)
-#' mu <- y + rnorm(100)
-#' sf <- rlnorm(100, 0, 0.5)
-#'
-#' calc.loglik.a(1, y, mu, sf)
-#' calc.loglik.b(1, y, mu, sf)
-#' calc.loglik.k(1, y, mu, sf)
 #'
 #' @rdname calc_loglik
-
-
 calc.loglik.a <- function(a, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
