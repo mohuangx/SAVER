@@ -1,3 +1,43 @@
+#' Calculates SAVER prediction.
+#'
+#' Uses \code{cv.glmnet} from the \code{glmnet} package to return the SAVER
+#' prediction.
+#'
+#' The SAVER method starts with predicting the prior mean for each cell for a
+#' specific gene. The prediction is performed using the observed normalized
+#' gene count as the response and the normalized gene counts of other genes as
+#' predictors. \code{cv.glmnet} from the \code{glmnet} package is used to fit
+#' the LASSO Poisson regression. The model with the lowest cross-validation
+#' error is chosen and the fitted response values are returned and used as the
+#' SAVER prediction.
+#'
+#' @param x A log-normalized expression count matrix of genes to be used in the
+#' prediction.
+#'
+#' @param y A normalized expression count vector of the gene to be predicted.
+#'
+#' @param dfmax The number of genes to be included in the prediction. Default
+#' is 300.
+#'
+#' @param nfolds Number of folds to use in the cross-validation. Default is 5.
+#'
+#' @param seed Sets the seed for reproducible results.
+#'
+#' @return A vector of predicted gene expression.
+#'
+#' @examples
+#' data("linnarsson")
+#'
+#' # library size normalization
+#' sf <- colSums(linnarsson)/mean(colSums(linnarsson))
+#' linnarsson.norm <- sweep(linnarsson, 2, sf, "/")
+#' linnarsson.est <- log(sweep(linarsson.norm, 2, 1/sf, "+"))
+#'
+#' # predicting 1st gene
+#' x <- t(linnarsson.est[-1, ])
+#' y <- linnarsson.norm[1, ]
+#' pred <- expr.predict(x, y, seed = 1)
+
 
 expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL) {
   if (!is.null(seed))

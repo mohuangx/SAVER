@@ -36,7 +36,7 @@ parallelize prediction. Must register parallel backend beforehand
 }
 \value{
 A list with the following components
-\item{\code{estimate}}{SAVER estimate}
+\item{\code{estimate}}{Recovered (normalized) expression}
 \item{\code{alpha}}{Posterior Gamma shape parameter}
 \item{\code{beta}}{Posterior Gamma rate parameter}
 \item{\code{predicted}}{Regression prediction}
