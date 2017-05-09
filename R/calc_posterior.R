@@ -1,3 +1,37 @@
+#' Calculates SAVER posterior
+#'
+#' Given prediction and prior variance, calculates the Gamma posterior
+#' distribution parameters for a single gene.
+#'
+#' Let \eqn{\alpha} be the shape parameter and \eqn{\beta} be the rate
+#' parameter of the prior Gamma distribution. Then, the posterior Gamma
+#' distribution will be
+#' \deqn{Gamma(y + \alpha, sf + \beta),}
+#' where y is the observed gene count and sf is the size factor.
+#'
+#' @param y A vector of observed gene counts.
+#'
+#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#'
+#' @param sf Vector of normalized size factors.
+#'
+#' @param scale.sf Mean of the original size factors.
+#'
+#' @return A list with the following components
+#' \item{\code{estimate}}{Recovered (normalized) expression}
+#' \item{\code{alpha}}{Posterior Gamma shape parameter}
+#' \item{\code{beta}}{Posterior Gamma rate parameter}
+#' \item{\code{predicted}}{Regression prediction}
+#' \item{\code{lower.95}}{Lower 95\% confidence interval}
+#' \item{\code{upper.95}}{Upper 95\% confidence interval}
+#'
+#' @examples
+#' y <- rpois(100, 5)
+#' mu <- y + rnorm(100)
+#' sf <- rlnorm(100, 0, 0.5)
+#'
+#' post <- calc.post(y, mu, sf, 1)
+
 
 calc.post <- function(y, mu, sf, scale.sf) {
   n <- length(y)
@@ -29,8 +63,11 @@ calc.post <- function(y, mu, sf, scale.sf) {
   post.alpha <- prior.alpha + y
   post.beta <- prior.beta + sf
   lambda.hat <- post.alpha/post.beta
+  lower.95 <- round(qgamma(0.05, post.alpha, post.beta), 3)
+  upper.95 <- round(qgamma(0.95, post.alpha, post.beta), 3)
   return(list(estimate = ceiling(lambda.hat*1000/scale.sf)/1000,
               alpha = ceiling(post.alpha*1000)/1000,
               beta = ceiling(post.beta*1000*scale.sf)/1000,
-              predicted = ceiling(mu*1000/scale.sf)/1000))
+              predicted = ceiling(mu*1000/scale.sf)/1000,
+              lower.95 = lower.95, upper.95 = upper.95))
 }

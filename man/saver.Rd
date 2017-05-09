@@ -40,6 +40,8 @@ A list with the following components
 \item{\code{alpha}}{Posterior Gamma shape parameter}
 \item{\code{beta}}{Posterior Gamma rate parameter}
 \item{\code{predicted}}{Regression prediction}
+\item{\code{lower.95}}{Lower 95\% confidence interval}
+\item{\code{upper.95}}{Upper 95\% confidence interval}
 }
 \description{
 Recovers expression using the SAVER method.

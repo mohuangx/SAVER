@@ -42,6 +42,8 @@
 #' \item{\code{alpha}}{Posterior Gamma shape parameter}
 #' \item{\code{beta}}{Posterior Gamma rate parameter}
 #' \item{\code{predicted}}{Regression prediction}
+#' \item{\code{lower.95}}{Lower 95\% confidence interval}
+#' \item{\code{upper.95}}{Upper 95\% confidence interval}
 #'
 #' @examples
 #' data("linnarsson")
@@ -159,19 +161,21 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   message("Predictions finished. Calculating posterior...")
   if (pred.genes.only) {
-    out <- lapply(1:4, function(x) matrix(0, npred, ncells))
+    out <- lapply(1:6, function(x) matrix(0, npred, ncells))
     mu <- mu.par
     for (i in 1:length(pred.genes)) {
       post <- calc.post(x[pred.genes[i], ], mu[i, ], sf, scale.sf)
       out[[1]][i, ] <- post$estimate
       out[[2]][i, ] <- post$alpha
       out[[3]][i, ] <- post$beta
+      out[[5]][i, ] <- post$lower.95
+      out[[6]][i, ] <- post$upper.95
     }
     out[[4]] <- mu
     gene.names <- rownames(x)[pred.genes]
     cell.names <- colnames(x)
   } else {
-    out <- lapply(1:4, function(x) matrix(0, ngenes, ncells))
+    out <- lapply(1:6, function(x) matrix(0, ngenes, ncells))
     mu <- matrix(gene.means, ngenes, ncells)
     mu[pred.genes, ] <- mu.par
     for (i in 1:ngenes) {
@@ -179,6 +183,8 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
       out[[1]][i, ] <- post$estimate
       out[[2]][i, ] <- post$alpha
       out[[3]][i, ] <- post$beta
+      out[[5]][i, ] <- post$lower.95
+      out[[6]][i, ] <- post$upper.95
     }
     out[[4]] <- mu
     gene.names <- rownames(x)
@@ -186,7 +192,8 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   out.named <- lapply(out, function(x) {rownames(x) <- gene.names;
                                         colnames(x) <- cell.names; x})
-  names(out.named) <- c("estimate", "alpha", "beta", "predicted")
+  names(out.named) <- c("estimate", "alpha", "beta", "predicted", "lower.95",
+                        "upper.95")
   message("Done!")
   return(out.named)
 }
