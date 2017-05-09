@@ -58,10 +58,12 @@
 #' saver3 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 #'
 #' # Parallel
+#' \dontrun{
 #' require(doParallel)
 #' registerDoParallel(cores = 2)
 #' system.time(saver(linnarsson, npred = 20))
 #' system.time(saver(linnarsson, npred = 20, parallel = TRUE))
+#' }
 #'
 #' @export
 
