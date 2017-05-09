@@ -1,5 +1,32 @@
-
+#' Optimizes variance
+#'
+#' Finds the prior parameter that maximizes the marginal likelihood given
+#' the prediction.
+#'
+#' \code{calc.a} returns a prior alpha parameter assuming constant
+#' coefficient of variation. \code{calc.b} returns a prior beta parameter
+#' assuming constant Fano factor. \code{calc.k} returns a prior variance
+#' parameter assuming constant variance.
+#'
+#' @param y A vector of observed gene counts.
+#'
+#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#'
+#' @param sf Vector of normalized size factors.
+#'
+#' @return A vector with the optimized parameter and the log likelihood.
+#'
+#' @examples
+#' y <- rpois(100, 5)
+#' mu <- y + rnorm(100)
+#' sf <- rlnorm(100, 0, 0.5)
+#'
+#' calc.a(y, mu, sf)
+#' calc.b(y, mu, sf)
+#' calc.k(y, mu, sf)
+#'
 #' @importFrom  stats optimize ppoints uniroot var
+#' @rdname optimize_variance
 calc.a <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -35,6 +62,7 @@ calc.a <- function(y, mu, sf) {
   return(c(1/a, a.loglik))
 }
 
+#' @rdname optimize_variance
 calc.b <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -70,6 +98,7 @@ calc.b <- function(y, mu, sf) {
   return(c(1/b, b.loglik))
 }
 
+#' @rdname optimize_variance
 calc.k <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
