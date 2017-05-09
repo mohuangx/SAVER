@@ -1,3 +1,36 @@
+#' Calculates marginal likelihood
+#'
+#' Calculates the marginal likelihood given the prediction under constant
+#' coefficient of variation (a), Fano factor (b), and variance (k).
+#'
+#' \code{calc.loglik.a} returns the shifted negative log-likelihood under
+#' constant coefficient of variation.
+#' \code{calc.loglik.b} returns the shifted negative log-likelihood under
+#' constant Fano factor.
+#' \code{calc.loglik.k} returns the shifted negative log-likelihood under
+#' constant variance.
+#'
+#' @param a,b,k Prior parameter.
+#'
+#' @param y A vector of observed gene counts.
+#'
+#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#'
+#' @param sf Vector of normalized size factors.
+#'
+#' @return A shifted negative marginal log-likelihood.
+#'
+#' @examples
+#' y <- rpois(100, 5)
+#' mu <- y + rnorm(100)
+#' sf <- rlnorm(100, 0, 0.5)
+#'
+#' calc.loglik.a(1, y, mu, sf)
+#' calc.loglik.b(1, y, mu, sf)
+#' calc.loglik.k(1, y, mu, sf)
+#'
+#' @rdname calc_loglik
+
 
 calc.loglik.a <- function(a, y, mu, sf) {
   n <- length(y)
@@ -15,6 +48,7 @@ calc.loglik.a <- function(a, y, mu, sf) {
   return(-sum(func1, func2, func3, func4, func5))
 }
 
+#' @rdname calc_loglik
 calc.loglik.b <- function(b, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -30,6 +64,7 @@ calc.loglik.b <- function(b, y, mu, sf) {
   return(-sum(func1, func2, func3, func4))
 }
 
+#' @rdname calc_loglik
 calc.loglik.k <- function(k, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {

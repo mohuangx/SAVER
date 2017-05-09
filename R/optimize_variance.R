@@ -14,7 +14,8 @@
 #'
 #' @param sf Vector of normalized size factors.
 #'
-#' @return A vector with the optimized parameter and the log likelihood.
+#' @return A vector with the optimized parameter and the negative
+#' log-likelihood.
 #'
 #' @examples
 #' y <- rpois(100, 5)

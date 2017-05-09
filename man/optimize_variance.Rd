@@ -20,7 +20,8 @@ calc.k(y, mu, sf)
 \item{sf}{Vector of normalized size factors.}
 }
 \value{
-A vector with the optimized parameter and the log likelihood.
+A vector with the optimized parameter and the negative
+log-likelihood.
 }
 \description{
 Finds the prior parameter that maximizes the marginal likelihood given
