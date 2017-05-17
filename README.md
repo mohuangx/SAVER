@@ -36,3 +36,5 @@ saver4 <- saver(linnarsson, parallel = TRUE)
 ```
 
 Recovered normalized expression estimates are stored in the ```estimate``` element of the list returned by ```saver```.
+
+Library-size normalization is performed by default. If the input expression matrix is already normalized or normalization is not desired, use the option ```size.factor = 1```. A vector of other size factors can also be assigned to the ```size.factor``` argument.
