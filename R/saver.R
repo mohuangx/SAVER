@@ -191,11 +191,14 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   out.named <- lapply(out, function(x) {rownames(x) <- gene.names;
                                         colnames(x) <- cell.names; x})
   out.named[[7]] <- sf*scale.sf
-  out.named[[8]] <- ncells
-  out.named[[9]] <- ngenes
+  out.named[[8]] <- ngenes
+  out.named[[9]] <- ncells
+  out.named[[10]] <- gene.names
+  out.named[[11]] <- cell.names
   names(out.named[[7]]) <- cell.names
   names(out.named) <- c("estimate", "alpha", "beta", "predicted", "lower.95",
-                        "upper.95", "size.factor", "ncells", "ngenes")
+                        "upper.95", "size.factor", "ngenes", "ncells",
+                        "genes", "cells")
   class(out.named) <- "saver"
   message("Done!")
   return(out.named)
