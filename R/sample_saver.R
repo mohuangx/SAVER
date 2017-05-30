@@ -28,9 +28,10 @@
 
 sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
                          seed = NULL) {
-  if (!inherits(x, "saver")) {
-    stop("x must be a saver object.")
-  }
+  ncells <- ncol(x$estimate)
+  ngenes <- nrow(x$estimate)
+  cell.names <- colnames(x$estimate)
+  gene.names <- rownames(x$estimate)
   rep <- as.integer(rep)
   if (rep <= 0) {
     stop("rep must be a positive integer.")
@@ -40,26 +41,26 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
   }
   if (rep == 1) {
     if (efficiency.known) {
-      samp <- t(sapply(1:x$ngenes, function(i)
-        rnbinom(x$ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+      samp <- t(sapply(1:ngenes, function(i)
+        rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
     } else {
-      samp <- t(sapply(1:x$ngenes, function(i)
-        rgamma(x$ncells, x$alpha[i, ], x$beta[i, ])))
+      samp <- t(sapply(1:ngenes, function(i)
+        rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
     }
-    rownames(samp) <- x$genes
-    colnames(samp) <- x$cells
+    rownames(samp) <- gene.names
+    colnames(samp) <- cell.names
   } else {
     samp <- vector("list", rep)
     for (j in 1:rep) {
       if (efficiency.known) {
-        samp[[j]] <- t(sapply(1:x$ngenes, function(i)
-          rnbinom(x$ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+        samp[[j]] <- t(sapply(1:ngenes, function(i)
+          rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
       } else {
-        samp[[j]] <- t(sapply(1:x$ngenes, function(i)
-          rgamma(x$ncells, x$alpha[i, ], x$beta[i, ])))
+        samp[[j]] <- t(sapply(1:ngenes, function(i)
+          rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
       }
-      rownames(samp[[j]]) <- x$genes
-      colnames(samp[[j]]) <- x$cells
+      rownames(samp[[j]]) <- gene.names
+      colnames(samp[[j]]) <- cell.names
     }
   }
   return(samp)
