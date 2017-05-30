@@ -25,6 +25,8 @@
 #'
 #' saver1 <- saver(linnarsson, npred = 5)
 #' samp1 <- sample.saver(saver1, seed = 50)
+#'
+#' @export
 
 sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
                          seed = NULL) {

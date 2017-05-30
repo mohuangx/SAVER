@@ -35,4 +35,5 @@ data("linnarsson")
 
 saver1 <- saver(linnarsson, npred = 5)
 samp1 <- sample.saver(saver1, seed = 50)
+
 }

@@ -14,5 +14,5 @@ genes and cells, SAVER provides estimates for true expression levels as well
 as posterior distributions to account for estimation uncertainty.
 }
 \author{
-Mo Huang, mohuang@wharton.upenn.edu
+Mo Huang, \url{mohuang@wharton.upenn.edu}
 }
