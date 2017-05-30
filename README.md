@@ -41,7 +41,7 @@ Library-size normalization is performed by default. If the input expression matr
 
 ## Sampling example
 
-Oftentimes for downstream analysis, you may want to sample from the posterior distributions to account for estimation uncertainty. This is similar to performing multiple imputation to obtain multiple imputed datasets. To sample from the posterior distributions, we use the function ```sample.saver```, which takes in a ```saver``` object and outputs sampled datasets. For example,
+Oftentimes for downstream analysis, you may want to sample from the posterior distributions to account for estimation uncertainty. This is similar to performing multiple imputation to obtain multiple imputed datasets. To sample from the posterior distributions, we use the function ```sample.saver```, which takes in the ```saver``` result and outputs sampled datasets. For example,
 
 ```R
 samp1 <- sample.saver(saver1, rep = 1, seed = 50)
