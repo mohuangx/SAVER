@@ -63,5 +63,5 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
       colnames(samp[[j]]) <- cell.names
     }
   }
-  return(samp)
+  return(round(samp, 3))
 }
