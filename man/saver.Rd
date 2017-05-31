@@ -5,7 +5,8 @@
 \title{Runs SAVER}
 \usage{
 saver(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
-  pred.genes.only = FALSE, parallel = FALSE, dfmax = 300, nfolds = 5)
+  pred.genes.only = FALSE, parallel = FALSE, dfmax = 300, nfolds = 5,
+  remove.zero.genes = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -33,6 +34,8 @@ parallelize prediction. Must register parallel backend beforehand
 300.}
 
 \item{nfolds}{Number of folds to be used in cross validation. Default is 5.}
+
+\item{remove.zero.genes}{Whether to remove genes with all zero. Default is FALSE.}
 }
 \value{
 A list with the following components

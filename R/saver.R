@@ -37,6 +37,8 @@
 #'
 #' @param nfolds Number of folds to be used in cross validation. Default is 5.
 #'
+#' @param remove.zero.genes Whether to remove genes with all zero. Default is FALSE.
+#'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{alpha}}{Posterior Gamma shape parameter}
@@ -70,12 +72,20 @@
 #' @export
 saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
-                  nfolds = 5) {
+                  nfolds = 5, remove.zero.genes = FALSE) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
-  if (min(rowSums(x)) == 0 | min(colSums(x)) == 0)
-    stop("Please remove genes or cells with all zero expression")
+  if (min(colSums(x)) == 0) {
+    x <- x[, colSums(x) != 0]
+    message("Removing cells with zero expression.")
+  }
+  nzero <- which(rowSums(x) == 0)
+  if (remove.zero.genes) {
+    x <- x[-nzero, ]
+    message("Removing genes with zero expression.")
+  }
+  np <- dim(x)
   ngenes <- as.integer(np[1])
   ncells <- as.integer(np[2])
   if (is.null(size.factor)) {
@@ -94,62 +104,69 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   if (!is.null(pred.genes)) {
     if (!is.integer(pred.genes) | min(pred.genes) < 1 |
-        max(pred.genes) > as.integer(np[1])) {
+        max(pred.genes) > ngenes) {
       stop("pred.genes must be row indices of x")
     }
     npred <- length(pred.genes)
   } else if (is.null(npred)) {
-    npred <- ngenes
-    pred.genes <- 1:ngenes
+    npred <- ngenes-length(nzero)
+    pred.genes <- (1:ngenes)[-nzero]
   } else if (npred < ngenes) {
     pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
   } else {
     stop("npred must be less than number of rows in x")
   }
+  if (length(nzero) > 0) {
+    pred.genes <- pred.genes[!(pred.genes %in% nzero)]
+    x.norm <- sweep(x[-nzero, ], 2, sf, "/")
+  } else {
+    x.norm <- sweep(x, 2, sf, "/")
+  }
+  x.est <- log(sweep(x.norm, 2, 1/sf, "+"))
+  npred <- length(pred.genes)
   if (pred.genes.only)
     ngenes <- npred
-  x.norm <- sweep(x, 2, sf, "/")
-  x.est <- log(sweep(x.norm, 2, 1/sf, "+"))
   gene.means <- rowMeans(x.norm)
   message("calculating predictions...")
-  t1 <- Sys.time()
-  cvt <- expr.predict(t(x.est[-pred.genes[1], ]), x[pred.genes[1], ]/sf,
-                      dfmax, nfolds)
-  t2 <- Sys.time()
-  t.diff <- t2-t1
-  units(t.diff) <- "secs"
-  if (parallel) {
-    nworkers <- foreach::getDoParWorkers()
-    t3 <- t.diff*1.1*npred/nworkers + 0.01*ngenes
-    units(t3) <- "mins"
-    message("Approximate finish time: ", t2+t3)
-    if (nworkers == 1) {
-      message("Only one worker assigned! Running sequentially...")
-      mu.par <- matrix(0, npred, ncells)
-      for (i in 1:length(pred.genes)) {
-        mu.par[i, ] <- expr.predict(t(x.est[-pred.genes[i], ]),
-                                    x[pred.genes[i], ]/sf, dfmax, nfolds,
-                                    seed = pred.genes[i])
-      }
-    } else {
-      message("Running in parallel: ", nworkers, " workers")
-      gene.list <- chunk2(pred.genes, nworkers)
-      mu.par <- foreach::foreach(i = 1:nworkers, .combine = rbind,
-                                 .packages = c("glmnet", "SAVER")) %dopar% {
-        mu.temp <- matrix(0, length(gene.list[[i]]), ncells)
-        for (j in 1:length(gene.list[[i]])) {
-          mu.temp[j, ] <- expr.predict(t(x.est[-gene.list[[i]][j], ]),
-                                       x[gene.list[[i]][j], ]/sf, dfmax,
-                                       nfolds, seed = gene.list[[i]][j])
-        }
-        return(mu.temp)
-      }
+  mu <- matrix(0, 5, ncells)
+  if (npred > 5) {
+    s <- sample(1:npred, 5)
+    t1 <- Sys.time()
+    for (i in 1:5) {
+      mu[i, ] <- expr.predict(t(x.est[-pred.genes[s[i]], ]),
+                              x[pred.genes[s[i]], ]/sf, dfmax, nfolds)
     }
-
+    t2 <- Sys.time()
+    for (i in 1:5) {
+      post <- calc.post(x[pred.genes[s[i]], ], mu[i, ], sf, scale.sf)
+    }
+    t3 <- Sys.time()
+  }
+  t.diff1 <- (t2-t1)/5
+  t.diff2 <- (t3-t2)/5
+  units(t.diff1) <- "secs"
+  units(t.diff2) <- "secs"
+  nworkers <- foreach::getDoParWorkers()
+  t3 <- t.diff1*npred/nworkers*1.1 + t.diff2*ngenes/nworkers*1.1
+  units(t3) <- "mins"
+  message("Approximate finish time: ", t2+t3)
+  if (parallel & nworkers > 1) {
+    message("Running in parallel: ", nworkers, " workers")
+    gene.list <- chunk2(pred.genes, nworkers)
+    mu.par <- foreach::foreach(i = 1:nworkers, .combine = rbind,
+                           .packages = c("glmnet", "SAVER")) %dopar% {
+      mu.temp <- matrix(0, length(gene.list[[i]]), ncells)
+      for (j in 1:length(gene.list[[i]])) {
+        mu.temp[j, ] <- expr.predict(t(x.est[-gene.list[[i]][j], ]),
+                                     x[gene.list[[i]][j], ]/sf, dfmax,
+                                     nfolds, seed = gene.list[[i]][j])
+      }
+    return(mu.temp)
+    }
   } else {
-    t3 <- t.diff*npred + 0.01*ngenes
-    units(t3) <- "mins"
-    message("Approximate finish time: ", t2+t3)
+    if (parallel & nworkers == 1) {
+      message("Only one worker assigned! Running sequentially...")
+    }
     mu.par <- matrix(0, npred, ncells)
     for (i in 1:length(pred.genes)) {
       mu.par[i, ] <- expr.predict(t(x.est[-pred.genes[i], ]),
