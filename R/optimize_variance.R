@@ -64,6 +64,9 @@ calc.b <- function(y, mu, sf) {
   if (length(sf) == 1) {
     sf <- rep(sf, n)
   }
+  if (sum(mu) == 0) {
+    return(c(0, 0))
+  }
   b.vec <- optimize(calc.loglik.b, interval = c(0, var(y/sf)/mean(y/sf)), y = y, mu = mu,
                     sf = sf)
   b <- b.vec$minimum
