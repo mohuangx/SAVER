@@ -45,6 +45,11 @@ A list with the following components
 \item{\code{predicted}}{Regression prediction}
 \item{\code{lower.95}}{Lower 95\% confidence interval}
 \item{\code{upper.95}}{Upper 95\% confidence interval}
+\item{\code{size.factor}}{Size factors used to normalize expression.}
+\item{\code{ngenes}}{Number of genes.}
+\item{\code{ncells}}{Number of cells.}
+\item{\code{genes}}{Gene names.}
+\item{\code{cells}}{Cell names.}
 }
 \description{
 Recovers expression using the SAVER method.
