@@ -39,6 +39,12 @@
 #'
 #' @param remove.zero.genes Whether to remove genes with all zero. Default is FALSE.
 #'
+#' @param cutoff If the model with the lowest mean cross-validation error has
+#' Poisson deviance greater than the mean cross-validation error of the null
+#' model subtracted by the estimated standard error of the mean
+#' cross-validation error of the null model times \code{cutoff}, then the null
+#' model is selected. Default is 0.
+#'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{alpha}}{Posterior Gamma shape parameter}
@@ -77,7 +83,7 @@
 #' @export
 saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
-                  nfolds = 5, remove.zero.genes = FALSE) {
+                  nfolds = 5, remove.zero.genes = FALSE, cutoff = 0) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
@@ -146,15 +152,16 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
       post <- calc.post(x[pred.genes[s[i]], ], mu[i, ], sf, scale.sf)
     }
     t3 <- Sys.time()
+    t.diff1 <- (t2-t1)/5
+    t.diff2 <- (t3-t2)/5
+    units(t.diff1) <- "secs"
+    units(t.diff2) <- "secs"
+    nworkers <- foreach::getDoParWorkers()
+    t3 <- t.diff1*npred/nworkers*1.1 + t.diff2*ngenes/nworkers*1.1
+    units(t3) <- "mins"
+    message("Approximate finish time: ", t2+t3)
   }
-  t.diff1 <- (t2-t1)/5
-  t.diff2 <- (t3-t2)/5
-  units(t.diff1) <- "secs"
-  units(t.diff2) <- "secs"
   nworkers <- foreach::getDoParWorkers()
-  t3 <- t.diff1*npred/nworkers*1.1 + t.diff2*ngenes/nworkers*1.1
-  units(t3) <- "mins"
-  message("Approximate finish time: ", t2+t3)
   if (parallel & nworkers > 1) {
     message("Running in parallel: ", nworkers, " workers")
     gene.list <- chunk2(pred.genes, nworkers)
@@ -164,7 +171,8 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
       for (j in 1:length(gene.list[[i]])) {
         mu.temp[j, ] <- expr.predict(t(x.est[-gene.list[[i]][j], ]),
                                      x[gene.list[[i]][j], ]/sf, dfmax,
-                                     nfolds, seed = gene.list[[i]][j])
+                                     nfolds, seed = gene.list[[i]][j],
+                                     cutoff)
       }
     return(mu.temp)
     }
@@ -176,7 +184,7 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     for (i in 1:length(pred.genes)) {
       mu.par[i, ] <- expr.predict(t(x.est[-pred.genes[i], ]),
                                   x[pred.genes[i], ]/sf, dfmax, nfolds,
-                                  seed = pred.genes[i])
+                                  seed = pred.genes[i], cutoff)
     }
   }
   message("Predictions finished. Calculating posterior...")

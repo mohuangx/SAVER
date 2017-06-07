@@ -6,7 +6,7 @@
 \usage{
 saver(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300, nfolds = 5,
-  remove.zero.genes = FALSE)
+  remove.zero.genes = FALSE, cutoff = 0)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -36,6 +36,12 @@ parallelize prediction. Must register parallel backend beforehand
 \item{nfolds}{Number of folds to be used in cross validation. Default is 5.}
 
 \item{remove.zero.genes}{Whether to remove genes with all zero. Default is FALSE.}
+
+\item{cutoff}{If the model with the lowest mean cross-validation error has
+Poisson deviance greater than the mean cross-validation error of the null
+model subtracted by the estimated standard error of the mean
+cross-validation error of the null model times \code{cutoff}, then the null
+model is selected. Default is 0.}
 }
 \value{
 A list with the following components
