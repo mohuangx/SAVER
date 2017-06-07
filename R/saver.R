@@ -91,9 +91,9 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     x <- x[, colSums(x) != 0]
     message("Removing cells with zero expression.")
   }
-  nzero <- which(rowSums(x) == 0)
+  nonzero <- which(rowSums(x) != 0)
   if (remove.zero.genes) {
-    x <- x[-nzero, ]
+    x <- x[nonzero, ]
     message("Removing genes with zero expression.")
   }
   np <- dim(x)
@@ -120,16 +120,16 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     }
     npred <- length(pred.genes)
   } else if (is.null(npred)) {
-    npred <- ngenes-length(nzero)
-    pred.genes <- (1:ngenes)[-nzero]
+    npred <- length(nonzero)
+    pred.genes <- nonzero
   } else if (npred < ngenes) {
     pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
   } else {
     stop("npred must be less than number of rows in x")
   }
-  if (length(nzero) > 0) {
-    pred.genes <- pred.genes[!(pred.genes %in% nzero)]
-    x.norm <- sweep(x[-nzero, ], 2, sf, "/")
+  if (length(nonzero) < ngenes) {
+    pred.genes <- pred.genes[pred.genes %in% nonzero]
+    x.norm <- sweep(x[nonzero, ], 2, sf, "/")
   } else {
     x.norm <- sweep(x, 2, sf, "/")
   }
