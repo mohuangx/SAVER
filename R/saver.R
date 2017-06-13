@@ -160,7 +160,7 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   nworkers <- foreach::getDoParWorkers()
   if (parallel & nworkers > 1) {
     if (npred > 5) {
-      t3 <- t.diff1*npred/nworkers*1.1 + t.diff2*ngenes/nworkers*1.1
+      t3 <- t.diff1*npred/nworkers*1.1 + t.diff2*ngenes*1.1
       units(t3) <- "mins"
       message("Approximate finish time: ", t2+t3)
     }
