@@ -35,6 +35,8 @@ expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
                          cutoff = 0) {
   if (!is.null(seed))
     set.seed(seed)
+  if (sum(y) == 0)
+    return(rep(0, length(y)))
   cv <- tryCatch(
     suppressWarnings(glmnet::cv.glmnet(x, y, family="poisson", dfmax = dfmax,
                                nfolds = nfolds)),

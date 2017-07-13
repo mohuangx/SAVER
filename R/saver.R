@@ -120,21 +120,15 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     }
     npred <- length(pred.genes)
   } else if (is.null(npred)) {
-    npred <- length(nonzero)
-    pred.genes <- nonzero
+    npred <- ngenes
+    pred.genes <- 1:ngenes
   } else if (npred < ngenes) {
     pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
   } else {
     stop("npred must be less than number of rows in x")
   }
-  if (length(nonzero) < ngenes) {
-    pred.genes <- pred.genes[pred.genes %in% nonzero]
-    x.norm <- sweep(x[nonzero, ], 2, sf, "/")
-  } else {
-    x.norm <- sweep(x, 2, sf, "/")
-  }
+  x.norm <- sweep(x, 2, sf, "/")
   x.est <- log(sweep(x.norm, 2, 1/sf, "+"))
-  npred <- length(pred.genes)
   if (pred.genes.only)
     ngenes <- npred
   gene.means <- rowMeans(x.norm)
