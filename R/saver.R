@@ -168,6 +168,7 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
                                      x[gene.list[[i]][j], ]/sf, dfmax,
                                      nfolds, seed = gene.list[[i]][j],
                                      cutoff)
+        print(gene.list[[i]][j])
       }
     return(mu.temp)
     }
