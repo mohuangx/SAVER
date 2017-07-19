@@ -48,11 +48,7 @@
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{alpha}}{Posterior Gamma shape parameter}
 #' \item{\code{beta}}{Posterior Gamma rate parameter}
-#' \item{\code{size.factor}}{Size factors used to normalize expression.}
-#' \item{\code{ngenes}}{Number of genes.}
-#' \item{\code{ncells}}{Number of cells.}
-#' \item{\code{genes}}{Gene names.}
-#' \item{\code{cells}}{Cell names.}
+#' \item{\code{info}}{Information about dataset}
 #'
 #' @examples
 #' data("linnarsson")
@@ -126,6 +122,7 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   good.genes <- which(rowSums(x > 0) >= nzero)
   x.est <- log(sweep(x[good.genes, ] + 1, 2, sf, "/"))
+  print(dim(x.est))
   if (pred.genes.only) {
     ngenes <- npred
     genes <- pred.genes
@@ -164,26 +161,27 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     gene.list <- chunk2(genes, nworkers)
     out <- foreach::foreach(i = 1:nworkers, .combine = 'combine.mat',
                             .packages = c("glmnet", "SAVER")) %dopar% {
-                              est <- matrix(0, length(gene.list[[i]]), ncells)
-                              alpha <- matrix(0, length(gene.list[[i]]), ncells)
-                              beta <- matrix(0, length(gene.list[[i]]), ncells)
-                              k <- 0
-                              for (j in gene.list[[i]]) {
-                                k <- k+1
-                                if (j %in% pred.genes) {
-                                  ind <- which(j == good.genes)
-                                  mu <- expr.predict(t(x.est[-ind, ]), x[j, ]/sf, dfmax, nfolds,
-                                                     seed = j)
-                                } else {
-                                  mu <- rep(mean(x[j, ]/sf), ncells)
-                                }
-                                post <- calc.post(x[j, ], mu, sf, scale.sf)
-                                est[k, ] <- post$estimate
-                                alpha[k, ] <- post$alpha
-                                beta[k, ] <- post$beta
-                              }
-                              return(list(estimate = est, alpha = alpha, beta = beta))
-                            }
+      est <- matrix(0, length(gene.list[[i]]), ncells)
+      alpha <- matrix(0, length(gene.list[[i]]), ncells)
+      beta <- matrix(0, length(gene.list[[i]]), ncells)
+      k <- 0
+      for (j in gene.list[[i]]) {
+        k <- k+1
+        if (j %in% pred.genes) {
+          ind <- which(j == good.genes)
+          mu <- expr.predict(t(x.est[-ind, ]), x[j, ]/sf, dfmax, nfolds,
+                             seed = j)
+        } else {
+          mu <- rep(mean(x[j, ]/sf), ncells)
+        }
+        post <- calc.post(x[j, ], mu, sf, scale.sf)
+        est[k, ] <- post$estimate
+        alpha[k, ] <- post$alpha
+        beta[k, ] <- post$beta
+        print(j)
+      }
+      return(list(estimate = est, alpha = alpha, beta = beta))
+    }
   } else {
     if (parallel & nworkers == 1) {
       message("Only one worker assigned! Running sequentially...")
