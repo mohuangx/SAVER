@@ -6,7 +6,7 @@
 \usage{
 saver(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300, nfolds = 5,
-  remove.zero.genes = FALSE, cutoff = 0)
+  remove.zero.genes = FALSE, nzero = 10)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -35,22 +35,17 @@ parallelize prediction. Must register parallel backend beforehand
 
 \item{nfolds}{Number of folds to be used in cross validation. Default is 5.}
 
-\item{remove.zero.genes}{Whether to remove genes with all zero. Default is FALSE.}
+\item{remove.zero.genes}{Whether to remove genes with all zero.
+Default is FALSE.}
 
-\item{cutoff}{If the model with the lowest mean cross-validation error has
-Poisson deviance greater than the mean cross-validation error of the null
-model subtracted by the estimated standard error of the mean
-cross-validation error of the null model times \code{cutoff}, then the null
-model is selected. Default is 0.}
+\item{nzero}{Run prediction for genes that have at least this many
+nonzero cells. Default is 10.}
 }
 \value{
 A list with the following components
 \item{\code{estimate}}{Recovered (normalized) expression}
 \item{\code{alpha}}{Posterior Gamma shape parameter}
 \item{\code{beta}}{Posterior Gamma rate parameter}
-\item{\code{predicted}}{Regression prediction}
-\item{\code{lower.95}}{Lower 95\% confidence interval}
-\item{\code{upper.95}}{Upper 95\% confidence interval}
 \item{\code{size.factor}}{Size factors used to normalize expression.}
 \item{\code{ngenes}}{Number of genes.}
 \item{\code{ncells}}{Number of cells.}
