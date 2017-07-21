@@ -131,32 +131,32 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   gene.means <- rowMeans(sweep(x, 2, sf, "/"))
   message("Calculating predictions...")
-  mu <- matrix(0, 5, ncells)
-  if (npred > 5) {
-    s <- sample(1:length(good.genes), 5)
-    t1 <- Sys.time()
-    for (i in 1:5) {
-      mu[i, ] <- expr.predict(t(x.est[-s[i], ]), x[good.genes[s[i]], ]/sf,
-                              dfmax, nfolds)
-    }
-    t2 <- Sys.time()
-    for (i in 1:5) {
-      post <- calc.post(x[good.genes[s[i]], ], mu[i, ], sf, scale.sf)
-    }
-    t3 <- Sys.time()
-    t.diff1 <- (t2-t1)/5
-    t.diff2 <- (t3-t2)/5
-    units(t.diff1) <- "secs"
-    units(t.diff2) <- "secs"
-  }
+  # mu <- matrix(0, 5, ncells)
+  # if (npred > 5) {
+  #   s <- sample(1:length(good.genes), 5)
+  #   t1 <- Sys.time()
+  #   for (i in 1:5) {
+  #     mu[i, ] <- expr.predict(t(x.est[-s[i], ]), x[good.genes[s[i]], ]/sf,
+  #                             dfmax, nfolds)
+  #   }
+  #   t2 <- Sys.time()
+  #   for (i in 1:5) {
+  #     post <- calc.post(x[good.genes[s[i]], ], mu[i, ], sf, scale.sf)
+  #   }
+  #   t3 <- Sys.time()
+  #   t.diff1 <- (t2-t1)/5
+  #   t.diff2 <- (t3-t2)/5
+  #   units(t.diff1) <- "secs"
+  #   units(t.diff2) <- "secs"
+  # }
   nworkers <- foreach::getDoParWorkers()
   if (parallel & nworkers > 1) {
-    if (npred > 5) {
-      npred2 <- sum(pred.genes %in% good.genes)
-      t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*ngenes*1.1
-      units(t3) <- "mins"
-      message("Approximate finish time: ", t2+t3)
-    }
+    # if (npred > 5) {
+    #   npred2 <- sum(pred.genes %in% good.genes)
+    #   t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*ngenes*1.1
+    #   units(t3) <- "mins"
+    #   message("Approximate finish time: ", t2+t3)
+    # }
     message("Running in parallel: ", nworkers, " workers")
     gene.list <- chunk2(genes, nworkers)
     out <- foreach::foreach(i = 1:nworkers, .combine = 'combine.mat',
@@ -186,12 +186,12 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     if (parallel & nworkers == 1) {
       message("Only one worker assigned! Running sequentially...")
     }
-    if (npred > 5) {
-      npred2 <- sum(pred.genes %in% good.genes)
-      t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
-      units(t3) <- "mins"
-      message("Approximate finish time: ", t2+t3)
-    }
+    # if (npred > 5) {
+    #   npred2 <- sum(pred.genes %in% good.genes)
+    #   t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
+    #   units(t3) <- "mins"
+    #   message("Approximate finish time: ", t2+t3)
+    # }
     out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
     k <- 0
     for (j in genes) {
