@@ -37,10 +37,6 @@ expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL) {
     error = function(cond) {
       message(cond)
       return(NA)
-    },
-    warning = function(cond) {
-      message(cond)
-      return(cv1)
     }
   )
   if (length(cv) == 1) {
