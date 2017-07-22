@@ -46,11 +46,7 @@ A list with the following components
 \item{\code{estimate}}{Recovered (normalized) expression}
 \item{\code{alpha}}{Posterior Gamma shape parameter}
 \item{\code{beta}}{Posterior Gamma rate parameter}
-\item{\code{size.factor}}{Size factors used to normalize expression.}
-\item{\code{ngenes}}{Number of genes.}
-\item{\code{ncells}}{Number of cells.}
-\item{\code{genes}}{Gene names.}
-\item{\code{cells}}{Cell names.}
+\item{\code{info}}{Information about dataset}
 }
 \description{
 Recovers expression using the SAVER method.
