@@ -73,9 +73,9 @@
 #' }
 #'
 #' @export
-saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
-                   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
-                   nfolds = 5, remove.zero.genes = FALSE, nzero = 10) {
+saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
+                  pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
+                  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
