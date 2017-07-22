@@ -178,7 +178,6 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
         est[k, ] <- post$estimate
         alpha[k, ] <- post$alpha
         beta[k, ] <- post$beta
-        print(j)
       }
       return(list(estimate = est, alpha = alpha, beta = beta))
     }
