@@ -122,7 +122,6 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
   }
   good.genes <- which(rowSums(x > 0) >= nzero)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
-  print(dim(x.est))
   if (pred.genes.only) {
     ngenes <- npred
     genes <- pred.genes
