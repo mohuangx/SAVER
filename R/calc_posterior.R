@@ -56,11 +56,7 @@ calc.post <- function(y, mu, sf, scale.sf) {
   post.alpha <- prior.alpha + y
   post.beta <- prior.beta + sf
   lambda.hat <- post.alpha/post.beta
-  lower.95 <- round(qgamma(0.05, post.alpha, post.beta), 3)
-  upper.95 <- round(qgamma(0.95, post.alpha, post.beta), 3)
   return(list(estimate = ceiling(lambda.hat*1000/scale.sf)/1000,
               alpha = ceiling(post.alpha*1000)/1000,
-              beta = ceiling(post.beta*1000*scale.sf)/1000,
-              predicted = ceiling(mu*1000/scale.sf)/1000,
-              lower.95 = lower.95, upper.95 = upper.95))
+              beta = ceiling(post.beta*1000*scale.sf)/1000))
 }

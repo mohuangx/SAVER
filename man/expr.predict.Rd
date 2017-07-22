@@ -4,7 +4,7 @@
 \alias{expr.predict}
 \title{Calculates SAVER prediction.}
 \usage{
-expr.predict(x, y, dfmax = 300, nfolds = 5, seed = NULL, cutoff = 0)
+expr.predict(x, y, dfmax = 300, nfolds = 5, seed = NULL)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the
@@ -18,12 +18,6 @@ is 300.}
 \item{nfolds}{Number of folds to use in the cross-validation. Default is 5.}
 
 \item{seed}{Sets the seed for reproducible results.}
-
-\item{cutoff}{If the model with the lowest mean cross-validation error has
-Poisson deviance greater than the mean cross-validation error of the null
-model subtracted by the estimated standard error of the mean
-cross-validation error of the null model times \code{cutoff}, then the null
-model is selected. Default is 0.}
 }
 \value{
 A vector of predicted gene expression.

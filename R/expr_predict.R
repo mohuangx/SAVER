@@ -23,36 +23,27 @@
 #'
 #' @param seed Sets the seed for reproducible results.
 #'
-#' @param cutoff If the model with the lowest mean cross-validation error has
-#' Poisson deviance greater than the mean cross-validation error of the null
-#' model subtracted by the estimated standard error of the mean
-#' cross-validation error of the null model times \code{cutoff}, then the null
-#' model is selected. Default is 0.
 #'
 #' @return A vector of predicted gene expression.
 #'
-expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
-                         cutoff = 0) {
+expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL) {
   if (!is.null(seed))
     set.seed(seed)
   if (sum(y) == 0)
     return(rep(0, length(y)))
   cv <- tryCatch(
-    suppressWarnings(glmnet::cv.glmnet(x, y, family="poisson", dfmax = dfmax,
-                               nfolds = nfolds)),
+    glmnet::cv.glmnet(x, y, family="poisson", dfmax = dfmax,
+                      nfolds = nfolds),
     error = function(cond) {
+      message(cond)
       return(NA)
     }
   )
   if (length(cv) == 1) {
     mu <- rep(mean(y), length(y))
   } else {
-    if (min(cv$cvm) < cv$cvm[1]-cv$cvsd[1]*cutoff) {
-      mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
+    mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
                                         type="response"))
-    } else{
-      mu <- rep(mean(y), length(y))
-    }
   }
   return(mu)
 }

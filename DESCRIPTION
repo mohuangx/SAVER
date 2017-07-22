@@ -13,7 +13,8 @@ LazyData: true
 Depends: R (>= 3.0.1)
 Imports:
     glmnet,
-    foreach
+    foreach,
+    methods
 Suggest:
     doParallel
 RoxygenNote: 6.0.1
