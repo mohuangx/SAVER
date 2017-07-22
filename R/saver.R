@@ -187,12 +187,12 @@ saver <- function(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
     if (parallel & nworkers == 1) {
       message("Only one worker assigned! Running sequentially...")
     }
-    # if (npred > 5) {
-    #   npred2 <- sum(pred.genes %in% good.genes)
-    #   t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
-    #   units(t3) <- "mins"
-    #   message("Approximate finish time: ", t2+t3)
-    # }
+    if (npred > 5) {
+      npred2 <- sum(pred.genes %in% good.genes)
+      t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
+      units(t3) <- "mins"
+      message("Approximate finish time: ", t2+t3)
+    }
     out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
     k <- 0
     for (j in genes) {
