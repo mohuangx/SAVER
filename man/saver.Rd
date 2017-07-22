@@ -4,9 +4,9 @@
 \alias{saver}
 \title{Runs SAVER}
 \usage{
-saver(x, size.factor = NULL, npred = NULL, pred.genes = NULL,
-  pred.genes.only = FALSE, parallel = FALSE, dfmax = 300, nfolds = 5,
-  remove.zero.genes = FALSE, nzero = 10)
+saver(x, size.factor = NULL, nzero = 10, npred = NULL,
+  pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
+  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -15,6 +15,9 @@ the columns correspond to cells.}
 \item{size.factor}{Vector of cell size normalization factors.
 If \code{x} is already normalized or normalization is not desired, use
 \code{size.factor = 1}. Default uses mean library size normalization.}
+
+\item{nzero}{Run prediction for genes that have at least this many
+nonzero cells. Default is 10.}
 
 \item{npred}{Number of genes for regression prediction. Selects the top
 \code{npred} genes in terms of mean expression for regression prediction.
@@ -37,9 +40,6 @@ parallelize prediction. Must register parallel backend beforehand
 
 \item{remove.zero.genes}{Whether to remove genes with all zero.
 Default is FALSE.}
-
-\item{nzero}{Run prediction for genes that have at least this many
-nonzero cells. Default is 10.}
 }
 \value{
 A list with the following components
