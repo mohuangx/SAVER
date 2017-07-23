@@ -47,3 +47,16 @@ Oftentimes for downstream analysis, you may want to sample from the posterior di
 samp1 <- sample.saver(saver1, rep = 1, seed = 50)
 samp5 <- sample.saver(saver1, rep = 5, seed = 50)
 ```
+
+## Correlation example
+
+Because the SAVER estimates contain uncertainty, correlations between genes and cells cannot be directly calculated using the SAVER estimates. To adjust for the uncertainty, we provide the functions ```cor.genes``` and ```cor.cells``` to construct gene-to-gene and cell-to-cell correlation matrices respectively for the SAVER output. These functions take in the ```saver``` result and outputs the gene-to-gene or cell-to-cell correlation matrix. For example,
+
+```R
+saver1.cor.gene <- cor.genes(saver1)
+saver1.cor.cell <- cor.cells(saver1)
+```
+
+
+
+
