@@ -48,6 +48,7 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
     } else {
       samp <- t(sapply(1:ngenes, function(i)
         rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+      samp <- round(samp, 3)
     }
     rownames(samp) <- gene.names
     colnames(samp) <- cell.names
@@ -60,10 +61,11 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
       } else {
         samp[[j]] <- t(sapply(1:ngenes, function(i)
           rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+        samp[[j]] <- round(samp[[j]], 3)
       }
       rownames(samp[[j]]) <- gene.names
       colnames(samp[[j]]) <- cell.names
     }
   }
-  return(round(samp, 3))
+  return(samp)
 }
