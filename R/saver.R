@@ -129,7 +129,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     genes <- 1:ngenes
   }
   lasso.genes <- intersect(good.genes, pred.genes)
-  gene.means <- rowMeans(sweep(x, 2, sf, "/"))
+  nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   message("Calculating predictions...")
   mu <- matrix(0, 5, ncells)
   if (npred > 5) {
@@ -152,41 +152,42 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   nworkers <- foreach::getDoParWorkers()
   if (parallel & nworkers > 1) {
     if (npred > 5) {
-      npred2 <- sum(pred.genes %in% good.genes)
-      t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*ngenes*1.1
+      npred2 <- length(lasso.genes)
+      npred3 <- length(nonlasso.genes)
+      t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*(npred2/nworkers+npred3)*1.1
       units(t3) <- "mins"
       message("Approximate finish time: ", t2+t3)
     }
     message("Running in parallel: ", nworkers, " workers")
-    gene.list <- chunk2(genes, nworkers)
-    out <- foreach::foreach(i = 1:nworkers, .combine = 'combine.mat',
-                            .packages = c("glmnet", "SAVER")) %dopar% {
-      est <- matrix(0, length(gene.list[[i]]), ncells)
-      alpha <- matrix(0, length(gene.list[[i]]), ncells)
-      beta <- matrix(0, length(gene.list[[i]]), ncells)
-      k <- 0
-      for (j in gene.list[[i]]) {
-        k <- k+1
-        if (j %in% lasso.genes) {
-          ind <- which(j == good.genes)
-          mu <- expr.predict(x.est[, -ind], x[j, ]/sf, dfmax, nfolds,
-                             seed = j)
-        } else {
-          mu <- rep(mean(x[j, ]/sf), ncells)
-        }
-        post <- calc.post(x[j, ], mu, sf, scale.sf)
-        est[k, ] <- post$estimate
-        alpha[k, ] <- post$alpha
-        beta[k, ] <- post$beta
-      }
+    lasso <- foreach::foreach(i = lasso.genes, .combine = 'combine.mat',
+                              .packages = c("glmnet", "SAVER")) %dopar% {
+      ind <- which(i == good.genes)
+      mu <- expr.predict(x.est[, -ind], x[i, ]/sf, dfmax, nfolds,
+                         seed = i)
+      post <- calc.post(x[i, ], mu, sf, scale.sf)
+      est <- post$estimate
+      alpha <- post$alpha
+      beta <- post$beta
       return(list(estimate = est, alpha = alpha, beta = beta))
+    }
+    out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
+    for (i in 1:3) {
+      out[[i]][lasso.genes, ] <- lasso[[i]]
+    }
+    if (length(nonlasso.genes) > 0) {
+      for (i in nonlasso.genes) {
+        post <- calc.post(x[i, ], mean(x[i, ]/sf), sf, scale.sf)
+        out[[1]][i, ] <- post$estimate
+        out[[2]][i, ] <- post$alpha
+        out[[3]][i, ] <- post$beta
+      }
     }
   } else {
     if (parallel & nworkers == 1) {
       message("Only one worker assigned! Running sequentially...")
     }
     if (npred > 5) {
-      npred2 <- sum(pred.genes %in% good.genes)
+      npred2 <- length(lasso.genes)
       t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
       units(t3) <- "mins"
       message("Approximate finish time: ", t2+t3)
