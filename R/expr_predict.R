@@ -41,9 +41,11 @@ expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL) {
   )
   if (length(cv) == 1) {
     mu <- rep(mean(y), length(y))
+    nvar <- 0
   } else {
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
                                         type="response"))
+    nvar <- cv$nzero[which(cv$lambda == cv$lambda.min)]
   }
-  return(mu)
+  return(list(mu = mu, nvar = nvar))
 }

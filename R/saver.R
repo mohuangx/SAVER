@@ -126,13 +126,13 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   good.genes <- which(rowSums(x > 0) >= nzero)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
-    ngenes <- npred
     genes <- pred.genes
   } else {
     genes <- 1:ngenes
   }
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
+  nvar.vec <- rep(0, ngenes)
   message("Calculating predictions...")
   mu <- matrix(0, 5, ncells)
   if (npred > 5) {
@@ -141,9 +141,9 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     for (i in 1:5) {
       cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
                                                  x[good.genes[s[i]], ]/sf,
-                              dfmax, nfolds))
+                              dfmax, nfolds)$mu)
       if (verbose) {
-        print(cvt)
+        print(cvt[3])
       }
     }
     t2 <- Sys.time()
@@ -170,11 +170,12 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       message("Approximate finish time: ", t2+t3)
     }
     message("Running in parallel: ", nworkers, " workers")
-    lasso <- foreach::foreach(i = lasso.genes, .combine = 'combine.mat',
+    lasso <- foreach::foreach(i = lasso.genes, .combine = "combine.mat",
                               .packages = c("glmnet", "SAVER")) %dopar% {
       ind <- which(i == good.genes)
-      mu <- expr.predict(x.est[, -ind], x[i, ]/sf, dfmax, nfolds,
+      cv <- expr.predict(x.est[, -ind], x[i, ]/sf, dfmax, nfolds,
                          seed = i)
+      mu <- cv$mu
       post <- calc.post(x[i, ], mu, sf, scale.sf)
       est <- post$estimate
       alpha <- post$alpha
@@ -182,13 +183,15 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       if (verbose) {
         print(i)
       }
-      return(list(estimate = est, alpha = alpha, beta = beta))
+      return(list(estimate = est, alpha = alpha, beta = beta, nvar = cv$nvar))
     }
     out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
     for (i in 1:3) {
       out[[i]][lasso.genes, ] <- lasso[[i]]
     }
+    nvar.vec[lasso.genes] <- lasso[[4]]
     if (length(nonlasso.genes) > 0) {
+      nvar.vec[nonlasso.genes] <- 0
       for (i in nonlasso.genes) {
         post <- calc.post(x[i, ], mean(x[i, ]/sf), sf, scale.sf)
         out[[1]][i, ] <- post$estimate
@@ -212,37 +215,47 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       k <- k+1
       if (j %in% lasso.genes) {
         ind <- which(j == good.genes)
-        mu <- expr.predict(x.est[, -ind], x[j, ]/sf, dfmax, nfolds,
+        cv <- expr.predict(x.est[, -ind], x[j, ]/sf, dfmax, nfolds,
                            seed = j)
+        mu <- cv$mu1
+        nvar <- cv$nvar
         if (verbose) {
           print(j)
         }
       } else {
         mu <- rep(mean(x[j, ]/sf), ncells)
+        nvar <- 0
       }
       post <- calc.post(x[j, ], mu, sf, scale.sf)
-      out[[1]][k, ] <- post$estimate
-      out[[2]][k, ] <- post$alpha
-      out[[3]][k, ] <- post$beta
+      out[[1]][j, ] <- post$estimate
+      out[[2]][j, ] <- post$alpha
+      out[[3]][j, ] <- post$beta
+      nvar.vec[j] <- nvar
     }
   }
   if (pred.genes.only) {
+    for (i in 1:3) {
+      out[[i]] <- out[[i]][pred.genes, ]
+    }
+    nvar.vec <- nvar.vec[pred.genes]
     gene.names <- rownames(x)[pred.genes]
     cell.names <- colnames(x)
   } else {
     gene.names <- rownames(x)
     cell.names <- colnames(x)
   }
-  out.named <- lapply(out, function(x) {rownames(x) <- gene.names;
+  out.named <- lapply(out[1:3], function(x) {rownames(x) <- gene.names;
   colnames(x) <- cell.names; x})
-  info <- list(size.factor = sf*scale.sf, ngenes = ngenes, ncells = ncells,
-               genes = gene.names, cells = cell.names)
+  info <- list(size.factor = sf*scale.sf, nvar = nvar.vec, ngenes = ngenes,
+               ncells = ncells, genes = gene.names, cells = cell.names)
   out.named[[4]] <- info
   names(out.named[[4]][[1]]) <- cell.names
+  names(out.named[[4]][[2]]) <- gene.names
   names(out.named) <- c("estimate", "alpha", "beta", "info")
   class(out.named) <- "saver"
   message("Done!")
   return(out.named)
+  return(lasso)
 }
 
 
