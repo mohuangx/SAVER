@@ -141,6 +141,9 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     for (i in 1:5) {
       mu[i, ] <- expr.predict(x.est[, -s[i]], x[good.genes[s[i]], ]/sf,
                               dfmax, nfolds)
+      if (verbose) {
+        print(i)
+      }
     }
     t2 <- Sys.time()
     for (i in 1:5) {
