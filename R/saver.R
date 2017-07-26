@@ -151,6 +151,10 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     t.diff2 <- (t3-t2)/5
     units(t.diff1) <- "secs"
     units(t.diff2) <- "secs"
+    if (verbose) {
+      message("Prediction: ", t.diff1, " per gene")
+      message("Posterior calc: ", t.diff2, " per gene")
+    }
   }
   nworkers <- foreach::getDoParWorkers()
   if (parallel & nworkers > 1) {
