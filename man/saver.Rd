@@ -6,7 +6,7 @@
 \usage{
 saver(x, size.factor = NULL, nzero = 10, npred = NULL,
   pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
-  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE)
+  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -40,6 +40,8 @@ parallelize prediction. Must register parallel backend beforehand
 
 \item{remove.zero.genes}{Whether to remove genes with all zero.
 Default is FALSE.}
+
+\item{verbose}{If TRUE, prints index of gene}
 }
 \value{
 A list with the following components

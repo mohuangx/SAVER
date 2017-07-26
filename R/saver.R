@@ -43,6 +43,8 @@
 #' @param remove.zero.genes Whether to remove genes with all zero.
 #' Default is FALSE.
 #'
+#' @param verbose If TRUE, prints index of gene
+#'
 #'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
@@ -75,7 +77,8 @@
 #' @export
 saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
                   pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
-                  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE) {
+                  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE,
+                  verbose = FALSE) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
@@ -168,6 +171,9 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       est <- post$estimate
       alpha <- post$alpha
       beta <- post$beta
+      if (verbose) {
+        print(i)
+      }
       return(list(estimate = est, alpha = alpha, beta = beta))
     }
     out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
@@ -200,6 +206,9 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
         ind <- which(j == good.genes)
         mu <- expr.predict(x.est[, -ind], x[j, ]/sf, dfmax, nfolds,
                            seed = j)
+        if (verbose) {
+          print(j)
+        }
       } else {
         mu <- rep(mean(x[j, ]/sf), ncells)
       }
