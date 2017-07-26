@@ -139,10 +139,11 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     s <- sample(1:length(good.genes), 5)
     t1 <- Sys.time()
     for (i in 1:5) {
-      mu[i, ] <- expr.predict(x.est[, -s[i]], x[good.genes[s[i]], ]/sf,
-                              dfmax, nfolds)
+      cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
+                                                 x[good.genes[s[i]], ]/sf,
+                              dfmax, nfolds))
       if (verbose) {
-        print(i)
+        print(cvt)
       }
     }
     t2 <- Sys.time()
