@@ -255,7 +255,6 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   class(out.named) <- "saver"
   message("Done!")
   return(out.named)
-  return(lasso)
 }
 
 
