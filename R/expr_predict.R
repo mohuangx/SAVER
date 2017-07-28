@@ -16,6 +16,9 @@
 #'
 #' @param y A normalized expression count vector of the gene to be predicted.
 #'
+#' @param pred.cells Index of cells to use for prediction. Default is to use
+#' all cells.
+#'
 #' @param dfmax The number of genes to be included in the prediction. Default
 #' is 300.
 #'
@@ -26,21 +29,22 @@
 #'
 #' @return A vector of predicted gene expression.
 #'
-expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL) {
+expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
+                         nfolds = 5, seed = NULL) {
   if (!is.null(seed))
     set.seed(seed)
   if (sum(y) == 0)
     return(rep(0, length(y)))
   cv <- tryCatch(
-    glmnet::cv.glmnet(x, y, family="poisson", dfmax = dfmax,
-                      nfolds = nfolds),
+    glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells], family="poisson",
+                      dfmax = dfmax, nfolds = nfolds),
     error = function(cond) {
       message(cond)
       return(NA)
     }
   )
   if (length(cv) == 1) {
-    mu <- rep(mean(y), length(y))
+    mu <- rep(mean(y[pred.cells]), length(y))
     nvar <- 0
   } else {
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",

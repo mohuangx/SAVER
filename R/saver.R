@@ -25,6 +25,9 @@
 #' \code{npred} genes in terms of mean expression for regression prediction.
 #' Default is all genes.
 #'
+#' @param pred.cells Indices of cells to perform regression prediction.
+#' Default is all cells.
+#'
 #' @param pred.genes Indices of specific genes to perform regression
 #' prediction. Overrides \code{npred}. Default is all genes.
 #'
@@ -76,9 +79,9 @@
 #'
 #' @export
 saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
-                  pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
-                  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE,
-                  verbose = FALSE) {
+                  pred.cells = NULL, pred.genes = NULL,
+                  pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
+                  nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
@@ -113,6 +116,14 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   } else {
     stop("Not a valid size factor")
   }
+  if (!is.null(pred.cells)) {
+    if (!is.integer(pred.cells) | min(pred.cells) < 1 |
+        max(pred.cells) > ncells) {
+      stop("pred.cells must be column indices of x")
+    }
+  } else {
+    pred.cells <- 1:ncells
+  }
   if (!is.null(pred.genes)) {
     if (!is.integer(pred.genes) | min(pred.genes) < 1 |
         max(pred.genes) > ngenes) {
@@ -137,7 +148,8 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
-  message("Calculating predictions for ", length(lasso.genes), " genes...")
+  message("Calculating predictions for ", length(lasso.genes), " genes using ",
+          length(pred.cells), " cells...")
   mu <- matrix(0, 5, ncells)
   if (npred > 5) {
     s <- sample(1:length(good.genes), 5)
@@ -145,7 +157,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     for (i in 1:5) {
       cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
                                                  x[good.genes[s[i]], ]/sf,
-                              dfmax, nfolds)$mu)
+                                                 pred.cells, dfmax, nfolds)$mu)
       if (verbose) {
         print(cvt[3])
       }
@@ -177,7 +189,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     lasso <- foreach::foreach(i = lasso.genes, .combine = "combine.mat",
                               .packages = c("glmnet", "SAVER")) %dopar% {
       ind <- which(i == good.genes)
-      cv <- expr.predict(x.est[, -ind], x[i, ]/sf, dfmax, nfolds,
+      cv <- expr.predict(x.est[, -ind], x[i, ]/sf, pred.cells, dfmax, nfolds,
                          seed = i)
       mu <- cv$mu
       post <- calc.post(x[i, ], mu, sf, scale.sf)
@@ -219,9 +231,9 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       k <- k+1
       if (j %in% lasso.genes) {
         ind <- which(j == good.genes)
-        cv <- expr.predict(x.est[, -ind], x[j, ]/sf, dfmax, nfolds,
+        cv <- expr.predict(x.est[, -ind], x[j, ]/sf, pred.cells, dfmax, nfolds,
                            seed = j)
-        mu <- cv$mu1
+        mu <- cv$mu
         nvar <- cv$nvar
         if (verbose) {
           print(j)
