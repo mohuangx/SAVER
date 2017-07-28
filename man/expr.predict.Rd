@@ -4,13 +4,17 @@
 \alias{expr.predict}
 \title{Calculates SAVER prediction.}
 \usage{
-expr.predict(x, y, dfmax = 300, nfolds = 5, seed = NULL)
+expr.predict(x, y, pred.cells = 1:length(y), dfmax = 300, nfolds = 5,
+  seed = NULL)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the
 prediction.}
 
 \item{y}{A normalized expression count vector of the gene to be predicted.}
+
+\item{pred.cells}{Index of cells to use for prediction. Default is to use
+all cells.}
 
 \item{dfmax}{The number of genes to be included in the prediction. Default
 is 300.}

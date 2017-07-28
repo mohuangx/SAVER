@@ -5,8 +5,9 @@
 \title{Runs SAVER}
 \usage{
 saver(x, size.factor = NULL, nzero = 10, npred = NULL,
-  pred.genes = NULL, pred.genes.only = FALSE, parallel = FALSE,
-  dfmax = 300, nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE)
+  pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
+  parallel = FALSE, dfmax = 300, nfolds = 5, remove.zero.genes = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -22,6 +23,9 @@ nonzero cells. Default is 10.}
 \item{npred}{Number of genes for regression prediction. Selects the top
 \code{npred} genes in terms of mean expression for regression prediction.
 Default is all genes.}
+
+\item{pred.cells}{Indices of cells to perform regression prediction.
+Default is all cells.}
 
 \item{pred.genes}{Indices of specific genes to perform regression
 prediction. Overrides \code{npred}. Default is all genes.}
