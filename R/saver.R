@@ -95,6 +95,10 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   np <- dim(x)
   ngenes <- as.integer(np[1])
   ncells <- as.integer(np[2])
+  if (verbose) {
+    message(ngenes, " genes")
+    message(ncells, " cells")
+  }
   if (is.null(size.factor)) {
     sf <- colSums(x)/mean(colSums(x))
     scale.sf <- 1
@@ -133,7 +137,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
-  message("Calculating predictions...")
+  message("Calculating predictions for ", length(lasso.genes), " genes...")
   mu <- matrix(0, 5, ncells)
   if (npred > 5) {
     s <- sample(1:length(good.genes), 5)
@@ -181,7 +185,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
       alpha <- post$alpha
       beta <- post$beta
       if (verbose) {
-        print(i)
+        message(i)
       }
       return(list(estimate = est, alpha = alpha, beta = beta, nvar = cv$nvar))
     }
