@@ -221,7 +221,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     }
     if (npred > 5) {
       npred2 <- length(lasso.genes)
-      t3 <- t.diff1*npred2*1.1 + t.diff2*ngenes*1.1
+      t3 <- t.diff1*npred2*1.1 + t.diff2*length(genes)*1.1
       units(t3) <- "mins"
       message("Approximate finish time: ", t2+t3)
     }

@@ -30,16 +30,17 @@
 #' @return A vector of predicted gene expression.
 #'
 expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
-                         nfolds = 5, seed = NULL) {
+                         nfolds = 5, seed = NULL, verbose = FALSE) {
   if (!is.null(seed))
     set.seed(seed)
   if (sum(y) == 0)
     return(rep(0, length(y)))
   cv <- tryCatch(
-    glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells], family="poisson",
-                      dfmax = dfmax, nfolds = nfolds),
+    suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells], family="poisson",
+                      dfmax = dfmax, nfolds = nfolds)),
     error = function(cond) {
-      message(cond)
+      if (verbose)
+        message(cond, "\n")
       return(NA)
     }
   )
