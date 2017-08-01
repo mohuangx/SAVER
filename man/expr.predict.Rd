@@ -5,7 +5,7 @@
 \title{Calculates SAVER prediction.}
 \usage{
 expr.predict(x, y, pred.cells = 1:length(y), dfmax = 300, nfolds = 5,
-  seed = NULL)
+  seed = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the

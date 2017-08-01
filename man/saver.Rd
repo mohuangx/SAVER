@@ -7,7 +7,7 @@
 saver(x, size.factor = NULL, nzero = 10, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
   parallel = FALSE, dfmax = 300, nfolds = 5, remove.zero.genes = FALSE,
-  verbose = FALSE)
+  verbose = FALSE, predict.time = TRUE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -46,6 +46,8 @@ parallelize prediction. Must register parallel backend beforehand
 Default is FALSE.}
 
 \item{verbose}{If TRUE, prints index of gene}
+
+\item{predict.time}{If TRUE, calculates approximate finish time.}
 }
 \value{
 A list with the following components

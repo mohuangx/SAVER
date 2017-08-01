@@ -48,6 +48,8 @@
 #'
 #' @param verbose If TRUE, prints index of gene
 #'
+#' @param predict.time If TRUE, calculates approximate finish time.
+#'
 #'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
@@ -81,7 +83,8 @@
 saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
                   pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
-                  nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE) {
+                  nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE,
+                  predict.time = TRUE) {
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
@@ -150,8 +153,8 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   nvar.vec <- rep(0, ngenes)
   message("Calculating predictions for ", length(lasso.genes), " genes using ",
           length(pred.cells), " cells...")
-  mu <- matrix(0, 5, ncells)
-  if (npred > 5) {
+  if (npred > 5 & predict.time) {
+    mu <- matrix(0, 5, ncells)
     s <- sample(1:length(good.genes), 5)
     t1 <- Sys.time()
     for (i in 1:5) {
@@ -178,7 +181,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   }
   nworkers <- foreach::getDoParWorkers()
   if (parallel & nworkers > 1) {
-    if (npred > 5) {
+    if (npred > 5 & predict.time) {
       npred2 <- length(lasso.genes)
       npred3 <- length(nonlasso.genes)
       t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*(npred2/nworkers+npred3)*1.1
@@ -219,7 +222,7 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
     if (parallel & nworkers == 1) {
       message("Only one worker assigned! Running sequentially...")
     }
-    if (npred > 5) {
+    if (npred > 5 & predict.time) {
       npred2 <- length(lasso.genes)
       t3 <- t.diff1*npred2*1.1 + t.diff2*length(genes)*1.1
       units(t3) <- "mins"
