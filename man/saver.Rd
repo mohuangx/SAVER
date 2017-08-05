@@ -4,10 +4,10 @@
 \alias{saver}
 \title{Runs SAVER}
 \usage{
-saver(x, size.factor = NULL, nzero = 10, npred = NULL,
+saver(x, size.factor = NULL, parallel = FALSE, nzero = 10, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
-  parallel = FALSE, dfmax = 300, nfolds = 5, remove.zero.genes = FALSE,
-  verbose = FALSE, predict.time = TRUE)
+  null.model = FALSE, dfmax = 300, nfolds = 5,
+  remove.zero.genes = FALSE, verbose = FALSE, predict.time = TRUE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -16,6 +16,10 @@ the columns correspond to cells.}
 \item{size.factor}{Vector of cell size normalization factors.
 If \code{x} is already normalized or normalization is not desired, use
 \code{size.factor = 1}. Default uses mean library size normalization.}
+
+\item{parallel}{If \code{TRUE}, uses the parallel backend \code{foreach} to
+parallelize prediction. Must register parallel backend beforehand
+(\code{doParallel}, \code{doMC}). See example below.}
 
 \item{nzero}{Run prediction for genes that have at least this many
 nonzero cells. Default is 10.}
@@ -33,9 +37,7 @@ prediction. Overrides \code{npred}. Default is all genes.}
 \item{pred.genes.only}{Return expression levels of only \code{pred.genes}.
 Default is FALSE (returns expression levels of all genes).}
 
-\item{parallel}{If \code{TRUE}, uses the parallel backend \code{foreach} to
-parallelize prediction. Must register parallel backend beforehand
-(\code{doParallel}, \code{doMC}). See example below.}
+\item{null.model}{Whether to use mean gene expression as prediction.}
 
 \item{dfmax}{Maximum number of genes used in prediction model. Default is
 300.}

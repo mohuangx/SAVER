@@ -18,6 +18,10 @@
 #' If \code{x} is already normalized or normalization is not desired, use
 #' \code{size.factor = 1}. Default uses mean library size normalization.
 #'
+#' @param parallel If \code{TRUE}, uses the parallel backend \code{foreach} to
+#' parallelize prediction. Must register parallel backend beforehand
+#' (\code{doParallel}, \code{doMC}). See example below.
+#'
 #' @param nzero Run prediction for genes that have at least this many
 #' nonzero cells. Default is 10.
 #'
@@ -34,9 +38,7 @@
 #' @param pred.genes.only Return expression levels of only \code{pred.genes}.
 #' Default is FALSE (returns expression levels of all genes).
 #'
-#' @param parallel If \code{TRUE}, uses the parallel backend \code{foreach} to
-#' parallelize prediction. Must register parallel backend beforehand
-#' (\code{doParallel}, \code{doMC}). See example below.
+#' @param null.model Whether to use mean gene expression as prediction.
 #'
 #' @param dfmax Maximum number of genes used in prediction model. Default is
 #' 300.
@@ -80,9 +82,9 @@
 #' }
 #'
 #' @export
-saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
-                  pred.cells = NULL, pred.genes = NULL,
-                  pred.genes.only = FALSE, parallel = FALSE, dfmax = 300,
+saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
+                  npred = NULL, pred.cells = NULL, pred.genes = NULL,
+                  pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
                   nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE,
                   predict.time = TRUE) {
   np <- dim(x)
@@ -151,100 +153,138 @@ saver <- function(x, size.factor = NULL, nzero = 10, npred = NULL,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
-  message("Calculating predictions for ", length(lasso.genes), " genes using ",
-          length(pred.cells), " cells...")
-  if (npred > 5 & predict.time) {
-    mu <- matrix(0, 5, ncells)
-    s <- sample(1:length(good.genes), 5)
-    t1 <- Sys.time()
-    for (i in 1:5) {
-      cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
-                                                 x[good.genes[s[i]], ]/sf,
-                                                 pred.cells, dfmax, nfolds)$mu)
-      if (verbose) {
-        print(cvt[3])
-      }
-    }
-    t2 <- Sys.time()
-    for (i in 1:5) {
-      post <- calc.post(x[good.genes[s[i]], ], mu[i, ], sf, scale.sf)
-    }
-    t3 <- Sys.time()
-    t.diff1 <- (t2-t1)/5
-    t.diff2 <- (t3-t2)/5
-    units(t.diff1) <- "secs"
-    units(t.diff2) <- "secs"
-    if (verbose) {
-      message("Prediction: ", t.diff1, " per gene")
-      message("Posterior calc: ", t.diff2, " per gene")
-    }
-  }
-  nworkers <- foreach::getDoParWorkers()
-  if (parallel & nworkers > 1) {
+  if (!null.model) {
+    message("Calculating predictions for ", length(lasso.genes),
+            " genes using ", length(pred.cells), " cells...")
     if (npred > 5 & predict.time) {
-      npred2 <- length(lasso.genes)
-      npred3 <- length(nonlasso.genes)
-      t3 <- t.diff1*npred2/nworkers*1.1 + t.diff2*(npred2/nworkers+npred3)*1.1
-      units(t3) <- "mins"
-      message("Approximate finish time: ", t2+t3)
-    }
-    message("Running in parallel: ", nworkers, " workers")
-    lasso <- foreach::foreach(i = lasso.genes, .combine = "combine.mat",
-                              .packages = c("glmnet", "SAVER")) %dopar% {
-      ind <- which(i == good.genes)
-      cv <- expr.predict(x.est[, -ind], x[i, ]/sf, pred.cells, dfmax, nfolds,
-                         seed = i)
-      mu <- cv$mu
-      post <- calc.post(x[i, ], mu, sf, scale.sf)
-      est <- post$estimate
-      alpha <- post$alpha
-      beta <- post$beta
-      if (verbose) {
-        message(i)
+      mu <- matrix(0, 5, ncells)
+      s <- sample(1:length(good.genes), 5)
+      t1 <- Sys.time()
+      for (i in 1:5) {
+        cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
+                                                   x[good.genes[s[i]], ]/sf,
+                                                   pred.cells, dfmax,
+                                                   nfolds)$mu)
+        if (verbose) {
+          print(cvt[3])
+        }
       }
-      return(list(estimate = est, alpha = alpha, beta = beta, nvar = cv$nvar))
+      t2 <- Sys.time()
+      for (i in 1:5) {
+        post <- calc.post(x[good.genes[s[i]], ], mu[i, ], sf, scale.sf)
+      }
+      t3 <- Sys.time()
+      t.diff1 <- (t2-t1)/5
+      t.diff2 <- (t3-t2)/5
+      units(t.diff1) <- "secs"
+      units(t.diff2) <- "secs"
+      if (verbose) {
+        message("Prediction: ", t.diff1, " per gene")
+        message("Posterior calc: ", t.diff2, " per gene")
+      }
     }
-    out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
-    for (i in 1:3) {
-      out[[i]][lasso.genes, ] <- lasso[[i]]
-    }
-    nvar.vec[lasso.genes] <- lasso[[4]]
-    if (length(nonlasso.genes) > 0) {
-      nvar.vec[nonlasso.genes] <- 0
-      for (i in nonlasso.genes) {
-        post <- calc.post(x[i, ], mean(x[i, ]/sf), sf, scale.sf)
-        out[[1]][i, ] <- post$estimate
-        out[[2]][i, ] <- post$alpha
-        out[[3]][i, ] <- post$beta
+    nworkers <- foreach::getDoParWorkers()
+    if (parallel & nworkers > 1) {
+      if (npred > 5 & predict.time) {
+        npred2 <- length(lasso.genes)
+        npred3 <- length(nonlasso.genes)
+        t4 <- t.diff1*npred2/nworkers*1.1 +
+          t.diff2*(npred2/nworkers+npred3)*1.1
+        units(t4) <- "mins"
+        message("Approximate finish time: ", t3+t4)
+      }
+      message("Running in parallel: ", nworkers, " workers")
+      lasso <- foreach::foreach(i = lasso.genes, .combine = "combine.mat",
+                                .packages = c("glmnet", "SAVER")) %dopar% {
+        ind <- which(i == good.genes)
+        cv <- expr.predict(x.est[, -ind], x[i, ]/sf, pred.cells, dfmax, nfolds,
+                           seed = i)
+        mu <- cv$mu
+        post <- calc.post(x[i, ], mu, sf, scale.sf)
+        est <- post$estimate
+        alpha <- post$alpha
+        beta <- post$beta
+        if (verbose) {
+          message(i)
+        }
+        return(list(estimate = est, alpha = alpha, beta = beta,
+                    nvar = cv$nvar))
+      }
+      out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
+      for (i in 1:3) {
+        out[[i]][lasso.genes, ] <- lasso[[i]]
+      }
+      nvar.vec[lasso.genes] <- lasso[[4]]
+      if (length(nonlasso.genes) > 0) {
+        nvar.vec[nonlasso.genes] <- 0
+        for (i in nonlasso.genes) {
+          post <- calc.post(x[i, ], mean(x[i, ]/sf), sf, scale.sf)
+          out[[1]][i, ] <- post$estimate
+          out[[2]][i, ] <- post$alpha
+          out[[3]][i, ] <- post$beta
+        }
+      }
+    } else {
+      if (parallel & nworkers == 1) {
+        message("Only one worker assigned! Running sequentially...")
+      }
+      if (npred > 5 & predict.time) {
+        npred2 <- length(lasso.genes)
+        t4 <- t.diff1*npred2*1.1 + t.diff2*length(genes)*1.1
+        units(t4) <- "mins"
+        message("Approximate finish time: ", t3+t4)
+      }
+      out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
+      k <- 0
+      for (j in genes) {
+        k <- k+1
+        if (j %in% lasso.genes) {
+          ind <- which(j == good.genes)
+          cv <- expr.predict(x.est[, -ind], x[j, ]/sf, pred.cells, dfmax,
+                             nfolds, seed = j)
+          mu <- cv$mu
+          nvar <- cv$nvar
+          if (verbose) {
+            print(j)
+          }
+        } else {
+          mu <- rep(mean(x[j, ]/sf), ncells)
+          nvar <- 0
+        }
+        post <- calc.post(x[j, ], mu, sf, scale.sf)
+        out[[1]][j, ] <- post$estimate
+        out[[2]][j, ] <- post$alpha
+        out[[3]][j, ] <- post$beta
+        nvar.vec[j] <- nvar
       }
     }
   } else {
-    if (parallel & nworkers == 1) {
-      message("Only one worker assigned! Running sequentially...")
+    message("Using means as predictions.")
+    if (npred > 5 & predict.time) {
+      mu <- matrix(0, 5, ncells)
+      s <- sample(1:length(good.genes), 5)
+      t2 <- Sys.time()
+      for (i in 1:5) {
+        mu[i, ] <- rep(mean(x[good.genes[s[i]], ]/sf), ncells)
+        post <- calc.post(x[good.genes[s[i]], ], mu[i, ], sf, scale.sf)
+      }
+      t3 <- Sys.time()
+      t.diff2 <- (t3-t2)/5
+      units(t.diff2) <- "secs"
+      if (verbose) {
+        message("Posterior calc: ", t.diff2, " per gene")
+      }
     }
     if (npred > 5 & predict.time) {
       npred2 <- length(lasso.genes)
-      t3 <- t.diff1*npred2*1.1 + t.diff2*length(genes)*1.1
-      units(t3) <- "mins"
-      message("Approximate finish time: ", t2+t3)
+      t4 <- t.diff2*length(genes)*1.1
+      units(t4) <- "mins"
+      message("Approximate finish time: ", t3+t4)
     }
     out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
-    k <- 0
     for (j in genes) {
-      k <- k+1
-      if (j %in% lasso.genes) {
-        ind <- which(j == good.genes)
-        cv <- expr.predict(x.est[, -ind], x[j, ]/sf, pred.cells, dfmax, nfolds,
-                           seed = j)
-        mu <- cv$mu
-        nvar <- cv$nvar
-        if (verbose) {
-          print(j)
-        }
-      } else {
-        mu <- rep(mean(x[j, ]/sf), ncells)
-        nvar <- 0
-      }
+      mu <- rep(mean(x[j, ]/sf), ncells)
+      nvar <- 0
       post <- calc.post(x[j, ], mu, sf, scale.sf)
       out[[1]][j, ] <- post$estimate
       out[[2]][j, ] <- post$alpha
