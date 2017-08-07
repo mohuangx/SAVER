@@ -194,7 +194,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         message("Approximate finish time: ", t3+t4)
       }
       message("Running in parallel: ", nworkers, " workers")
-      lasso <- foreach::foreach(i = lasso.genes, .combine = "combine.mat",
+      lasso <- foreach::foreach(i = lasso.genes,
                                 .packages = c("glmnet", "SAVER")) %dopar% {
         ind <- which(i == good.genes)
         cv <- expr.predict(x.est[, -ind], x[i, ]/sf, pred.cells, dfmax, nfolds,
@@ -212,9 +212,9 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
       }
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
-        out[[i]][lasso.genes, ] <- lasso[[i]]
+        out[[i]][lasso.genes, ] <- Reduce(rbind, lapply(lasso, `[[`, i))
       }
-      nvar.vec[lasso.genes] <- lasso[[4]]
+      nvar.vec[lasso.genes] <- Reduce(c, lapply(lasso, `[[`, 4))
       if (length(nonlasso.genes) > 0) {
         nvar.vec[nonlasso.genes] <- 0
         for (i in nonlasso.genes) {
