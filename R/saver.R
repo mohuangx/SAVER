@@ -87,6 +87,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
                   nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE,
                   predict.time = TRUE) {
+  if (!is.matrix(x)) {
+    x <- as.matrix(x)
+    message("Converting x to matrix.")
+    if (!is.numeric(x)) {
+      stop("Make sure x is numeric.")
+    }
+  }
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
@@ -122,7 +129,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     stop("Not a valid size factor")
   }
   if (!is.null(pred.cells)) {
-    if (!is.integer(pred.cells) | min(pred.cells) < 1 |
+    if (min(pred.cells) < 1 |
         max(pred.cells) > ncells) {
       stop("pred.cells must be column indices of x")
     }
@@ -130,7 +137,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     pred.cells <- 1:ncells
   }
   if (!is.null(pred.genes)) {
-    if (!is.integer(pred.genes) | min(pred.genes) < 1 |
+    if (min(pred.genes) < 1 |
         max(pred.genes) > ngenes) {
       stop("pred.genes must be row indices of x")
     }
