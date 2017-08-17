@@ -40,6 +40,7 @@ cor.genes <- function(x, cor.mat = NULL) {
   return(cor.adj)
 }
 
+#' @export
 #' @rdname cor_adjust
 cor.cells <- function(x, cor.mat = NULL) {
   if (is.null(cor.mat)) {
