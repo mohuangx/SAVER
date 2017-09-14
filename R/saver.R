@@ -160,8 +160,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
-  x <- as.big.matrix(x, descriptorfile = "x.desc")
-  x.est <- as.big.matrix(x.est, descriptorfile = "xest.desc")
+  x <- as.big.matrix(x)
+  x.desc <- describe(x)
+  x.est <- as.big.matrix(x.est)
+  xest.desc <- describe(x.est)
   if (!null.model) {
     message("Calculating predictions for ", length(lasso.genes),
             " genes using ", length(pred.cells), " cells...")
@@ -204,9 +206,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
       }
       message("Running in parallel: ", nworkers, " workers")
       lasso <- foreach::foreach(i = lasso.genes,
-                                .packages = c("glmnet", "SAVER")) %dopar% {
-        x1 <- attach.big.matrix("x.desc")
-        x.est1 <- attach.big.matrix("xest.desc")
+                                .packages = c("glmnet", "SAVER",
+                                              "bigmemory")) %dopar% {
+        x1 <- attach.big.matrix(x.desc)
+        x.est1 <- attach.big.matrix(xest.desc)
         ind <- which(i == good.genes)
         cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
                            seed = i)
