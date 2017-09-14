@@ -160,6 +160,8 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
+  x <- as.big.matrix(x, descriptorfile = "x.desc")
+  x.est <- as.big.matrix(x.est, descriptorfile = "xest.desc")
   if (!null.model) {
     message("Calculating predictions for ", length(lasso.genes),
             " genes using ", length(pred.cells), " cells...")
@@ -203,11 +205,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
       message("Running in parallel: ", nworkers, " workers")
       lasso <- foreach::foreach(i = lasso.genes,
                                 .packages = c("glmnet", "SAVER")) %dopar% {
+        x1 <- attach.big.matrix("x.desc")
+        x.est1 <- attach.big.matrix("xest.desc")
         ind <- which(i == good.genes)
-        cv <- expr.predict(x.est[, -ind], x[i, ]/sf, pred.cells, dfmax, nfolds,
+        cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
                            seed = i)
         mu <- cv$mu
-        post <- calc.post(x[i, ], mu, sf, scale.sf)
+        post <- calc.post(x1[i, ], mu, sf, scale.sf)
         est <- post$estimate
         alpha <- post$alpha
         beta <- post$beta
