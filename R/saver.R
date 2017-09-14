@@ -217,6 +217,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         return(list(estimate = est, alpha = alpha, beta = beta,
                     nvar = cv$nvar))
       }
+      saveRDS(lasso, "lasso.rds")
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
         out[[i]][lasso.genes, ] <- Reduce(rbind, lapply(lasso, `[[`, i))
