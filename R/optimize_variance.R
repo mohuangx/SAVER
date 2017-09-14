@@ -20,6 +20,7 @@
 #'
 #' @importFrom  stats optimize ppoints uniroot var
 #' @rdname optimize_variance
+#' @export
 calc.a <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -56,6 +57,7 @@ calc.a <- function(y, mu, sf) {
 }
 
 #' @rdname optimize_variance
+#' @export
 calc.b <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -95,6 +97,7 @@ calc.b <- function(y, mu, sf) {
 }
 
 #' @rdname optimize_variance
+#' @export
 calc.k <- function(y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {

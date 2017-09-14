@@ -26,6 +26,7 @@
 #' \item{\code{upper.95}}{Upper 95\% confidence interval}
 #'
 #' @importFrom stats qgamma
+#' @export
 calc.post <- function(y, mu, sf, scale.sf) {
   n <- length(y)
   if (length(mu) == 1) {

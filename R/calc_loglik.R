@@ -22,6 +22,7 @@
 #'
 #'
 #' @rdname calc_loglik
+#' @export
 calc.loglik.a <- function(a, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -39,6 +40,7 @@ calc.loglik.a <- function(a, y, mu, sf) {
 }
 
 #' @rdname calc_loglik
+#' @export
 calc.loglik.b <- function(b, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
@@ -55,6 +57,7 @@ calc.loglik.b <- function(b, y, mu, sf) {
 }
 
 #' @rdname calc_loglik
+#' @export
 calc.loglik.k <- function(k, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
