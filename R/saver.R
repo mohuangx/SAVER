@@ -210,19 +210,20 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                                               "bigmemory")) %dopar% {
         x1 <- attach.big.matrix(x.desc)
         x.est1 <- attach.big.matrix(xest.desc)
-        ind <- which(i == good.genes)
-        cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
-                           seed = i)
-        mu <- cv$mu
-        post <- calc.post(x1[i, ], mu, sf, scale.sf)
-        est <- post$estimate
-        alpha <- post$alpha
-        beta <- post$beta
-        if (verbose) {
-          message(i)
-        }
-        return(list(estimate = est, alpha = alpha, beta = beta,
-                    nvar = cv$nvar))
+        # ind <- which(i == good.genes)
+        # cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
+        #                    seed = i)
+        # mu <- cv$mu
+        # post <- calc.post(x1[i, ], mu, sf, scale.sf)
+        # est <- post$estimate
+        # alpha <- post$alpha
+        # beta <- post$beta
+        # if (verbose) {
+        #   message(i)
+        # }
+        # return(list(estimate = est, alpha = alpha, beta = beta,
+        #             nvar = cv$nvar))
+        return(list(estimate = 0, alpha = 0, beta = 0, nvar = 0))
       }
       saveRDS(lasso, "lasso.rds")
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
