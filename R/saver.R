@@ -86,7 +86,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
                   nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE,
-                  predict.time = TRUE) {
+                  predict.time = TRUE, savefile = "lasso.rds") {
   if (!is.matrix(x)) {
     x <- as.matrix(x)
     message("Converting x to matrix.")
@@ -224,7 +224,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         return(list(estimate = est, alpha = alpha, beta = beta,
                     nvar = cv$nvar))
       }
-      saveRDS(lasso, "lasso.rds")
+      saveRDS(lasso, savefile)
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
         out[[i]][lasso.genes, ] <- Reduce(rbind, lapply(lasso, `[[`, i))
