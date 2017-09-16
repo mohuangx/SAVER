@@ -215,14 +215,14 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                            seed = i)
         mu <- cv$mu
         post <- calc.post(x1[i, ], mu, sf, scale.sf)
-        est <- post$estimate
-        alpha <- post$alpha
-        beta <- post$beta
+        est <- unname(post$estimate)
+        alpha <- unname(post$alpha)
+        beta <- unname(post$beta)
         if (verbose) {
           message(i)
         }
         return(list(estimate = est, alpha = alpha, beta = beta,
-                    nvar = cv$nvar))
+                    nvar = unname(cv$nvar)))
       }
       saveRDS(lasso, savefile)
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
