@@ -227,9 +227,11 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
       saveRDS(lasso, savefile)
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
-        out[[i]][lasso.genes, ] <- Reduce(rbind, lapply(lasso, `[[`, i))
+        tempvec <- lapply(lasso, `[[`, i)
+        out[[i]][lasso.genes, ] <- matrix(unlist(tempvec),
+                                          nrow = length(tempvec), byrow = TRUE)
       }
-      nvar.vec[lasso.genes] <- Reduce(c, lapply(lasso, `[[`, 4))
+      nvar.vec[lasso.genes] <- unlist(lapply(lasso, `[[`, 4))
       if (length(nonlasso.genes) > 0) {
         nvar.vec[nonlasso.genes] <- 0
         for (i in nonlasso.genes) {
