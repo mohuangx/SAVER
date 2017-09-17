@@ -223,8 +223,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         }
         return(list(estimate = est, alpha = alpha, beta = beta,
                     nvar = unname(cv$nvar)))
-      }
+                                              }
+      message("Lasso finished:", Sys.time())
       saveRDS(lasso, savefile)
+      message("Saving Lasso finished:", Sys.time())
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
         tempvec <- lapply(lasso, `[[`, i)
@@ -232,6 +234,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                                           nrow = length(tempvec), byrow = TRUE)
       }
       nvar.vec[lasso.genes] <- unlist(lapply(lasso, `[[`, 4))
+      message("Unlist finished:", Sys.time())
       if (length(nonlasso.genes) > 0) {
         nvar.vec[nonlasso.genes] <- 0
         for (i in nonlasso.genes) {
