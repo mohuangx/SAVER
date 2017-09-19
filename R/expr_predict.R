@@ -24,6 +24,9 @@
 #'
 #' @param nfolds Number of folds to use in the cross-validation. Default is 5.
 #'
+#' @param nlambda Number of lambda to calculate in cross validation. Default is
+#' 5.
+#'
 #' @param seed Sets the seed for reproducible results.
 #'
 #'
@@ -31,14 +34,16 @@
 #'
 #' @export
 expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
-                         nfolds = 5, seed = NULL, verbose = FALSE) {
+                         nfolds = 5, nlambda = 50, seed = NULL,
+                         verbose = FALSE) {
   if (!is.null(seed))
     set.seed(seed)
   if (sum(y) == 0)
     return(list(mu = rep(0, length(y)), nvar = 0))
   cv <- tryCatch(
-    suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells], family="poisson",
-                      dfmax = dfmax, nfolds = nfolds)),
+    suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
+                                       family="poisson", dfmax = dfmax,
+                                       nfolds = nfolds, nlambda = nlambda)),
     error = function(cond) {
       if (verbose)
         message(cond, "\n")

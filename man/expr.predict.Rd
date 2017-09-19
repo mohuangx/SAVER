@@ -5,7 +5,7 @@
 \title{Calculates SAVER prediction.}
 \usage{
 expr.predict(x, y, pred.cells = 1:length(y), dfmax = 300, nfolds = 5,
-  seed = NULL, verbose = FALSE)
+  nlambda = 50, seed = NULL, verbose = FALSE)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the
@@ -20,6 +20,9 @@ all cells.}
 is 300.}
 
 \item{nfolds}{Number of folds to use in the cross-validation. Default is 5.}
+
+\item{nlambda}{Number of lambda to calculate in cross validation. Default is
+5.}
 
 \item{seed}{Sets the seed for reproducible results.}
 }

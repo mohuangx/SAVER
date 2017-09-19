@@ -6,7 +6,7 @@
 \usage{
 saver(x, size.factor = NULL, parallel = FALSE, nzero = 10, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
-  null.model = FALSE, dfmax = 300, nfolds = 5,
+  null.model = FALSE, dfmax = 300, nfolds = 5, nlambda = 50,
   remove.zero.genes = FALSE, verbose = FALSE, predict.time = TRUE)
 }
 \arguments{
@@ -43,6 +43,9 @@ Default is FALSE (returns expression levels of all genes).}
 300.}
 
 \item{nfolds}{Number of folds to be used in cross validation. Default is 5.}
+
+\item{nlambda}{Number of lambda to calculate in cross validation. Default is
+5.}
 
 \item{remove.zero.genes}{Whether to remove genes with all zero.
 Default is FALSE.}

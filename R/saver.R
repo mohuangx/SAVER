@@ -45,6 +45,9 @@
 #'
 #' @param nfolds Number of folds to be used in cross validation. Default is 5.
 #'
+#' @param nlambda Number of lambda to calculate in cross validation. Default is
+#' 5.
+#'
 #' @param remove.zero.genes Whether to remove genes with all zero.
 #' Default is FALSE.
 #'
@@ -85,8 +88,8 @@
 saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
-                  nfolds = 5, remove.zero.genes = FALSE, verbose = FALSE,
-                  predict.time = TRUE) {
+                  nfolds = 5, nlambda = 50, remove.zero.genes = FALSE,
+                  verbose = FALSE, predict.time = TRUE) {
   if (!is.matrix(x)) {
     x <- as.matrix(x)
     message("Converting x to matrix.")
@@ -175,7 +178,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         cvt <- system.time(mu[i, ] <- expr.predict(x.est[, -s[i]],
                                                    x[good.genes[s[i]], ]/sf,
                                                    pred.cells, dfmax,
-                                                   nfolds)$mu)
+                                                   nfolds, nlambda)$mu)
         if (verbose) {
           print(cvt[3])
         }
@@ -212,7 +215,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         x.est1 <- bigmemory::attach.big.matrix(xest.desc)
         ind <- which(i == good.genes)
         cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
-                           seed = i)
+                           nlambda, seed = i)
         mu <- cv$mu
         post <- calc.post(x1[i, ], mu, sf, scale.sf)
         est <- unname(post$estimate)
@@ -257,7 +260,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         if (j %in% lasso.genes) {
           ind <- which(j == good.genes)
           cv <- expr.predict(x.est[, -ind], x[j, ]/sf, pred.cells, dfmax,
-                             nfolds, seed = j)
+                             nfolds, nlambda, seed = j)
           mu <- cv$mu
           nvar <- cv$nvar
           if (verbose) {
