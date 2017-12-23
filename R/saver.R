@@ -153,7 +153,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   } else {
     stop("npred must be less than number of rows in x")
   }
-  good.genes <- which(rowSums(x > 0) >= nzero)
+  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) > 0.1)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
     genes <- pred.genes
