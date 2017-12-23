@@ -163,6 +163,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
+  sd.vec <- rep(0, ngenes)
   x <- bigmemory::as.big.matrix(x)
   x.desc <- bigmemory::describe(x)
   x.est <- bigmemory::as.big.matrix(x.est)
@@ -225,7 +226,8 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
           message(i)
         }
         return(list(estimate = est, alpha = alpha, beta = beta,
-                    nvar = unname(cv$nvar)))
+                    nvar = unname(cv$nvar),
+                    sd.cv = unname(cv$sd.cv)))
       }
       out <- lapply(1:3, function(x) matrix(0, ngenes, ncells))
       for (i in 1:3) {
@@ -234,8 +236,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                                           nrow = length(tempvec), byrow = TRUE)
       }
       nvar.vec[lasso.genes] <- unlist(lapply(lasso, `[[`, 4))
+      sd.vec[lasso.genes] <- unlist(lapply(lasso, `[[`, 5))
       if (length(nonlasso.genes) > 0) {
         nvar.vec[nonlasso.genes] <- 0
+        sd.vec[nonlasso.genes] <- 0
         for (i in nonlasso.genes) {
           post <- calc.post(x[i, ], mean(x[i, ]/sf), sf, scale.sf)
           out[[1]][i, ] <- post$estimate
@@ -263,18 +267,21 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                              nfolds, nlambda, seed = j)
           mu <- cv$mu
           nvar <- cv$nvar
+          sd.cv <- cv$sd.cv
           if (verbose) {
             print(j)
           }
         } else {
           mu <- rep(mean(x[j, ]/sf), ncells)
           nvar <- 0
+          sd.cv <- 0
         }
         post <- calc.post(x[j, ], mu, sf, scale.sf)
         out[[1]][j, ] <- post$estimate
         out[[2]][j, ] <- post$alpha
         out[[3]][j, ] <- post$beta
         nvar.vec[j] <- nvar
+        sd.vec[j] <- sd.cv
       }
     }
   } else {
@@ -304,11 +311,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     for (j in genes) {
       mu <- rep(mean(x[j, ]/sf), ncells)
       nvar <- 0
+      sd.cv <- 0
       post <- calc.post(x[j, ], mu, sf, scale.sf)
       out[[1]][j, ] <- post$estimate
       out[[2]][j, ] <- post$alpha
       out[[3]][j, ] <- post$beta
       nvar.vec[j] <- nvar
+      sd.vec[j] <- sd.cv
     }
   }
   if (pred.genes.only) {
@@ -316,6 +325,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
       out[[i]] <- out[[i]][pred.genes, ]
     }
     nvar.vec <- nvar.vec[pred.genes]
+    sd.vec <- sd.vec[pred.genes]
     gene.names <- rownames(x)[pred.genes]
     cell.names <- colnames(x)
   } else {
@@ -324,11 +334,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   }
   out.named <- lapply(out[1:3], function(x) {rownames(x) <- gene.names;
   colnames(x) <- cell.names; x})
-  info <- list(size.factor = sf*scale.sf, nvar = nvar.vec, ngenes = ngenes,
-               ncells = ncells, genes = gene.names, cells = cell.names)
+  info <- list(size.factor = sf*scale.sf, nvar = nvar.vec, sd.cv = sd.vec,
+               ngenes = ngenes, ncells = ncells, genes = gene.names,
+               cells = cell.names)
   out.named[[4]] <- info
   names(out.named[[4]][[1]]) <- cell.names
   names(out.named[[4]][[2]]) <- gene.names
+  names(out.named[[4]][[3]]) <- gene.names
   names(out.named) <- c("estimate", "alpha", "beta", "info")
   class(out.named) <- "saver"
   message("Done!")
