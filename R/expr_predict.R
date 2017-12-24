@@ -58,7 +58,8 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
                                         type="response"))
     nvar <- cv$lambda.min
-    sd.cv <- (cv$cvm[min.ind] - cv$cvm[i]) / cv$cvsd[min.ind]
+    min.ind <- which(cv$lambda == cv$lambda.min)
+    sd.cv <- (cv$cvm[1] - cv$cvm[min.ind]) / cv$cvsd[min.ind]
   }
   return(list(mu = mu, nvar = nvar, sd.cv = sd.cv))
 }
