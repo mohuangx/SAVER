@@ -160,7 +160,7 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   } else {
     genes <- 1:ngenes
   }
-  lasso.genes <- intersect(good.genes, pred.genes)
+  lasso.genes <- pred.genes
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
   sd.vec <- rep(0, ngenes)
