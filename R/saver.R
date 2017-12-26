@@ -170,7 +170,8 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   xest.desc <- bigmemory::describe(x.est)
   if (!null.model) {
     message("Calculating predictions for ", length(lasso.genes),
-            " genes using ", length(pred.cells), " cells...")
+            " genes using ", ncol(x.est), " genes and ", nrow(x.est),
+            " cells...")
     if (npred > 5 & predict.time) {
       mu <- matrix(0, 5, ncells)
       s <- sample(1:length(good.genes), 5)
