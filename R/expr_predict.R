@@ -52,8 +52,8 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
   )
   if (length(cv) == 1) {
     mu <- rep(mean(y[pred.cells]), length(y))
-    nvar <- 0
-    sd.cv <- 0
+    nvar <- -1
+    sd.cv <- -1
   } else {
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
                                         type="response"))
