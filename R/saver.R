@@ -270,10 +270,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         if (j %in% lasso.genes) {
           ind <- which(j == good.genes)
           if (length(ind) == 0) {
-            cv <- expr.predict(x.est1, x1[i, ]/sf, pred.cells, dfmax, nfolds,
+            cv <- expr.predict(x.est1, x1[j, ]/sf, pred.cells, dfmax, nfolds,
                                nlambda, seed = i)
           } else {
-            cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
+            cv <- expr.predict(x.est1[, -ind], x1[j, ]/sf, pred.cells, dfmax, nfolds,
                                nlambda, seed = i)
           }
           mu <- cv$mu
