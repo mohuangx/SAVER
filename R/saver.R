@@ -164,10 +164,6 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
   sd.vec <- rep(0, ngenes)
-  x <- bigmemory::as.big.matrix(x)
-  x.desc <- bigmemory::describe(x)
-  x.est <- bigmemory::as.big.matrix(x.est)
-  xest.desc <- bigmemory::describe(x.est)
   if (!null.model) {
     message("Calculating predictions for ", length(lasso.genes),
             " genes using ", ncol(x.est), " genes and ", nrow(x.est),
@@ -210,21 +206,20 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         message("Approximate finish time: ", t3+t4)
       }
       message("Running in parallel: ", nworkers, " workers")
-      lasso <- foreach::foreach(i = lasso.genes,
+      lasso <- foreach::foreach(xit = iterators::iter(x[lasso.genes, ], by = "row"), 
+                                i = lasso.genes,
                                 .packages = c("glmnet", "SAVER",
-                                              "bigmemory")) %dopar% {
-        x1 <- bigmemory::attach.big.matrix(x.desc)
-        x.est1 <- bigmemory::attach.big.matrix(xest.desc)
+                                              "bigmemory", "iterators")) %dopar% {
         ind <- which(i == good.genes)
         if (length(ind) == 0) {
-          cv <- expr.predict(x.est1, x1[i, ]/sf, pred.cells, dfmax, nfolds,
+          cv <- expr.predict(x.est, c(xit)/sf, pred.cells, dfmax, nfolds,
                              nlambda, seed = i)
         } else {
-          cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
+          cv <- expr.predict(x.est[, -ind], c(xit)/sf, pred.cells, dfmax, nfolds,
                              nlambda, seed = i)
         }
         mu <- cv$mu
-        post <- calc.post(x1[i, ], mu, sf, scale.sf)
+        post <- calc.post(c(xit), mu, sf, scale.sf)
         est <- unname(post$estimate)
         alpha <- unname(post$alpha)
         beta <- unname(post$beta)

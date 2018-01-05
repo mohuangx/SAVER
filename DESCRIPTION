@@ -15,7 +15,8 @@ Imports:
     glmnet,
     foreach,
     methods,
-    bigmemory
+    bigmemory,
+    iterators
 Suggest:
     doParallel
 RoxygenNote: 6.0.1
