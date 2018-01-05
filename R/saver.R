@@ -271,10 +271,10 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
           ind <- which(j == good.genes)
           if (length(ind) == 0) {
             cv <- expr.predict(x.est1, x1[j, ]/sf, pred.cells, dfmax, nfolds,
-                               nlambda, seed = i)
+                               nlambda, seed = j)
           } else {
             cv <- expr.predict(x.est1[, -ind], x1[j, ]/sf, pred.cells, dfmax, nfolds,
-                               nlambda, seed = i)
+                               nlambda, seed = j)
           }
           mu <- cv$mu
           nvar <- cv$nvar
