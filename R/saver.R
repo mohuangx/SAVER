@@ -216,8 +216,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         x1 <- bigmemory::attach.big.matrix(x.desc)
         x.est1 <- bigmemory::attach.big.matrix(xest.desc)
         ind <- which(i == good.genes)
-        cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
-                           nlambda, seed = i)
+        if (length(ind) == 0) {
+          cv <- expr.predict(x.est1, x1[i, ]/sf, pred.cells, dfmax, nfolds,
+                             nlambda, seed = i)
+        } else {
+          cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
+                             nlambda, seed = i)
+        }
         mu <- cv$mu
         post <- calc.post(x1[i, ], mu, sf, scale.sf)
         est <- unname(post$estimate)
@@ -264,8 +269,13 @@ saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
         k <- k+1
         if (j %in% lasso.genes) {
           ind <- which(j == good.genes)
-          cv <- expr.predict(x.est[, -ind], x[j, ]/sf, pred.cells, dfmax,
-                             nfolds, nlambda, seed = j)
+          if (length(ind) == 0) {
+            cv <- expr.predict(x.est1, x1[i, ]/sf, pred.cells, dfmax, nfolds,
+                               nlambda, seed = i)
+          } else {
+            cv <- expr.predict(x.est1[, -ind], x1[i, ]/sf, pred.cells, dfmax, nfolds,
+                               nlambda, seed = i)
+          }
           mu <- cv$mu
           nvar <- cv$nvar
           sd.cv <- cv$sd.cv
