@@ -1,6 +1,6 @@
 Package: SAVER
 Type: Package
-Version: 0.3.0
+Version: 0.3.1
 Title: Single-cell RNA-seq Gene Expression Recovery
 Description: This package implements a regularized regression prediction and 
     empirical Bayes method to recover the true gene expression profile in 
