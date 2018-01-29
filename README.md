@@ -4,7 +4,7 @@ SAVER (Single-cell Analysis Via Expression Recovery) implements a regularized re
 
 ## News and Updates
 January 29, 2018
-* Version 0.3.1 release.
+* Version 0.3.1 released.
 
 September 19, 2017
 * Version 0.3.0 released.
