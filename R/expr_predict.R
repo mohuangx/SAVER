@@ -39,7 +39,7 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
   if (!is.null(seed))
     set.seed(seed)
   if (sum(y) == 0)
-    return(list(mu = rep(0, length(y)), nvar = 0))
+    return(list(mu = rep(0, length(y)), nvar = 0, sd.cv = 0))
   cv <- tryCatch(
     suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
                                        family="poisson", dfmax = dfmax,
