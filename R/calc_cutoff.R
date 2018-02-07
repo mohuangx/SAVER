@@ -6,8 +6,9 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   n <- length(pred.cells)
   out <- suppressWarnings(
-    foreach::foreach(ix = iterx, ind = itercount, .combine = 'rbind',
-                     .packages = c("glmnet", "SAVER", "iterators")) %dopar% {
+    foreach::foreach(ix = iterx, ind = itercount,
+                     .packages = c("glmnet", "SAVER", "iterators"),
+                     .errorhandling="pass") %dopar% {
       if (npred > 100) {
         maxcor <- calc.maxcor(x.est, t(ix))
       } else {
@@ -18,7 +19,7 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
       if (output.se) {
-        se <- matrix(0, nrow(ix), col(ix))
+        se <- matrix(0, nrow(ix), ncol(ix))
       } else {
         se <- NULL
       }
@@ -46,4 +47,12 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
       list(est, se, maxcor, lambda.min, sd.cv)
     }
   )
+  est <- do.call(rbind, lapply(out, `[[`, 1))
+  se <- do.call(rbind, lapply(out, `[[`, 2))
+  maxcor <- unlist(lapply(out, `[[`, 3))
+  lambda.min <- unlist(lapply(out, `[[`, 4))
+  sd.cv <- unlist(lapply(out, `[[`, 5))
+  fit <- lm(sqrt(sd.cv) ~ maxcor)
+  cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
+  list(est, se, maxcor, lambda.min, sd.cv, cutoff)
 }

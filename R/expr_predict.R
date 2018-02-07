@@ -33,13 +33,12 @@
 #' @return A vector of predicted gene expression.
 #'
 #' @export
-expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
-                         nfolds = 5, nlambda = 50, seed = NULL,
-                         verbose = FALSE) {
+expr.predict.cv <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
+                            verbose = FALSE) {
   if (!is.null(seed))
     set.seed(seed)
-  if (sum(y) == 0)
-    return(list(mu = rep(0, length(y)), nvar = 0, sd.cv = 0))
+  if (sd(y) == 0)
+    return(list(rep(mean(y), length(y)), 0, 0))
   cv <- tryCatch(
     suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
                                        family="poisson", dfmax = dfmax,
@@ -51,15 +50,15 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
     }
   )
   if (length(cv) == 1) {
-    mu <- rep(mean(y[pred.cells]), length(y))
-    nvar <- -1
-    sd.cv <- -1
+    mu <- rep(mean(y), length(y))
+    lambda.min <- 0
+    sd.cv <- 0
   } else {
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
-                                        type="response"))
-    nvar <- cv$lambda.min
+                                      type="response"))
+    lambda.min <- cv$lambda.min
     min.ind <- which(cv$lambda == cv$lambda.min)
     sd.cv <- (cv$cvm[1] - cv$cvm[min.ind]) / cv$cvsd[min.ind]
   }
-  return(list(mu = mu, nvar = nvar, sd.cv = sd.cv))
+  return(list(mu, lambda.min, sd.cv))
 }

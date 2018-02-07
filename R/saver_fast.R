@@ -117,9 +117,18 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     genes <- 1:ngenes
   }
   x <- x[genes, ]
+  est <- matrix(0, length(genes), ncells)
+  se <- matrix(0, length(genes), ncells)
   
   nworkers <- foreach::getDoParWorkers()
   message("Running SAVER with ", nworkers, " worker(s)")
+  
+  ind <- sample(genes, length(genes))
+  ind1 <- ind[1:min(100, length(ind))]
+  
+  out1 <- calc.cutoff(x[ind1, ], x.est, npred, pred.cells, nworkers, output.se,
+                      verbose, index = NULL)
+  
   
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
