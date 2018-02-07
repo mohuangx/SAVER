@@ -90,26 +90,7 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
                   nfolds = 5, nlambda = 50, remove.zero.genes = FALSE,
                   verbose = FALSE, predict.time = TRUE) {
-  if (!is.matrix(x)) {
-    x <- as.matrix(x)
-    message("Converting x to matrix.")
-    if (!is.numeric(x)) {
-      stop("Make sure x is numeric.")
-    }
-  }
-  np <- dim(x)
-  if (is.null(np) | (np[2] <= 1))
-    stop("x should be a matrix with 2 or more columns")
-  if (min(colSums(x)) == 0) {
-    nzerocells <- sum(colSums(x) == 0)
-    x <- x[, colSums(x) != 0]
-    message("Removing ", nzerocells, " cells with zero expression.")
-  }
-  nonzero <- which(rowSums(x) != 0)
-  if (remove.zero.genes) {
-    x <- x[nonzero, ]
-    message("Removing ", length(nonzero), " genes with zero expression.")
-  }
+  x <- clean.data(x)
   np <- dim(x)
   ngenes <- as.integer(np[1])
   ncells <- as.integer(np[2])
@@ -117,50 +98,30 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     message(ngenes, " genes")
     message(ncells, " cells")
   }
-  if (is.null(size.factor)) {
-    sf <- colSums(x)/mean(colSums(x))
-    scale.sf <- 1
-  } else if (length(size.factor) == ncells) {
-    sf <- size.factor/mean(size.factor)
-    scale.sf <- mean(size.factor)
-  } else if (size.factor == 1) {
-    sf <- rep(1, ncells)
-    scale.sf <- 1
-  } else if (min(size.factor) <= 0) {
-    stop("Size factor must be greater than 0")
-  } else {
-    stop("Not a valid size factor")
-  }
-  if (!is.null(pred.cells)) {
-    if (min(pred.cells) < 1 |
-        max(pred.cells) > ncells) {
-      stop("pred.cells must be column indices of x")
-    }
-  } else {
-    pred.cells <- 1:ncells
-  }
-  if (!is.null(pred.genes)) {
-    if (min(pred.genes) < 1 |
-        max(pred.genes) > ngenes) {
-      stop("pred.genes must be row indices of x")
-    }
-    npred <- length(pred.genes)
-  } else if (is.null(npred)) {
-    npred <- ngenes
-    pred.genes <- 1:ngenes
-  } else if (npred < ngenes) {
-    pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
-  } else {
-    stop("npred must be less than number of rows in x")
-  }
-  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) > 0.1)
+  
+  # assign size factor
+  sf.out <- calc.size.factor(x, size.factor, ncells)
+  sf <- sf.out[[1]]
+  scale.sf <- sf.out[[2]]
+  
+  # assign pred.cells and pred.genes
+  pred.cells <- get.pred.cells(pred.cells, ncells)
+  pred.genes <- get.pred.genes(pred.genes, npred, ngenes)
+  npred <- length(pred.genes)
+  
+  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
     genes <- pred.genes
   } else {
     genes <- 1:ngenes
   }
-  lasso.genes <- pred.genes
+  x <- x[genes, ]
+  
+  nworkers <- foreach::getDoParWorkers()
+  message("Running SAVER with ", nworkers, " worker(s)")
+  
+  lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
   sd.vec <- rep(0, ngenes)
