@@ -11,7 +11,7 @@
 #'
 #' @param y A vector of observed gene counts.
 #'
-#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#' @param mu A vector of prior means.
 #'
 #' @param sf Vector of normalized size factors.
 #'
@@ -19,11 +19,7 @@
 #'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
-#' \item{\code{alpha}}{Posterior Gamma shape parameter}
-#' \item{\code{beta}}{Posterior Gamma rate parameter}
-#' \item{\code{predicted}}{Regression prediction}
-#' \item{\code{lower.95}}{Lower 95\% confidence interval}
-#' \item{\code{upper.95}}{Upper 95\% confidence interval}
+#' \item{\code{se}}{Standard error of expression estimate}
 #'
 #' @importFrom stats qgamma
 #' @export
@@ -57,7 +53,7 @@ calc.post <- function(y, mu, sf, scale.sf) {
   post.alpha <- prior.alpha + y
   post.beta <- prior.beta + sf
   lambda.hat <- post.alpha/post.beta
-  return(list(estimate = ceiling(lambda.hat*1000/scale.sf)/1000,
-              alpha = ceiling(post.alpha*1000)/1000,
-              beta = ceiling(post.beta*1000*scale.sf)/1000))
+  se <- sqrt(post.alpha/post.beta^2)
+  return(list(estimate = unname(ceiling(lambda.hat*1000*scale.sf)/1000),
+              se = unname(ceiling(se*1000*scale.sf)/1000)))
 }
