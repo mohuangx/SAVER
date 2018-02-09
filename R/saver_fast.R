@@ -87,6 +87,7 @@
 #' @export
 saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
+                  output.se = TRUE, 
                   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300,
                   nfolds = 5, nlambda = 50, remove.zero.genes = FALSE,
                   verbose = FALSE, predict.time = TRUE) {
@@ -109,7 +110,8 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   pred.genes <- get.pred.genes(pred.genes, npred, ngenes)
   npred <- length(pred.genes)
   
-  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
+  good.genes <- intersect(which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1),
+                          pred.genes)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
     genes <- pred.genes
@@ -128,6 +130,15 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   
   out1 <- calc.cutoff(x[ind1, ], x.est, npred, pred.cells, nworkers, output.se,
                       verbose, index = NULL)
+  
+  if (length(genes) > 100) {
+    cutoff <- out1$cutoff
+    n2 <- ceiling(200/mean(out1$maxcor > cutoff))+1
+    ind2 <- ind[101:n2]
+    out2 <- calc.lambda(x[ind2, ], x.est, cutoff, npred, pred.cells, nworkers, 
+                        output.se, verbose)
+  }
+  out2 <- calc.lambda()
   
   
   lasso.genes <- intersect(good.genes, pred.genes)
