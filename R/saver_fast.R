@@ -125,21 +125,39 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   nworkers <- foreach::getDoParWorkers()
   message("Running SAVER with ", nworkers, " worker(s)")
   
+  set.seed(1)
   ind <- sample(genes, length(genes))
   ind1 <- ind[1:min(100, length(ind))]
   
-  out1 <- calc.cutoff(x[ind1, ], x.est, npred, pred.cells, nworkers, output.se,
-                      verbose, index = NULL)
+  out1 <- calc.cutoff(x[ind1, ], x.est, sf, npred, pred.cells, nworkers, 
+                      output.se, verbose, index = NULL)
+  
+  est[ind1, ] <- out1$est
+  se[ind1, ] <- out1$se
   
   if (length(genes) > 100) {
     cutoff <- out1$cutoff
     n2 <- ceiling(200/mean(out1$maxcor > cutoff))+1
-    ind2 <- ind[101:n2]
-    out2 <- calc.lambda(x[ind2, ], x.est, cutoff, npred, pred.cells, nworkers, 
-                        output.se, verbose)
+    ind2 <- ind[101:min(n2, length(ind))]
+    out2 <- calc.lambda(x[ind2, ], x.est, cutoff, sf, npred, pred.cells, 
+                        nworkers, output.se, verbose)
+    
+    est[ind2, ] <- out2$est
+    se[ind2, ] <- out2$se
   }
-  out2 <- calc.lambda()
   
+  if (length(genes) > n2) {
+    maxcor <- c(out1$maxcor, out2$maxcor)
+    pred <- which(maxcor > cutoff)
+    lambda.max <- c(out1$lambda.max, out2$lambda.max)[pred]
+    lambda.min <- c(out1$lambda.min, out2$lambda.min)[pred]
+    fit <- lm(log(lambda.max/lambda.min)^2 ~ maxcor[pred])
+    
+    ind3 <- ind[(n2+1):length(ind)]
+    
+    #out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, npred, pred.cells,
+    #                      nworkers, output.se, verbose)
+  }
   
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]

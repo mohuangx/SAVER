@@ -76,3 +76,9 @@ get.chunk <- function(x, n) {
 get.nchunk <- function(x) {
   as.numeric(ceiling(object.size(x)/(500*1024*1024)))
 }
+
+# estimate lambda.min
+est.lambda.min <- function(x, r, sf, coefs) {
+  n <- length(sf)
+  r*sd(x/sf)*exp(-sqrt(coefs[1]+coefs[2]*r))*sqrt((n-1)/n)
+}

@@ -1,5 +1,5 @@
 
-calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
+calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
                         verbose, index) {
   cs <- min(ceiling(nrow(x)/nworkers), 10)
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
@@ -10,7 +10,7 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
       if (npred > 100) {
-        maxcor <- calc.maxcor(x.est, t(ix))
+        maxcor <- calc.maxcor(x.est, t(sweep(ix, 2, sf, "/")))
       } else {
         maxcor <- NULL
       }
@@ -23,6 +23,9 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
       } else {
         se <- NULL
       }
+      ct <- rep(0, nrow(ix))
+      vt <- rep(0, nrow(ix))
+      lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
       
@@ -30,30 +33,36 @@ calc.cutoff <- function(x, x.est, npred, pred.cells, nworkers, output.se,
         sameind <- which(x.est.names == x.names[i])
         y <- ix[i, pred.cells]/sf[pred.cells]
         if (length(sameind) == 1) {
-          pred.out <- expr.predict.cv(x.est[pred.cells, -sameind], y,
-                                      seed = (ind - 1)*cs + i)
+          ct[i] <- system.time(pred.out <- expr.predict.cv(
+            x.est[pred.cells, -sameind], y, seed = (ind - 1)*cs + i))[3]
         } else {
-          pred.out <- expr.predict.cv(x.est[pred.cells, ], y,
-                                      seed = (ind - 1)*cs + i)
+          ct[i] <- system.time(pred.out <- expr.predict.cv(
+            x.est[pred.cells, ], y, seed = (ind - 1)*cs + i))
         }
-        lambda.min[i] <- pred.out[[2]]
-        sd.cv[i] <- pred.out[[3]]
-        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        lambda.max[i] <- pred.out[[2]]
+        lambda.min[i] <- pred.out[[3]]
+        sd.cv[i] <- pred.out[[4]]
+        vt[i] <- system.time(post <- calc.post(ix[i, ], pred.out[[1]], sf, 
+                                               scale.sf))[3]
         est[i, ] <- post[[1]]
         if (output.se) {
           se[i, ] <- post[[2]]
         }
       }
-      list(est, se, maxcor, lambda.min, sd.cv)
+      list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
   maxcor <- unlist(lapply(out, `[[`, 3))
-  lambda.min <- unlist(lapply(out, `[[`, 4))
-  sd.cv <- unlist(lapply(out, `[[`, 5))
+  lambda.max <- unlist(lapply(out, `[[`, 4))
+  lambda.min <- unlist(lapply(out, `[[`, 5))
+  sd.cv <- unlist(lapply(out, `[[`, 6))
+  ct <- unlist(lapply(out, `[[`, 7))
+  vt <- unlist(lapply(out, `[[`, 8))
   fit <- lm(sqrt(sd.cv) ~ maxcor)
   cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
-  list(est = est, se = se, maxcor = maxcor, lambda.min = lambda.min, 
-       sd.cv = sd.cv, cutoff = cutoff)
+  list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
+       lambda.min = lambda.min, sd.cv = sd.cv, cutoff = cutoff,
+       ct = ct, vt = vt)
 }

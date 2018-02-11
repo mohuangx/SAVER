@@ -51,14 +51,16 @@ expr.predict.cv <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
   )
   if (length(cv) == 1) {
     mu <- rep(mean(y), length(y))
+    lambda.max <- 0
     lambda.min <- 0
     sd.cv <- 0
   } else {
     mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
                                       type="response"))
+    lambda.max <- cv$lambda[1]
     lambda.min <- cv$lambda.min
     min.ind <- which(cv$lambda == cv$lambda.min)
     sd.cv <- (cv$cvm[1] - cv$cvm[min.ind]) / cv$cvsd[min.ind]
   }
-  return(list(mu, lambda.min, sd.cv))
+  return(list(mu, lambda.max, lambda.min, sd.cv))
 }
