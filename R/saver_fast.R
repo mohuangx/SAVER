@@ -125,6 +125,13 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   nworkers <- foreach::getDoParWorkers()
   message("Running SAVER with ", nworkers, " worker(s)")
   
+  if (!null.model) {
+    message("Calculating predictions for ", length(lasso.genes),
+            " genes using ", ncol(x.est), " genes and ", nrow(x.est),
+            " cells...")
+  } else {
+    message("Using means as predictions.")
+  }
   set.seed(1)
   ind <- sample(genes, length(genes))
   ind1 <- ind[1:min(100, length(ind))]
@@ -155,18 +162,21 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     
     ind3 <- ind[(n2+1):length(ind)]
     
-    #out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, npred, pred.cells,
-    #                      nworkers, output.se, verbose)
+    out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, npred, pred.cells,
+                          nworkers, output.se, verbose)
+    
+    est[ind3, ] <- out3$est
+    se[ind3, ] <- out3$se
   }
   
+  
+
   lasso.genes <- intersect(good.genes, pred.genes)
   nonlasso.genes <- genes[!(genes %in% lasso.genes)]
   nvar.vec <- rep(0, ngenes)
   sd.vec <- rep(0, ngenes)
   if (!null.model) {
-    message("Calculating predictions for ", length(lasso.genes),
-            " genes using ", ncol(x.est), " genes and ", nrow(x.est),
-            " cells...")
+
     if (npred > 5 & predict.time) {
       mu <- matrix(0, 5, ncells)
       s <- sample(1:length(good.genes), 5)

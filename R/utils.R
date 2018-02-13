@@ -78,7 +78,9 @@ get.nchunk <- function(x) {
 }
 
 # estimate lambda.min
-est.lambda.min <- function(x, r, sf, coefs) {
-  n <- length(sf)
-  r*sd(x/sf)*exp(-sqrt(coefs[1]+coefs[2]*r))*sqrt((n-1)/n)
+est.lambda <- function(x, r, coefs) {
+  n <- length(x)
+  lambda.max <- r*sd(x)*sqrt((n-1)/n)
+  lambda.min <- lambda.max*exp(-sqrt(coefs[1]+coefs[2]*r))
+  c(lambda.max, lambda.min)
 }

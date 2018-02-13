@@ -33,34 +33,62 @@
 #' @return A vector of predicted gene expression.
 #'
 #' @export
-expr.predict.cv <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
-                            verbose = FALSE) {
+expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
+                         lambda.max = NULL, lambda.min = NULL, 
+                         verbose = FALSE) {
   if (!is.null(seed))
     set.seed(seed)
   if (sd(y) == 0)
-    return(list(rep(mean(y), length(y)), 0, 0))
-  cv <- tryCatch(
-    suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
-                                       family="poisson", dfmax = dfmax,
-                                       nfolds = nfolds, nlambda = nlambda)),
-    error = function(cond) {
-      if (verbose)
-        message(cond, "\n")
-      return(NA)
+    return(list(rep(mean(y[pred.cells]), length(y)), 0, 0))
+  if (is.null(lambda.max)) {
+    cv <- tryCatch(
+      suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
+                                         family="poisson", dfmax = dfmax,
+                                         nfolds = nfolds, nlambda = nlambda)),
+      error = function(cond) {
+        if (verbose)
+          message(cond, "\n")
+        return(NA)
+      }
+    )
+    if (length(cv) == 1) {
+      mu <- rep(mean(y[pred.cells]), length(y))
+      lambda.max <- 0
+      lambda.min <- 0
+      sd.cv <- 0
+    } else {
+      mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
+                                        type="response"))
+      lambda.max <- cv$lambda[1]
+      lambda.min <- cv$lambda.min
+      min.ind <- which(cv$lambda == cv$lambda.min)
+      sd.cv <- (cv$cvm[1] - cv$cvm[min.ind]) / cv$cvsd[min.ind]
     }
-  )
-  if (length(cv) == 1) {
-    mu <- rep(mean(y), length(y))
-    lambda.max <- 0
-    lambda.min <- 0
-    sd.cv <- 0
   } else {
-    mu <- c(glmnet::predict.cv.glmnet(cv, newx = x, s = "lambda.min",
-                                      type="response"))
-    lambda.max <- cv$lambda[1]
-    lambda.min <- cv$lambda.min
-    min.ind <- which(cv$lambda == cv$lambda.min)
-    sd.cv <- (cv$cvm[1] - cv$cvm[min.ind]) / cv$cvsd[min.ind]
+    lambda.seq <- c(exp(seq(log(lambda.max), log(lambda.min), by = -0.2)),
+                    lambda.min)
+    cv <- tryCatch(
+      suppressWarnings(glmnet::glmnet(x[pred.cells, ], y[pred.cells],
+                                      family="poisson", dfmax = dfmax,
+                                      lambda = lambda.seq)),
+      error = function(cond) {
+        if (verbose)
+          message(cond, "\n")
+        return(NA)
+      }
+    )
+    if (length(cv) == 1) {
+      mu <- rep(mean(y[pred.cells]), length(y))
+      lambda.max <- 0
+      lambda.min <- 0
+      sd.cv <- 0
+    } else {
+      mu <- exp(c(glmnet::predict.glmnet(cv, newx = x, s = lambda.min,
+                                     type="response")))
+      sd.cv <- NA
+    }
   }
+
   return(list(mu, lambda.max, lambda.min, sd.cv))
 }
+

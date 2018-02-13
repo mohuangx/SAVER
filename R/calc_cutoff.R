@@ -33,10 +33,10 @@ calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
         sameind <- which(x.est.names == x.names[i])
         y <- ix[i, pred.cells]/sf[pred.cells]
         if (length(sameind) == 1) {
-          ct[i] <- system.time(pred.out <- expr.predict.cv(
+          ct[i] <- system.time(pred.out <- expr.predict(
             x.est[pred.cells, -sameind], y, seed = (ind - 1)*cs + i))[3]
         } else {
-          ct[i] <- system.time(pred.out <- expr.predict.cv(
+          ct[i] <- system.time(pred.out <- expr.predict(
             x.est[pred.cells, ], y, seed = (ind - 1)*cs + i))
         }
         lambda.max[i] <- pred.out[[2]]
