@@ -28,22 +28,24 @@ calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
       lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
-      
+      y <- sweep(ix[, pred.cells], 2, sf[pred.cells], "/")
       for (i in 1:nrow(ix)) {
         sameind <- which(x.est.names == x.names[i])
-        y <- ix[i, pred.cells]/sf[pred.cells]
+        ptc <- proc.time()
         if (length(sameind) == 1) {
-          ct[i] <- system.time(pred.out <- expr.predict(
-            x.est[pred.cells, -sameind], y, seed = (ind - 1)*cs + i))[3]
+          pred.out <- expr.predict(x.est[pred.cells, -sameind], y[i, ], 
+                                   seed = (ind - 1)*cs + i)
         } else {
-          ct[i] <- system.time(pred.out <- expr.predict(
-            x.est[pred.cells, ], y, seed = (ind - 1)*cs + i))
+          pred.out <- expr.predict(x.est[pred.cells, ], y[i, ], 
+                                   seed = (ind - 1)*cs + i)
         }
+        ct[i] <- (proc.time()-ptc)[3]
         lambda.max[i] <- pred.out[[2]]
         lambda.min[i] <- pred.out[[3]]
         sd.cv[i] <- pred.out[[4]]
-        vt[i] <- system.time(post <- calc.post(ix[i, ], pred.out[[1]], sf, 
-                                               scale.sf))[3]
+        ptc <- proc.time()
+        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        vt[i] <- (proc.time()-ptc)[3]
         est[i, ] <- post[[1]]
         if (output.se) {
           se[i, ] <- post[[2]]
