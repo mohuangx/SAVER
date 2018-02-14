@@ -162,7 +162,7 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     
     ind3 <- ind[(n2+1):length(ind)]
     
-    out3 <- calc.estimate(x[ind3[1:100], ], x.est, cutoff, fit, sf, npred, pred.cells,
+    out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, npred, pred.cells,
                           nworkers, output.se, verbose)
     
     est[ind3, ] <- out3$est
