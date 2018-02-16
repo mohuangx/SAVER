@@ -5,7 +5,7 @@
 \title{Runs SAVER-fast}
 \usage{
 saver_fast(x, size.factor = NULL, parallel = FALSE, nzero = 10,
-  npred = NULL, pred.cells = NULL, pred.genes = NULL,
+  npred = NULL, pred.cells = NULL, pred.genes = NULL, output.se = TRUE,
   pred.genes.only = FALSE, null.model = FALSE, dfmax = 300, nfolds = 5,
   nlambda = 50, remove.zero.genes = FALSE, verbose = FALSE,
   predict.time = TRUE)

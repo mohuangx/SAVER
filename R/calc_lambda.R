@@ -1,6 +1,6 @@
 
-calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers, output.se,
-                        verbose, index) {
+calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers, 
+                        output.se, verbose, index) {
   cs <- min(ceiling(nrow(x)/nworkers), 10)
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -9,7 +9,8 @@ calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers, outpu
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
-      maxcor <- calc.maxcor(x.est, t(sweep(ix, 2, sf, "/")))
+      y <- sweep(ix, 2, sf, "/")
+      maxcor <- calc.maxcor(x.est, t(y))
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
@@ -23,20 +24,21 @@ calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers, outpu
       lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
-      y <- sweep(ix[, pred.cells], 2, sf[pred.cells], "/")
       for (i in 1:nrow(ix)) {
+        ptc <- proc.time()
         if (maxcor[i] > cutoff) {
           sameind <- which(x.est.names == x.names[i])
-          ptc <- proc.time()
           if (length(sameind) == 1) {
-            pred.out <- expr.predict(x.est[pred.cells, -sameind], y[i, ], 
+            pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+                                     pred.cells = pred.cells,
                                      seed = (ind - 1)*cs + i)
           } else {
-            pred.out <- expr.predict(x.est[pred.cells, ], y[i, ], 
+            pred.out <- expr.predict(x.est, y[i, ], 
+                                     pred.cells = pred.cells,
                                      seed = (ind - 1)*cs + i)
           }
         } else {
-          pred.out <- list(mean(y[i, ]), 0, 0, 0)
+          pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
         }
         ct[i] <- (proc.time()-ptc)[3]
         lambda.max[i] <- pred.out[[2]]

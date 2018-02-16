@@ -9,7 +9,7 @@ calc.post(y, mu, sf, scale.sf)
 \arguments{
 \item{y}{A vector of observed gene counts.}
 
-\item{mu}{A vector of predictions from \code{\link{expr.predict}}.}
+\item{mu}{A vector of prior means.}
 
 \item{sf}{Vector of normalized size factors.}
 
@@ -18,11 +18,7 @@ calc.post(y, mu, sf, scale.sf)
 \value{
 A list with the following components
 \item{\code{estimate}}{Recovered (normalized) expression}
-\item{\code{alpha}}{Posterior Gamma shape parameter}
-\item{\code{beta}}{Posterior Gamma rate parameter}
-\item{\code{predicted}}{Regression prediction}
-\item{\code{lower.95}}{Lower 95\% confidence interval}
-\item{\code{upper.95}}{Upper 95\% confidence interval}
+\item{\code{se}}{Standard error of expression estimate}
 }
 \description{
 Given prediction and prior variance, calculates the Gamma posterior

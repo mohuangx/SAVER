@@ -9,8 +9,9 @@ calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
+      y <- sweep(ix, 2, sf, "/")
       if (npred > 100) {
-        maxcor <- calc.maxcor(x.est, t(sweep(ix, 2, sf, "/")))
+        maxcor <- calc.maxcor(x.est, t(y))
       } else {
         maxcor <- NULL
       }
@@ -28,15 +29,16 @@ calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
       lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
-      y <- sweep(ix[, pred.cells], 2, sf[pred.cells], "/")
       for (i in 1:nrow(ix)) {
         sameind <- which(x.est.names == x.names[i])
         ptc <- proc.time()
         if (length(sameind) == 1) {
-          pred.out <- expr.predict(x.est[pred.cells, -sameind], y[i, ], 
+          pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+                                   pred.cells = pred.cells,
                                    seed = (ind - 1)*cs + i)
         } else {
-          pred.out <- expr.predict(x.est[pred.cells, ], y[i, ], 
+          pred.out <- expr.predict(x.est, y[i, ], 
+                                   pred.cells = pred.cells,
                                    seed = (ind - 1)*cs + i)
         }
         ct[i] <- (proc.time()-ptc)[3]
@@ -62,9 +64,6 @@ calc.cutoff <- function(x, x.est, sf, npred, pred.cells, nworkers, output.se,
   sd.cv <- unlist(lapply(out, `[[`, 6))
   ct <- unlist(lapply(out, `[[`, 7))
   vt <- unlist(lapply(out, `[[`, 8))
-  fit <- lm(sqrt(sd.cv) ~ maxcor)
-  cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
   list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
-       lambda.min = lambda.min, sd.cv = sd.cv, cutoff = cutoff,
-       ct = ct, vt = vt)
+       lambda.min = lambda.min, sd.cv = sd.cv, ct = ct, vt = vt)
 }

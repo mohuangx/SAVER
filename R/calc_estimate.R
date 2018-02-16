@@ -9,7 +9,8 @@ calc.estimate <- function(x, x.est, cutoff, fit, sf, npred, pred.cells,
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
-      maxcor <- calc.maxcor(x.est, t(sweep(ix, 2, sf, "/")))
+      y <- sweep(ix, 2, sf, "/")
+      maxcor <- calc.maxcor(x.est, t(y))
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
@@ -23,25 +24,26 @@ calc.estimate <- function(x, x.est, cutoff, fit, sf, npred, pred.cells,
       lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
-      y <- sweep(ix[, pred.cells], 2, sf[pred.cells], "/")
       for (i in 1:nrow(ix)) {
+        ptc <- proc.time()
         if (maxcor[i] > cutoff) {
           sameind <- which(x.est.names == x.names[i])
           lambda <- est.lambda(y[i, ], maxcor[i], fit$coefficients)
           lambda.max[i] <- lambda[1]
           lambda.min[i] <- lambda[2]
-          ptc <- proc.time()
           if (length(sameind) == 1) {
-            pred.out <- expr.predict(x.est[pred.cells, -sameind], y[i, ], 
+            pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+                                     pred.cells = pred.cells,
                                      lambda.max = lambda.max[i],
                                      lambda.min = lambda.min[i])
           } else {
-            pred.out <- expr.predict(x.est[pred.cells, ], y[i, ], 
+            pred.out <- expr.predict(x.est, y[i, ], 
+                                     pred.cells = pred.cells,
                                      lambda.max = lambda.max[i],
                                      lambda.min = lambda.min[i])
           }
         } else {
-          pred.out <- list(mean(y[pred.cells]), 0, 0, 0)
+          pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
         }
         ct[i] <- (proc.time()-ptc)[3]
         sd.cv[i] <- pred.out[[4]]

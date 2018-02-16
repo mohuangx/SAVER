@@ -33,9 +33,9 @@
 #' @return A vector of predicted gene expression.
 #'
 #' @export
-expr.predict <- function(x, y, dfmax = 300, nfolds = 5, seed = NULL,
-                         lambda.max = NULL, lambda.min = NULL, 
-                         verbose = FALSE) {
+expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300, 
+                         nfolds = 5, seed = NULL, lambda.max = NULL, 
+                         lambda.min = NULL, verbose = FALSE) {
   if (!is.null(seed))
     set.seed(seed)
   if (sd(y) == 0)
