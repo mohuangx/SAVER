@@ -148,8 +148,8 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
   ptc <- proc.time()
   message("Calculating cutoff for ", length(ind1), " genes")
   
-  out1 <- calc.cutoff(x[ind1, ], x.est, sf, npred, pred.cells, nworkers, 
-                      output.se, verbose, index = NULL)
+  out1 <- calc.cutoff(x[ind1, ], x.est, sf, scale.sf, npred, pred.cells, 
+                      nworkers, output.se, verbose, index = NULL)
   
   fit <- lm(sqrt(out1$sd.cv) ~ out1$maxcor)
   cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
@@ -172,8 +172,8 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     message("proportion of genes over cutoff: ", mean(out1$maxcor > cutoff))
     message("Calculating fit for ", length(ind2), " genes")
     
-    out2 <- calc.lambda(x[ind2, ], x.est, cutoff, sf, npred, pred.cells, 
-                        nworkers, output.se, verbose)
+    out2 <- calc.lambda(x[ind2, ], x.est, cutoff, sf, scale.sf, npred, 
+                        pred.cells, nworkers, output.se, verbose)
     
     est[ind2, ] <- out2$est
     se[ind2, ] <- out2$se
@@ -197,8 +197,8 @@ saver_fast <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
     ptc <- proc.time()
     message("Calculating rest for ", length(ind3), " genes")
     
-    out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, npred, pred.cells,
-                          nworkers, output.se, verbose)
+    out3 <- calc.estimate(x[ind3, ], x.est, cutoff, fit, sf, scale.sf, npred, 
+                          pred.cells, nworkers, output.se, verbose)
     
     est[ind3, ] <- out3$est
     se[ind3, ] <- out3$se

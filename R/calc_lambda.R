@@ -1,6 +1,6 @@
 
-calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers, 
-                        output.se, verbose, index) {
+calc.lambda <- function(x, x.est, cutoff, sf, scale.sf, npred, pred.cells, 
+                        nworkers, output.se, verbose, index) {
   cs <- min(ceiling(nrow(x)/nworkers), 10)
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
