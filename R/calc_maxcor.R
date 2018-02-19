@@ -21,6 +21,7 @@
 #' cor(x1, x2)
 #' calc.maxcor(x1, x2)
 #'
+#' @export
 
 calc.maxcor <- function(x1, x2) {
   cormat <- suppressWarnings(cor(x1, x2))

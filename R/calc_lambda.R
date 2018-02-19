@@ -10,7 +10,7 @@ calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
-      maxcor <- calc.maxcor(x.est, t(y))
+      maxcor <- SAVER::calc.maxcor(x.est, t(y))
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
@@ -29,11 +29,11 @@ calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers,
         if (maxcor[i] > cutoff) {
           sameind <- which(x.est.names == x.names[i])
           if (length(sameind) == 1) {
-            pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+            pred.out <- SAVER::expr.predict(x.est[, -sameind], y[i, ], 
                                      pred.cells = pred.cells,
                                      seed = (ind - 1)*cs + i)
           } else {
-            pred.out <- expr.predict(x.est, y[i, ], 
+            pred.out <- SAVER::expr.predict(x.est, y[i, ], 
                                      pred.cells = pred.cells,
                                      seed = (ind - 1)*cs + i)
           }
@@ -45,7 +45,7 @@ calc.lambda <- function(x, x.est, cutoff, sf, npred, pred.cells, nworkers,
         lambda.min[i] <- pred.out[[3]]
         sd.cv[i] <- pred.out[[4]]
         ptc <- proc.time()
-        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        post <- SAVER::calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
         vt[i] <- (proc.time()-ptc)[3]
         est[i, ] <- post[[1]]
         if (output.se) {

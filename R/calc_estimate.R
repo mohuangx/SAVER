@@ -10,7 +10,7 @@ calc.estimate <- function(x, x.est, cutoff, fit, sf, npred, pred.cells,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
-      maxcor <- calc.maxcor(x.est, t(y))
+      maxcor <- SAVER::calc.maxcor(x.est, t(y))
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
@@ -32,12 +32,12 @@ calc.estimate <- function(x, x.est, cutoff, fit, sf, npred, pred.cells,
           lambda.max[i] <- lambda[1]
           lambda.min[i] <- lambda[2]
           if (length(sameind) == 1) {
-            pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+            pred.out <- SAVER::expr.predict(x.est[, -sameind], y[i, ], 
                                      pred.cells = pred.cells,
                                      lambda.max = lambda.max[i],
                                      lambda.min = lambda.min[i])
           } else {
-            pred.out <- expr.predict(x.est, y[i, ], 
+            pred.out <- SAVER::expr.predict(x.est, y[i, ], 
                                      pred.cells = pred.cells,
                                      lambda.max = lambda.max[i],
                                      lambda.min = lambda.min[i])
@@ -48,7 +48,7 @@ calc.estimate <- function(x, x.est, cutoff, fit, sf, npred, pred.cells,
         ct[i] <- (proc.time()-ptc)[3]
         sd.cv[i] <- pred.out[[4]]
         ptc <- proc.time()
-        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        post <- SAVER::calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
         vt[i] <- (proc.time()-ptc)[3]
         est[i, ] <- post[[1]]
         if (output.se) {
