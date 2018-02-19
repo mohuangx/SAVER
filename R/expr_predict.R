@@ -39,12 +39,12 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
   if (!is.null(seed))
     set.seed(seed)
   if (sd(y) == 0)
-    return(list(rep(mean(y[pred.cells]), length(y)), 0, 0))
+    return(list(rep(mean(y[pred.cells]), length(y)), 0, 0, 0))
   if (is.null(lambda.max)) {
     cv <- tryCatch(
       suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
                                          family="poisson", dfmax = dfmax,
-                                         nfolds = nfolds, nlambda = nlambda)),
+                                         nfolds = nfolds)),
       error = function(cond) {
         if (verbose)
           message(cond, "\n")
