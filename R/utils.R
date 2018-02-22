@@ -51,7 +51,7 @@ get.pred.cells <- function(pred.cells, ncells) {
   pred.cells
 }
 
-get.pred.genes <- function(pred.genes, npred, ngenes) {
+get.pred.genes <- function(x, pred.genes, npred, ngenes) {
   if (!is.null(pred.genes)) {
     if (min(pred.genes) < 1 |
         max(pred.genes) > ngenes) {
