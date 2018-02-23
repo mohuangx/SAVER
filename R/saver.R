@@ -84,6 +84,8 @@
 #' system.time(saver(linnarsson, npred = 20, parallel = TRUE))
 #' }
 #'
+#' @import foreach
+#'
 #' @export
 saver <- function(x, size.factor = NULL, parallel = FALSE, nzero = 10,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
