@@ -36,7 +36,7 @@ calc.size.factor <- function(x, size.factor, ncells) {
   } else {
     stop("Not a valid size factor")
   }
-  list(sf, scale.sf)
+  list(unname(sf), scale.sf)
 }
 
 get.pred.cells <- function(pred.cells, ncells) {

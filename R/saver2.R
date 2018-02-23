@@ -90,24 +90,21 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   pred.cells <- get.pred.cells(pred.cells, ncells)
   pred.genes <- get.pred.genes(x, pred.genes, npred, ngenes)
   npred <- length(pred.genes)
+
+  
+  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
+  x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
+  if (pred.genes.only) {
+    x <- x[pred.genes, ]
+    pred.genes <- 1:nrow(x)
+  } 
   
   gene.names <- rownames(x)
   cell.names <- colnames(x)
   
-  good.genes <- intersect(which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1),
-                          pred.genes)
-  x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
-  if (pred.genes.only) {
-    genes <- pred.genes
-  } else {
-    genes <- 1:ngenes
-  }
-  x <- x[genes, ]
-
   out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells, 
-                   pred.genes.only, null.model, verbose, predict.time, 
-                   ngenes = nrow(x), ncells = ncol(x), gene.names, 
-                   cell.names)
+                   null.model, verbose, predict.time, ngenes = nrow(x), 
+                   ncells = ncol(x), gene.names, cell.names)
   class(out) <- "saver"
   message("Done!")
   out

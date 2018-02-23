@@ -1,7 +1,7 @@
 
 calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf, 
                           pred.gene.names, pred.cells, null.model, nworkers, 
-                          verbose) {
+                          verbose, calc.maxcor) {
   cs <- min(ceiling(nrow(x)/nworkers), 100)
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -10,7 +10,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                      .packages = c("glmnet", "SAVER", "iterators"),
                      .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
-      if (length(pred.gene.names) > 100) {
+      if (calc.maxcor) {
         maxcor <- SAVER::calc.maxcor(x.est, t(y))
       } else {
         maxcor <- rep(2, nrow(y))
@@ -35,42 +35,46 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
           sameind <- which(x.est.names == x.names[i])
           if (is.null(coefs)) {
             if (length(sameind) == 1) {
-              pred.out <- SAVER::expr.predict(x.est[, -sameind], y[i, ], 
-                                              pred.cells = pred.cells,
-                                              seed = (ind - 1)*cs + i)
+              pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+                                       pred.cells = pred.cells,
+                                       seed = (ind - 1)*cs + i)
             } else {
-              pred.out <- SAVER::expr.predict(x.est, y[i, ], 
-                                              pred.cells = pred.cells,
-                                              seed = (ind - 1)*cs + i)
+              pred.out <- expr.predict(x.est, y[i, ], 
+                                       pred.cells = pred.cells,
+                                       seed = (ind - 1)*cs + i)
             }
+            lambda.max[i] <- pred.out[[2]]
+            lambda.min[i] <- pred.out[[3]]
           } else {
             lambda <- est.lambda(y[i, ], maxcor[i], coefs)
             lambda.max[i] <- lambda[1]
             lambda.min[i] <- lambda[2]
             if (length(sameind) == 1) {
-              pred.out <- SAVER::expr.predict(x.est[, -sameind], y[i, ], 
-                                              pred.cells = pred.cells,
-                                              lambda.max = lambda.max[i],
-                                              lambda.min = lambda.min[i])
+              pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+                                       pred.cells = pred.cells,
+                                       lambda.max = lambda.max[i],
+                                       lambda.min = lambda.min[i])
             } else {
-              pred.out <- SAVER::expr.predict(x.est, y[i, ], 
-                                              pred.cells = pred.cells,
-                                              lambda.max = lambda.max[i],
-                                              lambda.min = lambda.min[i])
+              pred.out <- expr.predict(x.est, y[i, ], 
+                                       pred.cells = pred.cells,
+                                       lambda.max = lambda.max[i],
+                                       lambda.min = lambda.min[i])
             }
           }
         }
         ct[i] <- (proc.time()-ptc)[3]
-        sd.cv[i] <- pred.out[[4]]
+        #sd.cv[i] <- pred.out[[4]]
         ptc <- proc.time()
-        post <- SAVER::calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
         vt[i] <- (proc.time()-ptc)[3]
         est[i, ] <- post[[1]]
         se[i, ] <- post[[2]]
       }
+      return(pred.out)
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  return(out)
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
   maxcor <- unlist(lapply(out, `[[`, 3))
