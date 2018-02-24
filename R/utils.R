@@ -68,13 +68,14 @@ get.pred.genes <- function(x, pred.genes, npred, ngenes) {
 }
 
 # split genes for parallel
-get.chunk <- function(x, n) {
-  split(x, cut(seq_along(x), n, labels = FALSE))
-}
-
-# have each foreach output be less than 500 Mb
-get.nchunk <- function(x) {
-  as.numeric(ceiling(object.size(x)/(500*1024*1024)))
+get.chunk <- function(len, n) {
+  cs <- c(rbind(100:150, 99:49))
+  r <- rep(0, length(cs))
+  for (i in 1:length(cs)) {
+    r[i] <- ceiling(len/cs[i]) %% n
+    if (r[i] == 0) return(cs[i])
+  }
+  return(cs[which.max(r)])
 }
 
 # estimate lambda.min

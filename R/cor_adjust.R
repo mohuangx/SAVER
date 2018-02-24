@@ -33,7 +33,7 @@ cor.genes <- function(x, cor.mat = NULL) {
   for (i in 1:ngenes) {
     adj.vec[i] <- sqrt(var(x$estimate[i, ], na.rm = TRUE)/
                          (var(x$estimate[i, ], na.rm = TRUE) +
-                            mean(x$alpha[i, ]/x$beta[i, ]^2, na.rm = TRUE)))
+                            mean(x$se[i, ]^2, na.rm = TRUE)))
   }
   adj.mat <- outer(adj.vec, adj.vec)
   cor.adj <- adj.mat*cor.mat
@@ -52,7 +52,7 @@ cor.cells <- function(x, cor.mat = NULL) {
   for (i in 1:ncells) {
     adj.vec[i] <- sqrt(var(x$estimate[, i], na.rm = TRUE)/
                          (var(x$estimate[, i], na.rm = TRUE) +
-                            mean(x$alpha[, i]/x$beta[, i]^2, na.rm = TRUE)))
+                            mean(x$se[, i]^2, na.rm = TRUE)))
   }
   adj.mat <- outer(adj.vec, adj.vec)
   cor.adj <- adj.mat*cor.mat

@@ -2,46 +2,52 @@
 #'
 #' Fits SAVER object
 #'
-#' Fits SAVER object
+#' The SAVER method starts by estimating the prior mean and variance for the
+#' true expression level for each gene and cell. The prior mean is obtained
+#' through predictions from a LASSO Poisson regression for each gene
+#' implemented using the \code{glmnet} package. Then, the variance is estimated
+#' through maximum likelihood assuming constant variance, Fano factor, or
+#' coefficient of variation variance structure for each gene. The posterior
+#' distribution is calculated and the posterior mean is reported as the SAVER
+#' estimate.
 #'
 #' @param x An expression count matrix. The rows correspond to genes and
 #' the columns correspond to cells.
 #' 
+#' @param x.est The log-normalized predictor matrix. The rows correspond to
+#' cells and the columns correspond to genes.
+#' 
 #' @param do.fast Approximates the prediction step. Default is TRUE.
+#' 
+#' @param sf Normalized size factor.
 #'
-#' @param size.factor Vector of cell size normalization factors.
-#' If \code{x} is already normalized or normalization is not desired, use
-#' \code{size.factor = 1}. Default uses mean library size normalization.
-#'
-#' @param npred Number of genes for regression prediction. Selects the top
-#' \code{npred} genes in terms of mean expression for regression prediction.
-#' Default is all genes.
-#'
-#' @param pred.cells Indices of cells to perform regression prediction.
-#' Default is all cells.
-#'
-#' @param pred.genes Indices of specific genes to perform regression
-#' prediction. Overrides \code{npred}. Default is all genes.
+#' @param scale.sf Scale of size factor.
+#' 
+#' @param pred.genes Index of genes to perform regression prediction.
+#' 
+#' @param pred.cells Index of cells to perform regression prediction.
 #'
 #' @param null.model Whether to use mean gene expression as prediction.
-#'
-#' @param verbose If TRUE, prints index of gene
-#'
-#' @param predict.time If TRUE, calculates approximate finish time.
-#'
+#' 
+#' @param ngenes Number of genes.
+#' 
+#' @param ncells Number of cells.
+#' 
+#' @param gene.names Name of genes.
+#' 
+#' @param cell.names Name of cells.
 #'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
-#' \item{\code{info}}{Information about dataset}
+#' \item{\code{info}}{Information about fit}
 #'
 #' @export
 #' 
 
 saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells, 
-                      null.model, verbose, predict.time, ngenes = nrow(x), 
-                      ncells = ncol(x), gene.names = rownames(x), 
-                      cell.names = colnames(x)) {
+                      null.model, ngenes = nrow(x), ncells = ncol(x), 
+                      gene.names = rownames(x), cell.names = colnames(x)) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
   se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
   info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0))
@@ -72,8 +78,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     if (npred < 100) {
       out1 <- calc.estimate(x[ind, ], x.est, cutoff = 0, coefs = NULL, sf, 
                             scale.sf, gene.names[pred.genes], pred.cells, 
-                            null.model, nworkers, verbose, calc.maxcor = FALSE)
-      return(out1)
+                            null.model, nworkers, calc.maxcor = FALSE)
       est[ind, ] <- out1$est
       se[ind, ] <- out1$se
       for (j in 1:6) {
@@ -86,7 +91,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
       
       out1 <- calc.estimate(x[ind1, ], x.est, cutoff = 0, coefs = NULL, sf, 
                             scale.sf, gene.names[pred.genes], pred.cells, 
-                            null.model, nworkers, verbose, calc.maxcor = TRUE)
+                            null.model, nworkers, calc.maxcor = TRUE)
       fit <- lm(sqrt(out1$sd.cv) ~ out1$maxcor)
       
       cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
@@ -107,8 +112,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         ind2 <- ind[101:npred]
         out2 <- calc.estimate(x[ind2, ], x.est, cutoff = 0, coefs = NULL, sf, 
                               scale.sf, gene.names[pred.genes], pred.cells, 
-                              null.model, nworkers, verbose, 
-                              calc.maxcor = TRUE)
+                              null.model, nworkers, calc.maxcor = TRUE)
         est[ind2, ] <- out2$est
         se[ind2, ] <- out2$se
         for (j in 1:6) {
@@ -118,8 +122,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         ind3 <- ind[(npred+1):ngenes]
         out3 <- calc.estimate(x[ind3, ], x.est, cutoff = 0, coefs = NULL, sf, 
                               scale.sf, gene.names[pred.genes], pred.cells, 
-                              null.model, nworkers, verbose, 
-                              calc.maxcor = TRUE)
+                              null.model, nworkers, calc.maxcor = TRUE)
         est[ind3, ] <- out3$est
         se[ind3, ] <- out3$se
         for (j in 1:6) {
@@ -130,8 +133,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         ind2 <- ind[101:min(n2, length(ind))]
         out2 <- calc.estimate(x[ind2, ], x.est, cutoff = 0, coefs = NULL, sf, 
                               scale.sf, gene.names[pred.genes], pred.cells, 
-                              null.model, nworkers, verbose, 
-                              calc.maxcor = TRUE)
+                              null.model, nworkers, calc.maxcor = TRUE)
         est[ind2, ] <- out2$est
         se[ind2, ] <- out2$se
         for (j in 1:6) {
@@ -150,7 +152,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         
         out3 <- calc.estimate(x[ind3, ], x.est, cutoff, coefs, sf, scale.sf, 
                               gene.names[pred.genes], pred.cells, null.model,
-                              nworkers, verbose, calc.maxcor = TRUE)
+                              nworkers, calc.maxcor = TRUE)
         
         est[ind3, ] <- out3$est
         se[ind3, ] <- out3$se
@@ -161,7 +163,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
           ind4 <- ind[(npred+1):length(ind)]
           out4 <- calc.estimate(x[ind4, ], x.est, cutoff, coefs, sf, scale.sf, 
                                 gene.names[pred.genes], pred.cells, 
-                                null.model = TRUE, nworkers, verbose, 
+                                null.model = TRUE, nworkers, 
                                 calc.maxcor = FALSE)
           
           est[ind4, ] <- out4$est
@@ -175,7 +177,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
   } else {
     out1 <- calc.estimate(x[ind, ], x.est, cutoff = 0, coefs = NULL, sf, 
                           scale.sf, gene.names[pred.genes], pred.cells, 
-                          null.model, nworkers, verbose)
+                          null.model, nworkers, calc.maxcor = FALSE)
     est[ind, ] <- out1$est
     se[ind, ] <- out1$se
     for (j in 1:6) {

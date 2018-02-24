@@ -44,10 +44,12 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
   if (rep == 1) {
     if (efficiency.known) {
       samp <- t(sapply(1:ngenes, function(i)
-        rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+        rnbinom(ncells, mu = x$estimate[i, ], 
+                size = x$estimate[i, ]^2/x$se[i, ]^2)))
     } else {
       samp <- t(sapply(1:ngenes, function(i)
-        rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+        rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2, 
+               x$estimate[i, ]/x$se[i, ]^2)))
       samp <- round(samp, 3)
     }
     rownames(samp) <- gene.names
@@ -57,10 +59,12 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
     for (j in 1:rep) {
       if (efficiency.known) {
         samp[[j]] <- t(sapply(1:ngenes, function(i)
-          rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+          rnbinom(ncells, mu = x$estimate[i, ], 
+                  size = x$estimate[i, ]^2/x$se[i, ]^2)))
       } else {
         samp[[j]] <- t(sapply(1:ngenes, function(i)
-          rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+          rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2, 
+                 x$estimate[i, ]/x$se[i, ]^2)))
         samp[[j]] <- round(samp[[j]], 3)
       }
       rownames(samp[[j]]) <- gene.names
