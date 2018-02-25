@@ -15,7 +15,6 @@ Imports:
     glmnet,
     foreach,
     methods,
-    bigmemory,
     iterators
 Suggest:
     doParallel

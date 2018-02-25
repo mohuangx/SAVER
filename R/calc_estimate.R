@@ -94,8 +94,8 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
-        k <- ceiling(ind/nworkers)*cs+i
-        if (verbose) {
+        k <- floor(ind/nworkers)*cs+i
+        if (verbose & ind %% nworkers == 1) {
           if (k %in% progs) cat(perc[which.max(progs == k)], "..", sep = "")
         }
         ptc <- proc.time()
