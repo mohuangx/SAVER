@@ -64,6 +64,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
+  verbose <- reps > 1
   if (verbose) {
     progs <- round(quantile(1:cs*reps, (1:9/10)))
     perc <- names(progs)
