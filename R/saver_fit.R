@@ -87,7 +87,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     } else {
       ind1 <- ind[1:min(100, ngenes)]
       ptc <- proc.time()
-      message("Step 1 out of 3:")
+      message("Step 1:")
 
       out1 <- calc.estimate(x[ind1, ], x.est, cutoff = 0, coefs = NULL, sf,
                             scale.sf, gene.names[pred.genes], pred.cells,
@@ -106,7 +106,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
       n2 <- min(ceiling(200/mean(out1$maxcor > cutoff))+1, ngenes)
 
       if (npred < n2) {
-        message("Step 2 out of 3:")
+        message("Step 2:")
         ind2 <- ind[101:npred]
         out2 <- calc.estimate(x[ind2, ], x.est, cutoff = 0, coefs = NULL, sf,
                               scale.sf, gene.names[pred.genes], pred.cells,
@@ -116,7 +116,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         for (j in 1:6) {
           info[[j+1]][ind2] <- out2[[j+2]]
         }
-        message("Step 3 out of 3:")
+        message("Step 3:")
         ind3 <- ind[(npred+1):ngenes]
         out3 <- calc.estimate(x[ind3, ], x.est, cutoff = 0, coefs = NULL, sf,
                               scale.sf, gene.names[pred.genes], pred.cells,
@@ -128,7 +128,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         }
 
       } else {
-        message("Step 2 out of 3:")
+        message("Step 2:")
         ind2 <- ind[101:min(n2, length(ind))]
         out2 <- calc.estimate(x[ind2, ], x.est, cutoff = 0, coefs = NULL, sf,
                               scale.sf, gene.names[pred.genes], pred.cells,
@@ -144,22 +144,24 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         lambda.min <- c(out1$lambda.min, out2$lambda.min)[pred]
         coefs <- lm(log(lambda.max/lambda.min)^2 ~ maxcor[pred])$coefficients
 
-        ind3 <- ind[(n2+1):npred]
+        if (npred > n2) {
+          ind3 <- ind[(n2+1):npred]
 
-        ptc <- proc.time()
-        message("Step 3 out of 3:")
+          ptc <- proc.time()
+          message("Step 3:")
 
-        out3 <- calc.estimate(x[ind3, ], x.est, cutoff, coefs, sf, scale.sf,
-                              gene.names[pred.genes], pred.cells, null.model,
-                              nworkers, calc.maxcor = TRUE)
+          out3 <- calc.estimate(x[ind3, ], x.est, cutoff, coefs, sf, scale.sf,
+                                gene.names[pred.genes], pred.cells, null.model,
+                                nworkers, calc.maxcor = TRUE)
 
-        est[ind3, ] <- out3$est
-        se[ind3, ] <- out3$se
-        for (j in 1:6) {
-          info[[j+1]][ind3] <- out3[[j+2]]
+          est[ind3, ] <- out3$est
+          se[ind3, ] <- out3$se
+          for (j in 1:6) {
+            info[[j+1]][ind3] <- out3[[j+2]]
+          }
         }
         if (npred < ngenes) {
-          message("Finishing up:")
+          message("Step 4:")
           ind4 <- ind[(npred+1):length(ind)]
           out4 <- calc.estimate(x[ind4, ], x.est, cutoff, coefs, sf, scale.sf,
                                 gene.names[pred.genes], pred.cells,

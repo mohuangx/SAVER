@@ -63,9 +63,9 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
-  verbose <- nrow(x) > nworkers*2
+  reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
   if (verbose) {
-    progs <- round(quantile(1:nrow(x), (1:9/10)))
+    progs <- round(quantile(1:cs*reps, (1:9/10)))
     perc <- names(progs)
     cat("0%..")
   }
@@ -93,8 +93,9 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
+        k <- ceiling(ind/nworkers)*cs+i
         if (verbose) {
-          if (j %in% progs) cat(perc[which.max(progs == j)], "..", sep = "")
+          if (k %in% progs) cat(perc[which.max(progs == k)], "..", sep = "")
         }
         ptc <- proc.time()
         if (null.model | !pred.gene[i]) {
