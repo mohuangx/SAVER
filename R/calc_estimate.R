@@ -68,11 +68,11 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   if (verbose) {
     progs <- round(quantile(1:cs*reps, (1:9/10)))
     perc <- names(progs)
-    cat("0%..")
   }
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
+      if (verbose & ind == 1) cat("0%..")
       y <- sweep(ix, 2, sf, "/")
       if (calc.maxcor) {
         maxcor <- SAVER::calc.maxcor(x.est, t(y))
