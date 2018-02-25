@@ -72,8 +72,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   }
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
-                     .packages = c("glmnet", "SAVER", "iterators"),
-                     .errorhandling="pass") %dopar% {
+                     .packages = "SAVER", .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
       if (calc.maxcor) {
         maxcor <- SAVER::calc.maxcor(x.est, t(y))
