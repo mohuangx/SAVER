@@ -13,29 +13,29 @@
 #'
 #' @param x An expression count matrix. The rows correspond to genes and
 #' the columns correspond to cells.
-#' 
+#'
 #' @param x.est The log-normalized predictor matrix. The rows correspond to
 #' cells and the columns correspond to genes.
-#' 
+#'
 #' @param cutoff Maximum absolute correlation to determine whether a gene
-#' should be predicted. 
-#' 
-#' @param coefs Coefficients of a linear fit of log-squared ratio of 
+#' should be predicted.
+#'
+#' @param coefs Coefficients of a linear fit of log-squared ratio of
 #' largest lambda to lambda of lowest cross-validation error. Used to estimate
 #' model with lowest cross-validation error.
-#' 
+#'
 #' @param sf Normalized size factor.
 #'
 #' @param scale.sf Scale of size factor.
-#' 
+#'
 #' @param pred.genes.names Names of genes to perform regression prediction.
-#' 
+#'
 #' @param pred.cells Index of cells to perform regression prediction.
 #'
 #' @param null.model Whether to use mean gene expression as prediction.
-#' 
+#'
 #' @param nworkers Number of cores registered to parallel backend.
-#' 
+#'
 #' @param calc.maxcor Whether to calculate maximum absolute correlation.
 #'
 #' @return A list with the following components
@@ -43,11 +43,11 @@
 #' \item{\code{se}}{Standard error of estimates}
 #' \item{\code{maxcor}}{Maximum absolute correlation for each gene. 2 if not
 #' calculated}
-#' \item{\code{lambda.max}}{Smallest value of lambda which gives the null 
+#' \item{\code{lambda.max}}{Smallest value of lambda which gives the null
 #' model.}
 #' \item{\code{lambda.min}}{Value of lambda from which the prediction model is
 #' used}
-#' \item{\code{sd.cv}}{Difference in the number of standard deviations in 
+#' \item{\code{sd.cv}}{Difference in the number of standard deviations in
 #' deviance between the model with lowest cross-validation error and the null
 #' model}
 #' \item{\code{ct}}{Time taken to generate predictions.}
@@ -55,14 +55,20 @@
 #'
 #' @import foreach
 #' @export
-#' 
+#'
 
-calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf, 
-                          pred.gene.names, pred.cells, null.model, nworkers, 
+calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
+                          pred.gene.names, pred.cells, null.model, nworkers,
                           calc.maxcor) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  verbose <- nrow(x) > nworkers*2
+  if (verbose) {
+    progs <- round(quantile(1:nrow(x), (1:9/10)))
+    perc <- names(progs)
+    cat("0%..")
+  }
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = c("glmnet", "SAVER", "iterators"),
@@ -73,7 +79,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       } else {
         maxcor <- rep(2, nrow(y))
       }
-      
+
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
@@ -83,9 +89,13 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       lambda.max <- rep(0, nrow(ix))
       lambda.min <- rep(0, nrow(ix))
       sd.cv <- rep(0, nrow(ix))
-      
+
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
       for (i in 1:nrow(ix)) {
+        j <- (ind - 1)*cs + i
+        if (verbose) {
+          if (j %in% progs) cat(perc[which.max(progs == j)], "..", sep = "")
+        }
         ptc <- proc.time()
         if (null.model | !pred.gene[i]) {
           pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
@@ -93,13 +103,11 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
           sameind <- which(x.est.names == x.names[i])
           if (is.null(coefs)) {
             if (length(sameind) == 1) {
-              pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
-                                       pred.cells = pred.cells,
-                                       seed = (ind - 1)*cs + i)
+              pred.out <- expr.predict(x.est[, -sameind], y[i, ],
+                                       pred.cells = pred.cells, seed = j)
             } else {
-              pred.out <- expr.predict(x.est, y[i, ], 
-                                       pred.cells = pred.cells,
-                                       seed = (ind - 1)*cs + i)
+              pred.out <- expr.predict(x.est, y[i, ],
+                                       pred.cells = pred.cells, seed = j)
             }
             lambda.max[i] <- pred.out[[2]]
             lambda.min[i] <- pred.out[[3]]
@@ -108,12 +116,12 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
             lambda.max[i] <- lambda[1]
             lambda.min[i] <- lambda[2]
             if (length(sameind) == 1) {
-              pred.out <- expr.predict(x.est[, -sameind], y[i, ], 
+              pred.out <- expr.predict(x.est[, -sameind], y[i, ],
                                        pred.cells = pred.cells,
                                        lambda.max = lambda.max[i],
                                        lambda.min = lambda.min[i])
             } else {
-              pred.out <- expr.predict(x.est, y[i, ], 
+              pred.out <- expr.predict(x.est, y[i, ],
                                        pred.cells = pred.cells,
                                        lambda.max = lambda.max[i],
                                        lambda.min = lambda.min[i])
@@ -131,6 +139,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  if (verbose) cat("100%\n")
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
   maxcor <- unlist(lapply(out, `[[`, 3))

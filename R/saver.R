@@ -13,7 +13,7 @@
 #'
 #' @param x An expression count matrix. The rows correspond to genes and
 #' the columns correspond to cells.
-#' 
+#'
 #' @param do.fast Approximates the prediction step. Default is TRUE.
 #'
 #' @param size.factor Vector of cell size normalization factors.
@@ -40,16 +40,16 @@
 #' \item{\code{estimate}}{Recovered (normalized) expression.}
 #' \item{\code{se}}{Standard error of estimates.}
 #' \item{\code{info}}{Information about dataset.}
-#' 
+#'
 #' The \code{info} element is a list with the following components:
 #' \item{\code{size.factor}}{Size factor used for normalization.}
 #' \item{\code{maxcor}}{Maximum absolute correlation for each gene. 2 if not
 #' calculated}
-#' \item{\code{lambda.max}}{Smallest value of lambda which gives the null 
+#' \item{\code{lambda.max}}{Smallest value of lambda which gives the null
 #' model.}
 #' \item{\code{lambda.min}}{Value of lambda from which the prediction model is
 #' used}
-#' \item{\code{sd.cv}}{Difference in the number of standard deviations in 
+#' \item{\code{sd.cv}}{Difference in the number of standard deviations in
 #' deviance between the model with lowest cross-validation error and the null
 #' model}
 #' \item{\code{pred.time}}{Time taken to generate predictions.}
@@ -80,40 +80,39 @@
 #' }
 #'
 #' @export
-saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL, 
-                  pred.cells = NULL, pred.genes = NULL, 
+saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
+                  pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE) {
   x <- clean.data(x)
   np <- dim(x)
   ngenes <- as.integer(np[1])
   ncells <- as.integer(np[2])
 
-  message(ngenes, " genes")
-  message(ncells, " cells")
-  
+  message(ngenes, " genes, ", ncells, " cells")
+
   # assign size factor
   sf.out <- calc.size.factor(x, size.factor, ncells)
   sf <- sf.out[[1]]
   scale.sf <- sf.out[[2]]
-  
+
   # assign pred.cells and pred.genes
   pred.cells <- get.pred.cells(pred.cells, ncells)
   pred.genes <- get.pred.genes(x, pred.genes, npred, ngenes)
   npred <- length(pred.genes)
 
-  
+
   good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
     x <- x[pred.genes, ]
     pred.genes <- 1:nrow(x)
-  } 
-  
+  }
+
   gene.names <- rownames(x)
   cell.names <- colnames(x)
-  
-  out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells, 
-                   null.model, ngenes = nrow(x), ncells = ncol(x), gene.names, 
+
+  out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
+                   null.model, ngenes = nrow(x), ncells = ncol(x), gene.names,
                    cell.names)
   class(out) <- "saver"
   message("Done!")
