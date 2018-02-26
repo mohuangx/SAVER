@@ -37,6 +37,8 @@
 #' @param nworkers Number of cores registered to parallel backend.
 #'
 #' @param calc.maxcor Whether to calculate maximum absolute correlation.
+#' 
+#' @param sind Starting index for progress bar.
 #'
 #' @return A list with the following components
 #' \item{\code{est}}{Recovered (normalized) expression}
@@ -59,20 +61,14 @@
 
 calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                           pred.gene.names, pred.cells, null.model, nworkers,
-                          calc.maxcor) {
+                          calc.maxcor, sind = NULL) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
-  verbose <- reps > 1
-  if (verbose) {
-    progs <- round(quantile(1:cs*reps, (1:9/10)))
-    perc <- names(progs)
-  }
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
-      if (verbose & ind == 1) cat("0%..")
       y <- sweep(ix, 2, sf, "/")
       if (calc.maxcor) {
         maxcor <- SAVER::calc.maxcor(x.est, t(y))
@@ -91,13 +87,11 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       sd.cv <- rep(0, nrow(ix))
 
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
+      progs <- !is.null(sind)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
-        k <- floor(ind/nworkers)*cs+i
-        if (verbose & ind %% nworkers == 1) {
-          if (k %in% progs) cat(perc[which.max(progs == k)], "..", sep = "")
-        }
-        ptc <- proc.time()
+        if (progs) setTxtProgressBar(pb, j+sind)
+        ptc <- Sys.time()
         if (null.model | !pred.gene[i]) {
           pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
         } else {
@@ -129,18 +123,17 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
             }
           }
         }
-        ct[i] <- (proc.time()-ptc)[3]
+        ct[i] <- as.numeric(Sys.time()-ptc)
         sd.cv[i] <- pred.out[[4]]
-        ptc <- proc.time()
+        ptc <- Sys.time()
         post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
-        vt[i] <- (proc.time()-ptc)[3]
+        vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
         se[i, ] <- post[[2]]
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
-  if (verbose) cat("100%\n")
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
   maxcor <- unlist(lapply(out, `[[`, 3))
