@@ -50,9 +50,9 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
                       gene.names = rownames(x), cell.names = colnames(x)) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
   se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0))
+  info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0))
   names(info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
-                   "sd.cv", "pred.time", "var.time", "cutoff")
+                   "sd.cv", "pred.time", "var.time", "cutoff", "total.time")
   info$size.factor <- scale.sf*sf
 
   nworkers <- foreach::getDoParWorkers()
@@ -68,6 +68,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     message("Using means as predictions.")
   }
   set.seed(1)
+  st <- proc.time()
   if (npred < ngenes) {
     ind <- c(sample(pred.genes, npred), sample((1:ngenes)[-pred.genes],
                                                ngenes-npred))
@@ -82,7 +83,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
       est[ind, ] <- out1$est
       se[ind, ] <- out1$se
       for (j in 1:6) {
-        info[[j+1]] <- out1[[j+2]]
+        info[[j+1]][ind] <- out1[[j+2]]
       }
     } else {
       ind1 <- ind[1:min(100, ngenes)]
@@ -183,8 +184,9 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     est[ind, ] <- out1$est
     se[ind, ] <- out1$se
     for (j in 1:6) {
-      info[[j+1]] <- out1[[j+2]]
+      info[[j+1]][ind] <- out1[[j+2]]
     }
   }
+  info[[8]] <- (proc.time - st)[3]
   list(estimate = est, se = se, info = info)
 }

@@ -17,7 +17,7 @@ cells and the columns correspond to genes.}
 \item{cutoff}{Maximum absolute correlation to determine whether a gene
 should be predicted.}
 
-\item{coefs}{Coefficients of a linear fit of log-squared ratio of 
+\item{coefs}{Coefficients of a linear fit of log-squared ratio of
 largest lambda to lambda of lowest cross-validation error. Used to estimate
 model with lowest cross-validation error.}
 
@@ -41,11 +41,11 @@ A list with the following components
 \item{\code{se}}{Standard error of estimates}
 \item{\code{maxcor}}{Maximum absolute correlation for each gene. 2 if not
 calculated}
-\item{\code{lambda.max}}{Smallest value of lambda which gives the null 
+\item{\code{lambda.max}}{Smallest value of lambda which gives the null
 model.}
 \item{\code{lambda.min}}{Value of lambda from which the prediction model is
 used}
-\item{\code{sd.cv}}{Difference in the number of standard deviations in 
+\item{\code{sd.cv}}{Difference in the number of standard deviations in
 deviance between the model with lowest cross-validation error and the null
 model}
 \item{\code{ct}}{Time taken to generate predictions.}

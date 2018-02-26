@@ -43,17 +43,18 @@ The \code{info} element is a list with the following components:
 \item{\code{size.factor}}{Size factor used for normalization.}
 \item{\code{maxcor}}{Maximum absolute correlation for each gene. 2 if not
 calculated}
-\item{\code{lambda.max}}{Smallest value of lambda which gives the null 
+\item{\code{lambda.max}}{Smallest value of lambda which gives the null
 model.}
 \item{\code{lambda.min}}{Value of lambda from which the prediction model is
 used}
-\item{\code{sd.cv}}{Difference in the number of standard deviations in 
+\item{\code{sd.cv}}{Difference in the number of standard deviations in
 deviance between the model with lowest cross-validation error and the null
 model}
 \item{\code{pred.time}}{Time taken to generate predictions.}
 \item{\code{var.time}}{Time taken to estimate variance.}
 \item{\code{maxcor}}{Maximum absolute correlation cutoff used to determine
 if a gene should be predicted.}
+\item{\code{total.time}}{Total time for SAVER estimation.}
 }
 \description{
 Recovers expression using the SAVER method.
