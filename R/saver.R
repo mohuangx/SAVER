@@ -56,6 +56,7 @@
 #' \item{\code{var.time}}{Time taken to estimate variance.}
 #' \item{\code{maxcor}}{Maximum absolute correlation cutoff used to determine
 #' if a gene should be predicted.}
+#' \item{\code{total.time}}{Total time for SAVER estimation.}
 #'
 #' @examples
 #' data("linnarsson")
