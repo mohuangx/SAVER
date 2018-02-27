@@ -64,7 +64,8 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
-  pb <- txtProgressBar(min = 1, max = reps+1, style = 3)
+  pb <- txtProgressBar(min = 1, max = reps*iterx$chunksize, style = 3)
+  setTxtProgressBar(pb, 1)
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
@@ -86,8 +87,11 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       sd.cv <- rep(0, nrow(ix))
 
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
+      progs <- ind %% nworkers == 0 | 
+        ind == ceiling(iterx$length/iterx$chunksize)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
+        if (progs) setTxtProgressBar(pb, ceiling(ind/nworkers-1)*nrow(ix)+i)
         ptc <- Sys.time()
         if (null.model | !pred.gene[i]) {
           pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
@@ -128,10 +132,10 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         est[i, ] <- post[[1]]
         se[i, ] <- post[[2]]
       }
-      if (ind %% nworkers == 1) setTxtProgressBar(pb, ceiling(ind/nworkers)+1)
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  setTxtProgressBar(pb, reps*iterx$chunksize)
   cat("\n")
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
