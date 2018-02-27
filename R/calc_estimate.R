@@ -132,6 +132,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  cat("\n")
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
   maxcor <- unlist(lapply(out, `[[`, 3))
