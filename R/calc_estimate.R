@@ -37,8 +37,6 @@
 #' @param nworkers Number of cores registered to parallel backend.
 #'
 #' @param calc.maxcor Whether to calculate maximum absolute correlation.
-#' 
-#' @param sind Starting index for progress bar.
 #'
 #' @return A list with the following components
 #' \item{\code{est}}{Recovered (normalized) expression}
@@ -61,11 +59,12 @@
 
 calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                           pred.gene.names, pred.cells, null.model, nworkers,
-                          calc.maxcor, sind = NULL) {
+                          calc.maxcor) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
+  pb <- txtProgressBar(min = 1, max = nrow(x), style = 3)
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
@@ -87,10 +86,9 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       sd.cv <- rep(0, nrow(ix))
 
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
-      progs <- !is.null(sind)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
-        if (progs) setTxtProgressBar(pb, j+sind)
+        setTxtProgressBar(pb, j)
         ptc <- Sys.time()
         if (null.model | !pred.gene[i]) {
           pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
