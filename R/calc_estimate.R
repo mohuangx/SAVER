@@ -92,7 +92,6 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         ind == ceiling(iterx$length/iterx$chunksize)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
-        if (progs) setTxtProgressBar(pb, ceiling(ind/nworkers-1)*nrow(ix)+i)
         ptc <- Sys.time()
         if (null.model | !pred.gene[i]) {
           pred.out <- list(mean(y[i, pred.cells]), 0, 0, 0)
@@ -132,6 +131,9 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
         se[i, ] <- post[[2]]
+        if (progs) {
+          setTxtProgressBar(pb, ceiling(ind/nworkers-1)*cs+i*cs/nrow(x)+1)
+        }
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
