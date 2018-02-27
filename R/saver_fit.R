@@ -152,14 +152,10 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     fit <- lm(sqrt(info$sd.cv[ind[1:n2]]) ~ info$maxcor[ind[1:n2]])
     cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
     info$cutoff <- unname(cutoff)
-    
-    message(cutoff)
 
     n3 <- min(max(ceiling(n2/mean(info$maxcor[ind[1:n2]] > cutoff) + n2),
                   nworkers + n2), npred)
     ind3 <- ind[(n2+1):n3]
-    
-    message(n3)
     
     message("Calculating lambda coefficients with ", length(ind3), " genes.")
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff, coefs = NULL, 
