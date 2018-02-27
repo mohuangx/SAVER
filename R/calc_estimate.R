@@ -64,7 +64,8 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
-  pb <- txtProgressBar(min = 1, max = reps*iterx$chunksize, style = 3)
+  message(reps*cs)
+  pb <- txtProgressBar(min = 1, max = reps*cs+1, style = 3)
   setTxtProgressBar(pb, 1)
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
@@ -135,7 +136,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
-  setTxtProgressBar(pb, reps*iterx$chunksize)
+  setTxtProgressBar(pb, reps*iterx$chunksize+1)
   cat("\n")
   est <- do.call(rbind, lapply(out, `[[`, 1))
   se <- do.call(rbind, lapply(out, `[[`, 2))
