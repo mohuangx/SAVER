@@ -105,7 +105,7 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
   x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
   if (pred.genes.only) {
-    x <- x[pred.genes, ]
+    x <- x[pred.genes, , drop = FALSE]
     pred.genes <- 1:nrow(x)
   }
 
