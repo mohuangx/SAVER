@@ -64,7 +64,6 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
-  message(reps*cs)
   pb <- txtProgressBar(min = 1, max = reps*cs+1, style = 3)
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
@@ -87,8 +86,8 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       sd.cv <- rep(0, nrow(ix))
 
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
-      progs <- ind %% nworkers == 0 | 
-        ind == ceiling(iterx$length/iterx$chunksize)
+      progs <- ind %% nworkers == nworkers-1 | 
+        (ind == ceiling(iterx$length/iterx$chunksize) & ind %% nworkers != 0)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
         ptc <- Sys.time()
