@@ -272,18 +272,16 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     units(tdiff) <- "secs"
     message("Approximate finish time: ", Sys.time() + tdiff)
     
-    message("Estimating remaining ", length(ind2), " genes.")
+    message("Predicting remaining ", length(ind2), " genes.")
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0, 
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes], 
                          pred.cells, null.model, nworkers, calc.maxcor = FALSE)
-    est[ind, ] <- out$est
-    se[ind, ] <- out$se
+    est[ind2, ] <- out$est
+    se[ind2, ] <- out$se
     for (j in 1:6) {
-      info[[j+1]][ind] <- out[[j+2]]
+      info[[j+1]][ind2] <- out[[j+2]]
     }
     info[[9]] <- Sys.time() - st
     return(list(estimate = est, se = se, info = info))
   }
-  info[[9]] <- Sys.time() - st
-  return(list(estimate = est, se = se, info = info))
 }
