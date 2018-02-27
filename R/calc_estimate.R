@@ -66,7 +66,6 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
   message(reps*cs)
   pb <- txtProgressBar(min = 1, max = reps*cs+1, style = 3)
-  setTxtProgressBar(pb, 1)
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
@@ -132,7 +131,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         est[i, ] <- post[[1]]
         se[i, ] <- post[[2]]
         if (progs) {
-          setTxtProgressBar(pb, ceiling(ind/nworkers-1)*cs+i*cs/nrow(x)+1)
+          setTxtProgressBar(pb, ceiling(ind/nworkers-1)*cs+i*cs/nrow(ix)+1)
         }
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
