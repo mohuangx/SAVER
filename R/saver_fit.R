@@ -60,7 +60,6 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
   message("Running SAVER with ", nworkers, " worker(s)")
   
   npred <- length(pred.genes)
-  message(npred)
   if (!null.model) {
     message("Calculating predictions for ", npred,
             " genes using ", ncol(x.est), " genes and ", nrow(x.est),
@@ -194,12 +193,13 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     lambda.min <- info$lambda.min[pred]
     coefs <- lm(log(lambda.max/lambda.min)^2 ~ info$maxcor[pred])$coefficients
     info[[9]] <- coefs
+    cutoff2 <- max(info$cutoff, -coefs[1]/coefs[2])
     
     n4 <- npred
     ind4 <- ind[(n3+1):n4]
     
     message("Predicting ", length(ind4), " genes.")
-    out <- calc.estimate(x[ind4, , drop = FALSE], x.est, cutoff, coefs, sf, 
+    out <- calc.estimate(x[ind4, , drop = FALSE], x.est, cutoff2, coefs, sf, 
                          scale.sf, gene.names[pred.genes], pred.cells, 
                          null.model, nworkers, calc.maxcor = TRUE)
     
