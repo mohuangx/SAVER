@@ -41,7 +41,6 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL,
                                          family="poisson", dfmax = 300,
                                          nfolds = 5)),
       error = function(cond) {
-        message(cond, "\n")
         return(NA)
       }
     )
@@ -66,7 +65,6 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL,
                                       family="poisson", dfmax = 300,
                                       lambda = lambda.seq)),
       error = function(cond) {
-        message(cond, "\n")
         return(NA)
       }
     )
