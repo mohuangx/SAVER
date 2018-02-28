@@ -31,7 +31,7 @@ combine.saver <- function(saver.list) {
   for (i in 2:9) {
     info[[i]] <- do.call(c, lapply(info.list, `[[`, i))
   }
-  info[[10]] <- do.call(sum, (lapply(info.list, `[[`, 9)))
+  info[[10]] <- do.call(sum, (lapply(info.list, `[[`, 10)))
   out <- list(estimate = est, se = se, info = info)
   class(out) <- "saver"
   out
