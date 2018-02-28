@@ -20,11 +20,17 @@ August 13, 2017
 
 ## Installation
 
-You can install SAVER from github with:
+You can install the most recent updates of SAVER from github with:
 
 ```R
 # install.packages("devtools")
 devtools::install_github("mohuangx/SAVER")
+```
+To install the stable release of SAVER:
+
+```R
+# install.packages("devtools")
+devtools::install_github("mohuangx/SAVER@*release")
 ```
 
 ## saver Example
