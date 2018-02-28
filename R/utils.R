@@ -82,6 +82,6 @@ get.chunk <- function(len, n) {
 est.lambda <- function(x, r, coefs) {
   n <- length(x)
   lambda.max <- r*sd(x)*sqrt((n-1)/n)
-  lambda.min <- lambda.max*exp(-sqrt(coefs[1]+coefs[2]*r))
+  lambda.min <- lambda.max*exp(-sqrt(max(0, coefs[1]+coefs[2]*r)))
   c(lambda.max, lambda.min)
 }

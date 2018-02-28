@@ -19,23 +19,18 @@
 #' @param pred.cells Index of cells to use for prediction. Default is to use
 #' all cells.
 #'
-#' @param dfmax The number of genes to be included in the prediction. Default
-#' is 300.
-#'
-#' @param nfolds Number of folds to use in the cross-validation. Default is 5.
-#'
-#' @param nlambda Number of lambda to calculate in cross validation. Default is
-#' 5.
-#'
 #' @param seed Sets the seed for reproducible results.
-#'
+#' 
+#' @param lambda.max Maximum value of lambda which gives null model.
+#' 
+#' @param lambda.min Value of lambda from which the prediction model is
+#' used
 #'
 #' @return A vector of predicted gene expression.
 #'
 #' @export
-expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300, 
-                         nfolds = 5, seed = NULL, lambda.max = NULL, 
-                         lambda.min = NULL, verbose = FALSE) {
+expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL, 
+                         lambda.max = NULL, lambda.min = NULL) {
   if (!is.null(seed))
     set.seed(seed)
   if (sd(y) == 0)
@@ -43,11 +38,10 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
   if (is.null(lambda.max)) {
     cv <- tryCatch(
       suppressWarnings(glmnet::cv.glmnet(x[pred.cells, ], y[pred.cells],
-                                         family="poisson", dfmax = dfmax,
-                                         nfolds = nfolds)),
+                                         family="poisson", dfmax = 300,
+                                         nfolds = 5)),
       error = function(cond) {
-        if (verbose)
-          message(cond, "\n")
+        message(cond, "\n")
         return(NA)
       }
     )
@@ -69,11 +63,10 @@ expr.predict <- function(x, y, pred.cells = 1:length(y), dfmax = 300,
                     lambda.min)
     cv <- tryCatch(
       suppressWarnings(glmnet::glmnet(x[pred.cells, ], y[pred.cells],
-                                      family="poisson", dfmax = dfmax,
+                                      family="poisson", dfmax = 300,
                                       lambda = lambda.seq)),
       error = function(cond) {
-        if (verbose)
-          message(cond, "\n")
+        message(cond, "\n")
         return(NA)
       }
     )

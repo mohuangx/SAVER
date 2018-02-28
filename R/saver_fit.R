@@ -50,9 +50,10 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
                       gene.names = rownames(x), cell.names = colnames(x)) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
   se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0))
+  info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
   names(info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
-                   "sd.cv", "pred.time", "var.time", "cutoff", "total.time")
+                   "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs", 
+                   "total.time")
   info$size.factor <- scale.sf*sf
   
   nworkers <- foreach::getDoParWorkers()
@@ -91,7 +92,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     
     if (n1 == npred) {
       if (n1 == ngenes) {
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       } else {
         ind5 <- ind[(npred+1):ngenes]
@@ -105,7 +106,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         for (j in 1:6) {
           info[[j+1]][ind5] <- out[[j+2]]
         }
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       }
     }
@@ -131,7 +132,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     
     if (n2 == npred) {
       if (n2 == ngenes) {
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       } else {
         ind5 <- ind[(npred+1):ngenes]
@@ -145,7 +146,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         for (j in 1:6) {
           info[[j+1]][ind5] <- out[[j+2]]
         }
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       }
     }
@@ -169,7 +170,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     
     if (n3 == npred) {
       if (n3 == ngenes) {
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       } else {
         ind5 <- ind[(npred+1):ngenes]
@@ -183,7 +184,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         for (j in 1:6) {
           info[[j+1]][ind5] <- out[[j+2]]
         }
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       }
     }
@@ -192,6 +193,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     lambda.max <- info$lambda.max[pred]
     lambda.min <- info$lambda.min[pred]
     coefs <- lm(log(lambda.max/lambda.min)^2 ~ info$maxcor[pred])$coefficients
+    info[[9]] <- coefs
     
     n4 <- npred
     ind4 <- ind[(n3+1):n4]
@@ -208,7 +210,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     }
     
     if (n4 == ngenes) {
-      info[[9]] <- Sys.time() - st
+      info[[10]] <- Sys.time() - st
       return(list(estimate = est, se = se, info = info))
     } else {
       ind5 <- ind[(npred+1):ngenes]
@@ -222,7 +224,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
       for (j in 1:6) {
         info[[j+1]][ind5] <- out[[j+2]]
       }
-      info[[9]] <- Sys.time() - st
+      info[[10]] <- Sys.time() - st
       return(list(estimate = est, se = se, info = info))
     }
   } else {
@@ -241,7 +243,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     
     if (n1 == npred) {
       if (n1 == ngenes) {
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       } else {
         ind5 <- ind[(npred+1):ngenes]
@@ -255,7 +257,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
         for (j in 1:6) {
           info[[j+1]][ind5] <- out[[j+2]]
         }
-        info[[9]] <- Sys.time() - st
+        info[[10]] <- Sys.time() - st
         return(list(estimate = est, se = se, info = info))
       }
     }
@@ -277,7 +279,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
     for (j in 1:6) {
       info[[j+1]][ind2] <- out[[j+2]]
     }
-    info[[9]] <- Sys.time() - st
+    info[[10]] <- Sys.time() - st
     return(list(estimate = est, se = se, info = info))
   }
 }
