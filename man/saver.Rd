@@ -4,25 +4,19 @@
 \alias{saver}
 \title{Runs SAVER}
 \usage{
-saver(x, size.factor = NULL, parallel = FALSE, nzero = 10, npred = NULL,
+saver(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
-  null.model = FALSE, dfmax = 300, nfolds = 5, nlambda = 50,
-  remove.zero.genes = FALSE, verbose = FALSE, predict.time = TRUE)
+  null.model = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
 the columns correspond to cells.}
 
+\item{do.fast}{Approximates the prediction step. Default is TRUE.}
+
 \item{size.factor}{Vector of cell size normalization factors.
 If \code{x} is already normalized or normalization is not desired, use
 \code{size.factor = 1}. Default uses mean library size normalization.}
-
-\item{parallel}{If \code{TRUE}, uses the parallel backend \code{foreach} to
-parallelize prediction. Must register parallel backend beforehand
-(\code{doParallel}, \code{doMC}). See example below.}
-
-\item{nzero}{Run prediction for genes that have at least this many
-nonzero cells. Default is 10.}
 
 \item{npred}{Number of genes for regression prediction. Selects the top
 \code{npred} genes in terms of mean expression for regression prediction.
@@ -38,28 +32,31 @@ prediction. Overrides \code{npred}. Default is all genes.}
 Default is FALSE (returns expression levels of all genes).}
 
 \item{null.model}{Whether to use mean gene expression as prediction.}
-
-\item{dfmax}{Maximum number of genes used in prediction model. Default is
-300.}
-
-\item{nfolds}{Number of folds to be used in cross validation. Default is 5.}
-
-\item{nlambda}{Number of lambda to calculate in cross validation. Default is
-5.}
-
-\item{remove.zero.genes}{Whether to remove genes with all zero.
-Default is FALSE.}
-
-\item{verbose}{If TRUE, prints index of gene}
-
-\item{predict.time}{If TRUE, calculates approximate finish time.}
 }
 \value{
 A list with the following components
-\item{\code{estimate}}{Recovered (normalized) expression}
-\item{\code{alpha}}{Posterior Gamma shape parameter}
-\item{\code{beta}}{Posterior Gamma rate parameter}
-\item{\code{info}}{Information about dataset}
+\item{\code{estimate}}{Recovered (normalized) expression.}
+\item{\code{se}}{Standard error of estimates.}
+\item{\code{info}}{Information about dataset.}
+
+The \code{info} element is a list with the following components:
+\item{\code{size.factor}}{Size factor used for normalization.}
+\item{\code{maxcor}}{Maximum absolute correlation for each gene. 2 if not
+calculated}
+\item{\code{lambda.max}}{Smallest value of lambda which gives the null
+model.}
+\item{\code{lambda.min}}{Value of lambda from which the prediction model is
+used}
+\item{\code{sd.cv}}{Difference in the number of standard deviations in
+deviance between the model with lowest cross-validation error and the null
+model}
+\item{\code{pred.time}}{Time taken to generate predictions.}
+\item{\code{var.time}}{Time taken to estimate variance.}
+\item{\code{maxcor}}{Maximum absolute correlation cutoff used to determine
+if a gene should be predicted.}
+\item{\code{lambda.coefs}}{Coefficients for estimating lambda with lowest
+cross-validation error.}
+\item{\code{total.time}}{Total time for SAVER estimation.}
 }
 \description{
 Recovers expression using the SAVER method.
@@ -91,9 +88,9 @@ saver3 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 # Parallel
 \dontrun{
 require(doParallel)
+system.time(saver(linnarsson, npred = 20))
 registerDoParallel(cores = 2)
 system.time(saver(linnarsson, npred = 20))
-system.time(saver(linnarsson, npred = 20, parallel = TRUE))
 }
 
 }

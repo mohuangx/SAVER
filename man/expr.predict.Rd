@@ -4,8 +4,8 @@
 \alias{expr.predict}
 \title{Calculates SAVER prediction.}
 \usage{
-expr.predict(x, y, pred.cells = 1:length(y), dfmax = 300, nfolds = 5,
-  nlambda = 50, seed = NULL, verbose = FALSE)
+expr.predict(x, y, pred.cells = 1:length(y), seed = NULL,
+  lambda.max = NULL, lambda.min = NULL)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the
@@ -16,15 +16,12 @@ prediction.}
 \item{pred.cells}{Index of cells to use for prediction. Default is to use
 all cells.}
 
-\item{dfmax}{The number of genes to be included in the prediction. Default
-is 300.}
-
-\item{nfolds}{Number of folds to use in the cross-validation. Default is 5.}
-
-\item{nlambda}{Number of lambda to calculate in cross validation. Default is
-5.}
-
 \item{seed}{Sets the seed for reproducible results.}
+
+\item{lambda.max}{Maximum value of lambda which gives null model.}
+
+\item{lambda.min}{Value of lambda from which the prediction model is
+used}
 }
 \value{
 A vector of predicted gene expression.
