@@ -85,3 +85,102 @@ est.lambda <- function(x, r, coefs) {
   lambda.min <- lambda.max*exp(-sqrt(max(0, coefs[1]+coefs[2]*r)))
   c(lambda.max, lambda.min)
 }
+
+# old version of sample.saver
+sample.saver.old <- function(x, rep = 1, efficiency.known = FALSE,
+                             seed = NULL) {
+  ncells <- ncol(x$estimate)
+  ngenes <- nrow(x$estimate)
+  cell.names <- colnames(x$estimate)
+  gene.names <- rownames(x$estimate)
+  rep <- as.integer(rep)
+  if (rep <= 0) {
+    stop("rep must be a positive integer.")
+  }
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  if (rep == 1) {
+    if (efficiency.known) {
+      samp <- t(sapply(1:ngenes, function(i)
+        rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+    } else {
+      samp <- t(sapply(1:ngenes, function(i)
+        rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+      samp <- round(samp, 3)
+    }
+    rownames(samp) <- gene.names
+    colnames(samp) <- cell.names
+  } else {
+    samp <- vector("list", rep)
+    for (j in 1:rep) {
+      if (efficiency.known) {
+        samp[[j]] <- t(sapply(1:ngenes, function(i)
+          rnbinom(ncells, mu = x$estimate[i, ], size = x$alpha[i, ])))
+      } else {
+        samp[[j]] <- t(sapply(1:ngenes, function(i)
+          rgamma(ncells, x$alpha[i, ], x$beta[i, ])))
+        samp[[j]] <- round(samp[[j]], 3)
+      }
+      rownames(samp[[j]]) <- gene.names
+      colnames(samp[[j]]) <- cell.names
+    }
+  }
+  return(samp)
+}
+
+# old version of cor.genes and cor.cells
+cor.genes.old <- function(x, cor.mat = NULL) {
+  if (is.null(cor.mat)) {
+    message("Calculating correlation matrix...")
+    cor.mat <- cor(t(x$estimate))
+  }
+  ngenes <- nrow(x$estimate)
+  adj.vec <- rep(0, ngenes)
+  for (i in 1:ngenes) {
+    adj.vec[i] <- sqrt(var(x$estimate[i, ], na.rm = TRUE)/
+                         (var(x$estimate[i, ], na.rm = TRUE) +
+                            mean(x$alpha[i, ]/x$beta[i, ]^2, na.rm = TRUE)))
+  }
+  adj.mat <- outer(adj.vec, adj.vec)
+  cor.adj <- adj.mat*cor.mat
+  return(cor.adj)
+}
+
+cor.cells.old <- function(x, cor.mat = NULL) {
+  if (is.null(cor.mat)) {
+    message("Calculating correlation matrix...")
+    cor.mat <- cor(x$estimate)
+  }
+  ncells <- ncol(x$estimate)
+  adj.vec <- rep(0, ncells)
+  for (i in 1:ncells) {
+    adj.vec[i] <- sqrt(var(x$estimate[, i], na.rm = TRUE)/
+                         (var(x$estimate[, i], na.rm = TRUE) +
+                            mean(x$alpha[, i]/x$beta[, i]^2, na.rm = TRUE)))
+  }
+  adj.mat <- outer(adj.vec, adj.vec)
+  cor.adj <- adj.mat*cor.mat
+  return(cor.adj)
+}
+
+# old version of combine.saver
+combine.saver.old <- function(saver.list) {
+  est <- do.call(rbind, lapply(saver.list, `[[`, 1))
+  alpha <- do.call(rbind, lapply(saver.list, `[[`, 2))
+  beta <- do.call(rbind, lapply(saver.list, `[[`, 3))
+  info <- vector("list", length(saver.list[[1]]$info))
+  names(info) <- names(saver.list[[1]]$info)
+  info[[1]] <- saver.list[[1]]$info$size.factor
+  info.list <- lapply(saver.list, `[[`, 4)
+  for (i in 2:3) {
+    info[[i]] <- do.call(c, lapply(info.list, `[[`, i))
+  }
+  for (i in 4:length(info)) {
+    info[[i]] <- saver.list[[1]]$info[[i]]
+  }
+  out <- list(estimate = est, alpha = alpha, beta = beta, info = info)
+  class(out) <- "saver"
+  out
+}
+

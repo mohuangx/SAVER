@@ -24,6 +24,9 @@
 #' @export
 #' @rdname cor_adjust
 cor.genes <- function(x, cor.mat = NULL) {
+  if (!is.null(x$alpha)) {
+    cor.genes.old(x, cor.mat)
+  }
   if (is.null(cor.mat)) {
     message("Calculating correlation matrix...")
     cor.mat <- cor(t(x$estimate))
@@ -43,6 +46,9 @@ cor.genes <- function(x, cor.mat = NULL) {
 #' @export
 #' @rdname cor_adjust
 cor.cells <- function(x, cor.mat = NULL) {
+  if (!is.null(x$alpha)) {
+    cor.cells.old(x, cor.mat)
+  }
   if (is.null(cor.mat)) {
     message("Calculating correlation matrix...")
     cor.mat <- cor(x$estimate)

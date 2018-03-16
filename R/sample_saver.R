@@ -30,6 +30,9 @@
 
 sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
                          seed = NULL) {
+  if (!is.null(x$alpha)) {
+    return(sample.saver.old(x, rep, efficiency.known, seed))
+  }
   ncells <- ncol(x$estimate)
   ngenes <- nrow(x$estimate)
   cell.names <- colnames(x$estimate)
