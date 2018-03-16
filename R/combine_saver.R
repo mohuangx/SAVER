@@ -21,7 +21,7 @@
 
 combine.saver <- function(saver.list) {
   if (!is.null(x$alpha)) {
-    combine.saver.old(saver.list)
+    return(combine.saver.old(saver.list))
   }
   est <- do.call(rbind, lapply(saver.list, `[[`, 1))
   se <- do.call(rbind, lapply(saver.list, `[[`, 2))

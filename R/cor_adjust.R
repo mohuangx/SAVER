@@ -25,7 +25,7 @@
 #' @rdname cor_adjust
 cor.genes <- function(x, cor.mat = NULL) {
   if (!is.null(x$alpha)) {
-    cor.genes.old(x, cor.mat)
+    return(cor.genes.old(x, cor.mat))
   }
   if (is.null(cor.mat)) {
     message("Calculating correlation matrix...")
@@ -47,7 +47,7 @@ cor.genes <- function(x, cor.mat = NULL) {
 #' @rdname cor_adjust
 cor.cells <- function(x, cor.mat = NULL) {
   if (!is.null(x$alpha)) {
-    cor.cells.old(x, cor.mat)
+    return(cor.cells.old(x, cor.mat))
   }
   if (is.null(cor.mat)) {
     message("Calculating correlation matrix...")
