@@ -31,6 +31,9 @@ calc.post <- function(y, mu, sf, scale.sf) {
   if (length(sf) == 1) {
     sf <- rep(sf, n)
   }
+  if (sum(y) == 0) {
+    return(list(estimate = rep(0, n), se = rep(0, n)))
+  }
   if (var(mu) == 0) {
     prior.beta <- rep(calc.b(y, mu, sf)[1], n)
     prior.alpha <- mu*prior.beta
