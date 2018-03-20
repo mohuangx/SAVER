@@ -58,8 +58,9 @@ get.pred.genes <- function(x, pred.genes, npred, ngenes) {
       stop("pred.genes must be row indices of x")
     }
   } else if (is.null(npred)) {
-    pred.genes <- 1:ngenes
+    pred.genes <- (1:ngenes)[rowSums(x) != 0]
   } else if (npred < ngenes) {
+    npred <- min(sum(rowSums(x) != 0), npred)
     pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
   } else {
     stop("npred must be less than number of rows in x")

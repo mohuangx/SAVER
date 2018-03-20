@@ -59,6 +59,8 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
   nworkers <- foreach::getDoParWorkers()
   message("Running SAVER with ", nworkers, " worker(s)")
   
+  pred.genes1 <- pred.genes[rowSums(x[pred.genes, ]) > 0]
+  npred1 <- length(pred.genes1)
   npred <- length(pred.genes)
   if (!null.model) {
     message("Calculating predictions for ", npred,
@@ -69,9 +71,9 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
   }
   set.seed(1)
   st <- Sys.time()
-  if (npred < ngenes) {
-    ind <- c(sample(pred.genes, npred), sample((1:ngenes)[-pred.genes],
-                                               ngenes-npred))
+  if (npred1 < ngenes) {
+    ind <- c(sample(pred.genes1, npred1), sample((1:ngenes)[-pred.genes1],
+                                               ngenes-npred1))
   } else {
     ind <- sample(1:ngenes, ngenes)
   }
