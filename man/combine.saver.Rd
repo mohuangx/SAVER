@@ -16,7 +16,7 @@ A combined SAVER object
 Combines SAVER objects
 }
 \details{
-If SAVER was applied to a dataset for chunks of genes (by specifying 
+If SAVER was applied to a dataset for chunks of genes (by specifying
 \code{pred.genes} and \code{pred.genes.only = TRUE}), this function combines
 the individual SAVER objects into one SAVER object.
 }

@@ -3,6 +3,10 @@
 SAVER (Single-cell Analysis Via Expression Recovery) implements a regularized regression prediction and empirical Bayes method to recover the true gene expression profile in noisy and sparse single-cell RNA-seq data.
 
 ## News and Updates
+April 25, 2018
+* Version 1.0.0 released
+  * First official release
+
 February 28, 2018
 * Version 0.4.0 released
   * Implemented faster version of SAVER which is 20-30x faster
