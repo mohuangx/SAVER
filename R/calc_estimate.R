@@ -28,6 +28,8 @@
 #'
 #' @param scale.sf Scale of size factor.
 #'
+#' @param mu Matrix of prior means
+#'
 #' @param pred.genes.names Names of genes to perform regression prediction.
 #'
 #' @param pred.cells Index of cells to perform regression prediction.
@@ -86,7 +88,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       sd.cv <- rep(0, nrow(ix))
 
       pred.gene <- (maxcor > cutoff) & (x.names %in% pred.gene.names)
-      progs <- ind %% nworkers == nworkers-1 | 
+      progs <- ind %% nworkers == nworkers-1 |
         (ind == ceiling(iterx$length/iterx$chunksize) & ind %% nworkers != 0)
       for (i in 1:nrow(ix)) {
         j <- (ind - 1)*cs + i
@@ -148,4 +150,58 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   vt <- unlist(lapply(out, `[[`, 8))
   list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
        lambda.min = lambda.min, sd.cv = sd.cv, ct = ct, vt = vt)
+}
+
+#' @rdname calc_estimate
+#' @import foreach
+#' @export
+calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
+  cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
+  iterx <- iterators::iter(x, by = "row", chunksize = cs)
+  itermu <- iterators::iter(mu, by = "row", chunksize = cs)
+  itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  reps <- ceiling(ceiling(iterx$length/iterx$chunksize)/nworkers)
+  pb <- txtProgressBar(min = 1, max = reps*cs+1, style = 3)
+  out <- suppressWarnings(
+    foreach::foreach(ix = iterx, imu = itermu, ind = itercount,
+                     .packages = "SAVER", .errorhandling="pass") %dopar% {
+      y <- sweep(ix, 2, sf, "/")
+      gene.means <- rowMeans(y)
+      mu.means <- rowMeans(imu)
+      pred <- sweep(imu, 1, rowMeans(y)/rowMeans(imu), "*")
+      est <- matrix(0, nrow(ix), ncol(ix))
+      se <- matrix(0, nrow(ix), ncol(ix))
+      ct <- rep(0, nrow(ix))
+      vt <- rep(0, nrow(ix))
+      lambda.max <- rep(0, nrow(ix))
+      lambda.min <- rep(0, nrow(ix))
+      sd.cv <- rep(0, nrow(ix))
+      progs <- ind %% nworkers == nworkers-1 |
+        (ind == ceiling(iterx$length/iterx$chunksize) & ind %% nworkers != 0)
+      for (i in 1:nrow(ix)) {
+        ptc <- Sys.time()
+        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
+        vt[i] <- as.numeric(Sys.time()-ptc)
+        est[i, ] <- post[[1]]
+        se[i, ] <- post[[2]]
+        if (progs) {
+          setTxtProgressBar(pb, ceiling(ind/nworkers-1)*cs+i*cs/nrow(ix)+1)
+        }
+      }
+      list(est, se, maxcor = 0, lambda.max, lambda.min, sd.cv, ct, vt)
+    }
+  )
+  setTxtProgressBar(pb, reps*iterx$chunksize+1)
+  cat("\n")
+  est <- do.call(rbind, lapply(out, `[[`, 1))
+  se <- do.call(rbind, lapply(out, `[[`, 2))
+  maxcor <- unlist(lapply(out, `[[`, 3))
+  lambda.max <- unlist(lapply(out, `[[`, 4))
+  lambda.min <- unlist(lapply(out, `[[`, 5))
+  sd.cv <- unlist(lapply(out, `[[`, 6))
+  ct <- unlist(lapply(out, `[[`, 7))
+  vt <- unlist(lapply(out, `[[`, 8))
+  list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
+       lambda.min = lambda.min, sd.cv = sd.cv, ct = ct, vt = vt)
+
 }

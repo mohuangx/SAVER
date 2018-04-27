@@ -21,6 +21,27 @@ clean.data <- function(x) {
   x
 }
 
+check.mu <- function(x, mu) {
+  if (!is.matrix(mu)) {
+    mu <- as.matrix(mu)
+    message("Converting mu to matrix.")
+    if (!is.numeric(mu)) {
+      stop("Make sure mu is numeric.")
+    }
+  }
+  np <- dim(x)
+  npmu <- dim(mu)
+  if (sum(np == npmu) != 2) {
+    stop("x and mu must have same dimensions")
+  }
+  if (min(colSums(x)) == 0) {
+    nzerocells <- sum(colSums(x) == 0)
+    mu <- mu[, colSums(x) != 0]
+  }
+  mu
+}
+
+
 calc.size.factor <- function(x, size.factor, ncells) {
   if (is.null(size.factor)) {
     sf <- colSums(x)/mean(colSums(x))

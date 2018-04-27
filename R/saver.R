@@ -35,6 +35,8 @@
 #'
 #' @param null.model Whether to use mean gene expression as prediction.
 #'
+#' @param mu Matrix of prior means.
+#'
 #'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression.}
@@ -87,7 +89,10 @@
 #' @export
 saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
                   pred.cells = NULL, pred.genes = NULL,
-                  pred.genes.only = FALSE, null.model = FALSE) {
+                  pred.genes.only = FALSE, null.model = FALSE, mu = NULL) {
+  if (!is.null(mu)) {
+    mu <- check.mu(x, mu)
+  }
   x <- clean.data(x)
   np <- dim(x)
   ngenes <- as.integer(np[1])
@@ -99,6 +104,18 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   sf.out <- calc.size.factor(x, size.factor, ncells)
   sf <- sf.out[[1]]
   scale.sf <- sf.out[[2]]
+
+  gene.names <- rownames(x)
+  cell.names <- colnames(x)
+
+  # if prior means are provided
+  if (!is.null(mu)) {
+    out <- saver.fit.mean(x, sf, scale.sf, mu, ngenes = nrow(x),
+                          ncells = ncol(x), gene.names, cell.names)
+    class(out) <- "saver"
+    message("Done!")
+    return(out)
+  }
 
   # assign pred.cells and pred.genes
   pred.cells <- get.pred.cells(pred.cells, ncells)
@@ -112,9 +129,6 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
     x <- x[pred.genes, , drop = FALSE]
     pred.genes <- 1:nrow(x)
   }
-
-  gene.names <- rownames(x)
-  cell.names <- colnames(x)
 
   out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
                    null.model, ngenes = nrow(x), ncells = ncol(x), gene.names,
