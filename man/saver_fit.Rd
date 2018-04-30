@@ -2,11 +2,15 @@
 % Please edit documentation in R/saver_fit.R
 \name{saver.fit}
 \alias{saver.fit}
+\alias{saver.fit.mean}
 \title{Fits SAVER}
 \usage{
 saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells, null.model,
   ngenes = nrow(x), ncells = ncol(x), gene.names = rownames(x),
   cell.names = colnames(x))
+
+saver.fit.mean(x, sf, scale.sf, mu, ngenes = nrow(x), ncells = ncol(x),
+  gene.names = rownames(x), cell.names = colnames(x))
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and

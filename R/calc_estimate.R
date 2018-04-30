@@ -55,6 +55,7 @@
 #' \item{\code{ct}}{Time taken to generate predictions.}
 #' \item{\code{vt}}{Time taken to estimate variance.}
 #'
+#' @rdname calc_estimate
 #' @import foreach
 #' @export
 #'

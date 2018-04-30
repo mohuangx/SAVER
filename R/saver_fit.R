@@ -42,6 +42,7 @@
 #' \item{\code{se}}{Standard error of estimates}
 #' \item{\code{info}}{Information about fit}
 #'
+#' @rdname saver_fit
 #' @export
 #'
 

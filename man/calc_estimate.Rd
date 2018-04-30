@@ -2,10 +2,13 @@
 % Please edit documentation in R/calc_estimate.R
 \name{calc.estimate}
 \alias{calc.estimate}
+\alias{calc.estimate.mean}
 \title{Calculate estimate}
 \usage{
 calc.estimate(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   pred.gene.names, pred.cells, null.model, nworkers, calc.maxcor)
+
+calc.estimate.mean(x, sf, scale.sf, mu, nworkers)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -32,6 +35,8 @@ model with lowest cross-validation error.}
 \item{nworkers}{Number of cores registered to parallel backend.}
 
 \item{calc.maxcor}{Whether to calculate maximum absolute correlation.}
+
+\item{mu}{Matrix of prior means}
 
 \item{pred.genes.names}{Names of genes to perform regression prediction.}
 }

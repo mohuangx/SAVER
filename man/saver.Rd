@@ -6,7 +6,7 @@
 \usage{
 saver(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
-  null.model = FALSE)
+  null.model = FALSE, mu = NULL)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -32,6 +32,8 @@ prediction. Overrides \code{npred}. Default is all genes.}
 Default is FALSE (returns expression levels of all genes).}
 
 \item{null.model}{Whether to use mean gene expression as prediction.}
+
+\item{mu}{Matrix of prior means.}
 }
 \value{
 A list with the following components
