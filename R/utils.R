@@ -7,6 +7,7 @@ clean.data <- function(x) {
       stop("Make sure x is numeric.")
     }
   }
+  x[x < 0.001] <- 0
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
