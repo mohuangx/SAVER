@@ -128,6 +128,8 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
   if (pred.genes.only) {
     x <- x[pred.genes, , drop = FALSE]
     pred.genes <- 1:nrow(x)
+    gene.names <- rownames(x)
+    cell.names <- colnames(x)
   }
 
   out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
