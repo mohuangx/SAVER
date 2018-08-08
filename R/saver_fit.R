@@ -37,7 +37,6 @@
 #'
 #' @param cell.names Name of cells.
 #'
-#' @param fix.seed Whether to fix the random seed (default = FALSE)
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
