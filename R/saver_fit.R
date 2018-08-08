@@ -37,6 +37,7 @@
 #'
 #' @param cell.names Name of cells.
 #'
+#' @param fix.seed Whether to fix the random seed (default = FALSE)
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
@@ -71,7 +72,6 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
   } else {
     message("Using means as predictions.")
   }
-  set.seed(1)
   st <- Sys.time()
   if (npred1 < ngenes) {
     ind <- c(sample(pred.genes1, npred1), sample((1:ngenes)[-pred.genes1],
