@@ -19,6 +19,8 @@
 #'
 #' @param do.fast Approximates the prediction step. Default is TRUE.
 #'
+#' @param ncores Number of cores to use. Default is 1.
+#'
 #' @param sf Normalized size factor.
 #'
 #' @param scale.sf Scale of size factor.
@@ -46,8 +48,8 @@
 #' @export
 #'
 
-saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
-                      null.model, ngenes = nrow(x),
+saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
+                      pred.cells, null.model, ngenes = nrow(x),
                       ncells = ncol(x), gene.names = rownames(x),
                       cell.names = colnames(x)) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
@@ -58,7 +60,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
                    "total.time")
   info$size.factor <- scale.sf*sf
 
-  nworkers <- foreach::getDoParWorkers()
+  nworkers <- ncores
   message("Running SAVER with ", nworkers, " worker(s)")
 
   pred.genes1 <- pred.genes[rowSums(x[pred.genes, ]) > 0]
@@ -290,7 +292,7 @@ saver.fit <- function(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
 
 #' @rdname saver_fit
 #' @export
-saver.fit.mean <- function(x, sf, scale.sf, mu, ngenes = nrow(x),
+saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
                            cell.names = colnames(x)) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
@@ -301,7 +303,7 @@ saver.fit.mean <- function(x, sf, scale.sf, mu, ngenes = nrow(x),
                    "total.time")
   info$size.factor <- scale.sf*sf
 
-  nworkers <- foreach::getDoParWorkers()
+  nworkers <- ncores
   message("Running SAVER given prior means with ", nworkers, " worker(s)")
 
   set.seed(1)

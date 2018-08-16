@@ -16,6 +16,8 @@
 #'
 #' @param do.fast Approximates the prediction step. Default is TRUE.
 #'
+#' @param ncores Number of cores to use. Default is 1.
+#'
 #' @param size.factor Vector of cell size normalization factors.
 #' If \code{x} is already normalized or normalization is not desired, use
 #' \code{size.factor = 1}. Default uses mean library size normalization.
@@ -87,8 +89,8 @@
 #' @import foreach
 #'
 #' @export
-saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
-                  pred.cells = NULL, pred.genes = NULL,
+saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
+                  npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, mu = NULL) {
   if (!is.null(mu)) {
     mu <- check.mu(x, mu)
@@ -132,9 +134,30 @@ saver <- function(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
     cell.names <- colnames(x)
   }
 
-  out <- saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells,
-                   null.model, ngenes = nrow(x), ncells = ncol(x), gene.names,
-                   cell.names)
+  cl.create <- FALSE
+  if (getDoParWorkers() > 1) {
+    if (ncores > 1 & getDoParWorkers() != ncores) {
+      message(paste("Parallel backend already registered and is inconsistent",
+                    "with ncores."))
+    }
+    ncores <- getDoParWorkers()
+  } else {
+    if (ncores > 1) {
+      cl.create <- TRUE
+      cl <- parallel::makeCluster(ncores)
+      doSNOW::registerDoSNOW(cl)
+    }
+  }
+
+  out <- saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
+                   pred.cells, null.model, ngenes = nrow(x), ncells = ncol(x),
+                   gene.names, cell.names)
+
+  if (cl.create) {
+    parallel::stopCluster(cl)
+    registerDoSEQ()
+  }
+
   class(out) <- "saver"
   message("Done!")
   out
