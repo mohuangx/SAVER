@@ -73,7 +73,6 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
   } else {
     message("Using means as predictions.")
   }
-  set.seed(1)
   st <- Sys.time()
   message("Start time: ", st)
   if (npred1 < ngenes) {
