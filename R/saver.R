@@ -110,30 +110,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   gene.names <- rownames(x)
   cell.names <- colnames(x)
 
-  # if prior means are provided
-  if (!is.null(mu)) {
-    out <- saver.fit.mean(x, sf, scale.sf, mu, ngenes = nrow(x),
-                          ncells = ncol(x), gene.names, cell.names)
-    class(out) <- "saver"
-    message("Done!")
-    return(out)
-  }
-
-  # assign pred.cells and pred.genes
-  pred.cells <- get.pred.cells(pred.cells, ncells)
-  pred.genes <- get.pred.genes(x, pred.genes, npred, ngenes)
-  npred <- length(pred.genes)
-
-
-  good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
-  x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
-  if (pred.genes.only) {
-    x <- x[pred.genes, , drop = FALSE]
-    pred.genes <- 1:nrow(x)
-    gene.names <- rownames(x)
-    cell.names <- colnames(x)
-  }
-
+  # Set up parallel backend
   cl.create <- FALSE
   if (getDoParWorkers() > 1) {
     if (ncores > 1 & getDoParWorkers() != ncores) {
@@ -146,16 +123,36 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
       cl.create <- TRUE
       cl <- parallel::makeCluster(ncores)
       doSNOW::registerDoSNOW(cl)
+      on.exit({
+        parallel::stopCluster(cl)
+        foreach::registerDoSEQ()
+      })
     }
   }
 
-  out <- saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
-                   pred.cells, null.model, ngenes = nrow(x), ncells = ncol(x),
-                   gene.names, cell.names)
+  # if prior means are provided
+  if (!is.null(mu)) {
+    out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
+                          ncells = ncol(x), gene.names, cell.names)
+  } else {
+    # assign pred.cells and pred.genes
+    pred.cells <- get.pred.cells(pred.cells, ncells)
+    pred.genes <- get.pred.genes(x, pred.genes, npred, ngenes)
+    npred <- length(pred.genes)
 
-  if (cl.create) {
-    parallel::stopCluster(cl)
-    registerDoSEQ()
+
+    good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
+    x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
+    if (pred.genes.only) {
+      x <- x[pred.genes, , drop = FALSE]
+      pred.genes <- 1:nrow(x)
+      gene.names <- rownames(x)
+      cell.names <- colnames(x)
+    }
+
+    out <- saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
+                     pred.cells, null.model, ngenes = nrow(x),
+                     ncells = ncol(x), gene.names, cell.names)
   }
 
   class(out) <- "saver"

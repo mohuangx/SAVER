@@ -167,6 +167,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
     foreach::foreach(ix = iterx, imu = itermu, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
+      maxcor <- rep(0, nrow(y))
       gene.means <- rowMeans(y)
       mu.means <- rowMeans(imu)
       pred <- sweep(imu, 1, rowMeans(y)/rowMeans(imu), "*")
@@ -189,7 +190,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
           setTxtProgressBar(pb, ceiling(ind/nworkers-1)*cs+i*cs/nrow(ix)+1)
         }
       }
-      list(est, se, maxcor = 0, lambda.max, lambda.min, sd.cv, ct, vt)
+      list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
   setTxtProgressBar(pb, reps*iterx$chunksize+1)
