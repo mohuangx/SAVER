@@ -157,6 +157,8 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
 
   class(out) <- "saver"
   message("Done!")
+  message("Finish time: ", Sys.time())
+  message("Total time: ", format(out$info$total.time))
   out
 }
 
