@@ -73,7 +73,6 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
   } else {
     message("Using means as predictions.")
   }
-  set.seed(1)
   st <- Sys.time()
   message("Start time: ", st)
   if (npred1 < ngenes) {
@@ -438,7 +437,6 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   nworkers <- ncores
   message("Running SAVER given prior means with ", nworkers, " worker(s)")
 
-  set.seed(1)
   st <- Sys.time()
   message("Start time: ", st)
   ind <- sample(1:ngenes, ngenes)
