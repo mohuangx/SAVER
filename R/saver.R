@@ -80,10 +80,8 @@
 #'
 #' # Parallel
 #' \dontrun{
-#' require(doParallel)
 #' system.time(saver(linnarsson, npred = 20))
-#' registerDoParallel(cores = 2)
-#' system.time(saver(linnarsson, npred = 20))
+#' system.time(saver(linnarsson, npred = 20, ncores = 2))
 #' }
 #'
 #' @import foreach

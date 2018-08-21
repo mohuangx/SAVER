@@ -4,7 +4,7 @@
 \alias{saver}
 \title{Runs SAVER}
 \usage{
-saver(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
+saver(x, do.fast = TRUE, ncores = 1, size.factor = NULL, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
   null.model = FALSE, mu = NULL)
 }
@@ -13,6 +13,8 @@ saver(x, do.fast = TRUE, size.factor = NULL, npred = NULL,
 the columns correspond to cells.}
 
 \item{do.fast}{Approximates the prediction step. Default is TRUE.}
+
+\item{ncores}{Number of cores to use. Default is 1.}
 
 \item{size.factor}{Vector of cell size normalization factors.
 If \code{x} is already normalized or normalization is not desired, use
@@ -89,10 +91,8 @@ saver3 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 
 # Parallel
 \dontrun{
-require(doParallel)
 system.time(saver(linnarsson, npred = 20))
-registerDoParallel(cores = 2)
-system.time(saver(linnarsson, npred = 20))
+system.time(saver(linnarsson, npred = 20, ncores = 2))
 }
 
 }

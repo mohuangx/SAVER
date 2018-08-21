@@ -4,9 +4,16 @@ Version: 1.0.0
 Title: Single-cell RNA-seq Gene Expression Recovery
 Description: This package implements a regularized regression prediction and 
     empirical Bayes method to recover the true gene expression profile in 
-    noisy and sparse single-cell RNA-seq data. 
-Author: Mo Huang
-Maintainer: Mo Huang <mohuang@wharton.upenn.edu>
+    noisy and sparse single-cell RNA-seq data. See Huang M, et al (2018) 
+    <doi:10.1038/s41592-018-0033-z> for more details.
+Authors@R: c(
+    person("Mo", "Huang", email = "mohuangx@gmail.com", 
+        role = c("aut", "cre")),
+    person("Nancy", "Zhang", email = "nzh@wharton.upenn.edu", role = "aut"),
+    person("Mingyao", "Li", email = "mingyao@pennmedicine.upenn.edu", 
+        role = "aut")
+    )
+Maintainer: Mo Huang <mohuangx@gmail.com>
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

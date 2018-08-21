@@ -5,12 +5,12 @@
 \alias{saver.fit.mean}
 \title{Fits SAVER}
 \usage{
-saver.fit(x, x.est, do.fast, sf, scale.sf, pred.genes, pred.cells, null.model,
-  ngenes = nrow(x), ncells = ncol(x), gene.names = rownames(x),
-  cell.names = colnames(x))
-
-saver.fit.mean(x, sf, scale.sf, mu, ngenes = nrow(x), ncells = ncol(x),
+saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes, pred.cells,
+  null.model, ngenes = nrow(x), ncells = ncol(x),
   gene.names = rownames(x), cell.names = colnames(x))
+
+saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
+  ncells = ncol(x), gene.names = rownames(x), cell.names = colnames(x))
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -20,6 +20,8 @@ the columns correspond to cells.}
 cells and the columns correspond to genes.}
 
 \item{do.fast}{Approximates the prediction step. Default is TRUE.}
+
+\item{ncores}{Number of cores to use. Default is 1.}
 
 \item{sf}{Normalized size factor.}
 
