@@ -3,6 +3,7 @@
 \name{saver.fit}
 \alias{saver.fit}
 \alias{saver.fit.mean}
+\alias{saver.fit.null}
 \title{Fits SAVER}
 \usage{
 saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes, pred.cells,
@@ -11,6 +12,9 @@ saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes, pred.cells,
 
 saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   ncells = ncol(x), gene.names = rownames(x), cell.names = colnames(x))
+
+saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x), ncells = ncol(x),
+  gene.names = rownames(x), cell.names = colnames(x))
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and

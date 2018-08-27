@@ -187,5 +187,46 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
   vt <- unlist(lapply(out, `[[`, 8))
   list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
        lambda.min = lambda.min, sd.cv = sd.cv, ct = ct, vt = vt)
+}
 
+#' @rdname calc_estimate
+#' @import foreach
+#' @export
+calc.estimate.null <- function(x, sf, scale.sf, nworkers) {
+  cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
+  iterx <- iterators::iter(x, by = "row", chunksize = cs)
+  itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  out <- suppressWarnings(
+    foreach::foreach(ix = iterx, ind = itercount, .packages = "SAVER",
+                     .errorhandling="pass") %dopar% {
+      y <- sweep(ix, 2, sf, "/")
+      maxcor <- rep(0, nrow(y))
+      pred <- matrix(rowMeans(y), nrow(y), ncol(y))
+      est <- matrix(0, nrow(ix), ncol(ix))
+      se <- matrix(0, nrow(ix), ncol(ix))
+      ct <- rep(0, nrow(ix))
+      vt <- rep(0, nrow(ix))
+      lambda.max <- rep(0, nrow(ix))
+      lambda.min <- rep(0, nrow(ix))
+      sd.cv <- rep(0, nrow(ix))
+      for (i in 1:nrow(ix)) {
+        ptc <- Sys.time()
+        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
+        vt[i] <- as.numeric(Sys.time()-ptc)
+        est[i, ] <- post[[1]]
+        se[i, ] <- post[[2]]
+      }
+      list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
+    }
+  )
+  est <- do.call(rbind, lapply(out, `[[`, 1))
+  se <- do.call(rbind, lapply(out, `[[`, 2))
+  maxcor <- unlist(lapply(out, `[[`, 3))
+  lambda.max <- unlist(lapply(out, `[[`, 4))
+  lambda.min <- unlist(lapply(out, `[[`, 5))
+  sd.cv <- unlist(lapply(out, `[[`, 6))
+  ct <- unlist(lapply(out, `[[`, 7))
+  vt <- unlist(lapply(out, `[[`, 8))
+  list(est = est, se = se, maxcor = maxcor, lambda.max = lambda.max,
+       lambda.min = lambda.min, sd.cv = sd.cv, ct = ct, vt = vt)
 }

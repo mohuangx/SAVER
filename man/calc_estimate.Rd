@@ -3,12 +3,15 @@
 \name{calc.estimate}
 \alias{calc.estimate}
 \alias{calc.estimate.mean}
+\alias{calc.estimate.null}
 \title{Calculate estimate}
 \usage{
 calc.estimate(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   pred.gene.names, pred.cells, null.model, nworkers, calc.maxcor)
 
 calc.estimate.mean(x, sf, scale.sf, mu, nworkers)
+
+calc.estimate.null(x, sf, scale.sf, nworkers)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and

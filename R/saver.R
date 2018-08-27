@@ -110,8 +110,8 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
 
   # Set up parallel backend
   cl.create <- FALSE
-  if (getDoParWorkers() > 1) {
-    if (ncores > 1 & getDoParWorkers() != ncores) {
+  if (foreach::getDoParWorkers() > 1) {
+    if (ncores > 1 & foreach::getDoParWorkers() != ncores) {
       message(paste("Parallel backend already registered and is inconsistent",
                     "with ncores."))
     }
@@ -131,6 +131,9 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   # if prior means are provided
   if (!is.null(mu)) {
     out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
+                          ncells = ncol(x), gene.names, cell.names)
+  } else if (null.model) {
+    out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names)
   } else {
     # assign pred.cells and pred.genes
