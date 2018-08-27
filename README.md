@@ -42,11 +42,7 @@ saver3 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 saver4 <- saver(linnarsson)
 
 # run in parallel
-library(doParallel)
-cl <- makeCluster(4, outfile = "")
-registerDoParallel(cl)
-saver5 <- saver(linnarsson)
-stopCluster(cl)
+saver5 <- saver(linnarsson, ncores = 4)
 ```
 
 Recovered normalized expression estimates are stored in the ```estimate``` element of the returned ```saver``` object.
