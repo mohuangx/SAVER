@@ -69,7 +69,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
   nworkers <- ncores
   message("Running SAVER with ", nworkers, " worker(s)")
 
-  pred.genes1 <- pred.genes[rowSums(x[pred.genes, , drop = FALSE]) > 0]
+  pred.genes1 <- pred.genes[Matrix::rowSums(x[pred.genes, , drop = FALSE]) > 0]
   npred1 <- length(pred.genes1)
   npred <- length(pred.genes)
   if (!null.model) {

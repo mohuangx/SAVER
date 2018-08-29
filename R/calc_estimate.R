@@ -66,14 +66,14 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                           pred.gene.names, pred.cells, null.model, nworkers,
                           calc.maxcor, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
-  iterx <- iterators::iter(x, by = "row", chunksize = cs)
+  iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
       y <- sweep(ix, 2, sf, "/")
       if (calc.maxcor) {
-        maxcor <- SAVER::calc.maxcor(x.est, t(y))
+        maxcor <- calc.maxcor(x.est, t(y))
       } else {
         maxcor <- rep(2, nrow(y))
       }
@@ -161,7 +161,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
 #' @export
 calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
-  iterx <- iterators::iter(x, by = "row", chunksize = cs)
+  iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itermu <- iterators::iter(mu, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   out <- suppressWarnings(
@@ -216,7 +216,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
 #' @export
 calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
-  iterx <- iterators::iter(x, by = "row", chunksize = cs)
+  iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount, .packages = "SAVER",

@@ -12,7 +12,7 @@
 #' estimate.
 #'
 #' @param x An expression count matrix. The rows correspond to genes and
-#' the columns correspond to cells.
+#' the columns correspond to cells. Can be sparse.
 #'
 #' @param do.fast Approximates the prediction step. Default is TRUE.
 #'
@@ -149,8 +149,8 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
     npred <- length(pred.genes)
 
 
-    good.genes <- which(rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
-    x.est <- t(log(sweep(x[good.genes, ] + 1, 2, sf, "/")))
+    good.genes <- which(Matrix::rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
+    x.est <- t(as.matrix(log(sweep(x[good.genes, ] + 1, 2, sf, "/"))))
     if (pred.genes.only) {
       x <- x[pred.genes, , drop = FALSE]
       pred.genes <- 1:nrow(x)

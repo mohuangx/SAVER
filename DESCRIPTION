@@ -23,7 +23,8 @@ Imports:
     foreach,
     methods,
     iterators,
-    doSNOW
+    doSNOW,
+    Matrix
 RoxygenNote: 6.0.1
 URL: https://github.com/mohuangx/SAVER
 BugReports: https://github.com/mohuangx/SAVER/issues

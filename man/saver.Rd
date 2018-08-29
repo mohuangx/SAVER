@@ -10,7 +10,7 @@ saver(x, do.fast = TRUE, ncores = 1, size.factor = NULL, npred = NULL,
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
-the columns correspond to cells.}
+the columns correspond to cells. Can be sparse.}
 
 \item{do.fast}{Approximates the prediction step. Default is TRUE.}
 

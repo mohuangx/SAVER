@@ -1,19 +1,19 @@
 
 clean.data <- function(x) {
-  if (!is.matrix(x)) {
-    x <- as.matrix(x)
+  if (!(grepl("matrix", class(x), ignore.case = TRUE))) {
+    x <- Matrix::Matrix(as.matrix(x))
     message("Converting x to matrix.")
     if (!is.numeric(x)) {
-      stop("Make sure x is numeric.")
+      warning("Make sure x is numeric.")
     }
   }
   x[x < 0.001] <- 0
   np <- dim(x)
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
-  if (min(colSums(x)) == 0) {
-    nzerocells <- sum(colSums(x) == 0)
-    x <- x[, colSums(x) != 0]
+  if (min(Matrix::colSums(x)) == 0) {
+    nzerocells <- sum(Matrix::colSums(x) == 0)
+    x <- x[, Matrix::colSums(x) != 0]
     message("Removing ", nzerocells, " cell(s) with zero expression.")
   }
   if (is.null(rownames(x))) {
@@ -35,9 +35,9 @@ check.mu <- function(x, mu) {
   if (sum(np == npmu) != 2) {
     stop("x and mu must have same dimensions")
   }
-  if (min(colSums(x)) == 0) {
-    nzerocells <- sum(colSums(x) == 0)
-    mu <- mu[, colSums(x) != 0]
+  if (min(Matrix::colSums(x)) == 0) {
+    nzerocells <- sum(Matrix::colSums(x) == 0)
+    mu <- mu[, Matrix::colSums(x) != 0]
   }
   mu
 }
@@ -45,7 +45,7 @@ check.mu <- function(x, mu) {
 
 calc.size.factor <- function(x, size.factor, ncells) {
   if (is.null(size.factor)) {
-    sf <- colSums(x)/mean(colSums(x))
+    sf <- Matrix::colSums(x)/mean(Matrix::colSums(x))
     scale.sf <- 1
   } else if (length(size.factor) == ncells) {
     sf <- size.factor/mean(size.factor)
@@ -80,10 +80,10 @@ get.pred.genes <- function(x, pred.genes, npred, ngenes) {
       stop("pred.genes must be row indices of x")
     }
   } else if (is.null(npred)) {
-    pred.genes <- (1:ngenes)[rowSums(x) != 0]
+    pred.genes <- (1:ngenes)[Matrix::rowSums(x) != 0]
   } else if (npred < ngenes) {
-    npred <- min(sum(rowSums(x) != 0), npred)
-    pred.genes <- order(rowMeans(x), decreasing = TRUE)[1:npred]
+    npred <- min(sum(Matrix::rowSums(x) != 0), npred)
+    pred.genes <- order(Matrix::rowMeans(x), decreasing = TRUE)[1:npred]
   } else {
     stop("npred must be less than number of rows in x")
   }
