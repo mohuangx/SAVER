@@ -39,8 +39,12 @@
 #'
 #' @param mu Matrix of prior means.
 #'
+#' @param estimates.only Only return SAVER estimates. Default is FALSE.
 #'
-#' @return A list with the following components
+#'
+#' @return If `estimates.only = TRUE`, then a matrix of SAVER estimtes.
+#'
+#' If `estimates.only = FALSE`, a list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression.}
 #' \item{\code{se}}{Standard error of estimates.}
 #' \item{\code{info}}{Information about dataset.}
@@ -89,7 +93,8 @@
 #' @export
 saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
-                  pred.genes.only = FALSE, null.model = FALSE, mu = NULL) {
+                  pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
+                  estimates.only = FALSE) {
   if (!is.null(mu)) {
     mu <- check.mu(x, mu)
   }
@@ -131,10 +136,12 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   # if prior means are provided
   if (!is.null(mu)) {
     out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
-                          ncells = ncol(x), gene.names, cell.names)
+                          ncells = ncol(x), gene.names, cell.names,
+                          estimates.only)
   } else if (null.model) {
     out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
-                          ncells = ncol(x), gene.names, cell.names)
+                          ncells = ncol(x), gene.names, cell.names,
+                          estimates.only)
   } else {
     # assign pred.cells and pred.genes
     pred.cells <- get.pred.cells(pred.cells, ncells)
@@ -153,14 +160,18 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
 
     out <- saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                      pred.cells, null.model, ngenes = nrow(x),
-                     ncells = ncol(x), gene.names, cell.names)
+                     ncells = ncol(x), gene.names, cell.names,
+                     estimates.only)
   }
-
-  class(out) <- "saver"
   message("Done!")
   message("Finish time: ", Sys.time())
   message("Total time: ", format(out$info$total.time))
-  out
+  if (!estimates.only) {
+    class(out) <- "saver"
+    out
+  } else {
+    out$estimate
+  }
 }
 
 

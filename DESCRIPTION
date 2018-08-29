@@ -27,3 +27,6 @@ Imports:
 RoxygenNote: 6.0.1
 URL: https://github.com/mohuangx/SAVER
 BugReports: https://github.com/mohuangx/SAVER/issues
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

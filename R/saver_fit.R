@@ -39,6 +39,8 @@
 #'
 #' @param cell.names Name of cells.
 #'
+#' @param estimates.only Only return SAVER estimates. Default is FALSE.
+#'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
@@ -51,9 +53,13 @@
 saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                       pred.cells, null.model, ngenes = nrow(x),
                       ncells = ncol(x), gene.names = rownames(x),
-                      cell.names = colnames(x)) {
+                      cell.names = colnames(x), estimates.only) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  if (!estimates.only) {
+    se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  } else {
+    se <- NA
+  }
   info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
   names(info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
                    "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs",
@@ -88,9 +94,12 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     t1 <- Sys.time()
     out <- calc.estimate(x[ind1, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
-                         pred.cells, null.model, nworkers, calc.maxcor = TRUE)
+                         pred.cells, null.model, nworkers, calc.maxcor = TRUE,
+                         estimates.only)
     est[ind1, ] <- out$est
-    se[ind1, ] <- out$se
+    if (!estimates.only){
+      se[ind1, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind1] <- out[[j+2]]
     }
@@ -108,33 +117,36 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 
 
     if (n1 == npred) {
-      if (n1 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n1 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
-                             null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                             null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                             estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     ind2 <- ind[(n1+1):n2]
     message("Calculating max cor cutoff...")
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
-                         pred.cells, null.model, nworkers, calc.maxcor = TRUE)
+                         pred.cells, null.model, nworkers, calc.maxcor = TRUE,
+                         estimates.only)
     est[ind2, ] <- out$est
-    se[ind2, ] <- out$se
+    if (!estimates.only) {
+      se[ind2, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind2] <- out[[j+2]]
     }
@@ -157,32 +169,35 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 
 
     if (n2 == npred) {
-      if (n2 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n2 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
-                             null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                             null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                             estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     message("Calculating lambda coefficients...")
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff, coefs = NULL,
                          sf, scale.sf, gene.names[pred.genes], pred.cells,
-                         null.model, nworkers, calc.maxcor = TRUE)
+                         null.model, nworkers, calc.maxcor = TRUE,
+                         estimates.only)
     est[ind3, ] <- out$est
-    se[ind3, ] <- out$se
+    if (!estimates.only) {
+      se[ind3, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind3] <- out[[j+2]]
     }
@@ -199,24 +214,24 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 
 
     if (n3 == npred) {
-      if (n3 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n3 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
-                             null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                             null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                             estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     pred <- which(info$maxcor > cutoff)
@@ -232,10 +247,13 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind4, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
-                         null.model, nworkers, calc.maxcor = TRUE)
+                         null.model, nworkers, calc.maxcor = TRUE,
+                         estimates.only)
 
     est[ind4, ] <- out$est
-    se[ind4, ] <- out$se
+    if (!estimates.only) {
+      se[ind4, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind4] <- out[[j+2]]
     }
@@ -249,24 +267,23 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
             Sys.time() + tdiff)
 
     if (n4 == npred) {
-      if (n4 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n4 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                              pred.cells, null.model = TRUE, nworkers,
-                             calc.maxcor = FALSE)
+                             calc.maxcor = FALSE, estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     n5 <- npred
@@ -275,10 +292,13 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind5, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
-                         null.model, nworkers, calc.maxcor = TRUE)
+                         null.model, nworkers, calc.maxcor = TRUE,
+                         estimates.only)
 
     est[ind5, ] <- out$est
-    se[ind5, ] <- out$se
+    if (!estimates.only) {
+      se[ind5, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind5] <- out[[j+2]]
     }
@@ -287,10 +307,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     tdiff <- (ngenes-npred)*mean(info$var.time[ind[1:n5]])/nworkers
     tdiff <- as.difftime(tdiff, units = "secs")
 
-    if (n5 == ngenes) {
-      info[[10]] <- Sys.time() - st
-      return(list(estimate = est, se = se, info = info))
-    } else {
+    if (n5 != ngenes) {
       message("Finished ", n5, "/", ngenes, " genes. Approximate finish time: ",
               Sys.time() + tdiff)
       ind6 <- ind[(npred+1):ngenes]
@@ -298,15 +315,17 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                            coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                            pred.cells, null.model = TRUE, nworkers,
-                           calc.maxcor = FALSE)
+                           calc.maxcor = FALSE, estimates.only)
       est[ind6, ] <- out$est
-      se[ind6, ] <- out$se
+      if (!estimates.only) {
+        se[ind6, ] <- out$se
+      }
       for (j in 1:6) {
         info[[j+1]][ind6] <- out[[j+2]]
       }
-      info[[10]] <- Sys.time() - st
-      return(list(estimate = est, se = se, info = info))
     }
+    info[[10]] <- Sys.time() - st
+    return(list(estimate = est, se = se, info = info))
   } else {
     n1 <- min(max(8, nworkers), npred)
     ind1 <- ind[1:n1]
@@ -314,9 +333,12 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     t1 <- Sys.time()
     out <- calc.estimate(x[ind1, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
-                         pred.cells, null.model, nworkers, calc.maxcor = FALSE)
+                         pred.cells, null.model, nworkers, calc.maxcor = FALSE,
+                         estimates.only)
     est[ind1, ] <- out$est
-    se[ind1, ] <- out$se
+    if (!estimates.only) {
+      se[ind1, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind1] <- out[[j+2]]
     }
@@ -329,24 +351,24 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
             Sys.time() + tdiff)
 
     if (n1 == npred) {
-      if (n1 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n1 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
-                             null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                             null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                             estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     n2 <- min(ceiling((npred-n1)/2) + n1, npred)
@@ -354,9 +376,12 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
-                         pred.cells, null.model, nworkers, calc.maxcor = FALSE)
+                         pred.cells, null.model, nworkers, calc.maxcor = FALSE,
+                         estimates.only)
     est[ind2, ] <- out$est
-    se[ind2, ] <- out$se
+    if (!estimates.only) {
+      se[ind2, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind2] <- out[[j+2]]
     }
@@ -369,24 +394,24 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
             Sys.time() + tdiff)
 
     if (n2 == npred) {
-      if (n2 == ngenes) {
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
-      } else {
+      if (n2 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
         message("Estimating remaining ", length(ind6), " genes.")
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
-                             null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                             null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                             estimates.only)
         est[ind6, ] <- out$est
-        se[ind6, ] <- out$se
+        if (!estimates.only) {
+          se[ind6, ] <- out$se
+        }
         for (j in 1:6) {
           info[[j+1]][ind6] <- out[[j+2]]
         }
-        info[[10]] <- Sys.time() - st
-        return(list(estimate = est, se = se, info = info))
       }
+      info[[10]] <- Sys.time() - st
+      return(list(estimate = est, se = se, info = info))
     }
 
     n3 <- npred
@@ -395,9 +420,12 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
-                         pred.cells, null.model, nworkers, calc.maxcor = FALSE)
+                         pred.cells, null.model, nworkers, calc.maxcor = FALSE,
+                         estimates.only)
     est[ind3, ] <- out$est
-    se[ind3, ] <- out$se
+    if (!estimates.only) {
+      se[ind3, ] <- out$se
+    }
     for (j in 1:6) {
       info[[j+1]][ind3] <- out[[j+2]]
     }
@@ -406,10 +434,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     tdiff <- (ngenes-npred)*mean(info$var.time[ind[1:n3]])/nworkers
     tdiff <- as.difftime(tdiff, units = "secs")
 
-    if (n3 == ngenes) {
-      info[[10]] <- Sys.time() - st
-      return(list(estimate = est, se = se, info = info))
-    } else {
+    if (n3 != ngenes) {
       message("Finished ", n3, "/", ngenes, " genes. Approximate finish time: ",
               Sys.time() + tdiff)
       ind6 <- ind[(npred+1):ngenes]
@@ -417,15 +442,18 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                            coefs = NULL, sf, scale.sf,
                            gene.names[pred.genes], pred.cells,
-                           null.model = TRUE, nworkers, calc.maxcor = FALSE)
+                           null.model = TRUE, nworkers, calc.maxcor = FALSE,
+                           estimates.only)
       est[ind6, ] <- out$est
-      se[ind6, ] <- out$se
+      if (!estimates.only) {
+        se[ind6, ] <- out$se
+      }
       for (j in 1:6) {
         info[[j+1]][ind6] <- out[[j+2]]
       }
-      info[[10]] <- Sys.time() - st
-      return(list(estimate = est, se = se, info = info))
     }
+    info[[10]] <- Sys.time() - st
+    return(list(estimate = est, se = se, info = info))
   }
 }
 
@@ -433,9 +461,13 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 #' @export
 saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
-                           cell.names = colnames(x)) {
+                           cell.names = colnames(x), estimates.only) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  if (!estimates.only) {
+    se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  } else {
+    se <- NA
+  }
   info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
   names(info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
                    "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs",
@@ -454,9 +486,11 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   message("Estimating finish time...")
   t1 <- Sys.time()
   out <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,
-                            mu[ind1, , drop = FALSE], nworkers)
+                            mu[ind1, , drop = FALSE], nworkers, estimates.only)
   est[ind1, ] <- out$est
-  se[ind1, ] <- out$se
+  if (!estimates.only) {
+    se[ind1, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind1] <- out[[j+2]]
   }
@@ -476,9 +510,11 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   ind2 <- ind[(n1+1):n2]
   message("Estimating remaining genes...")
   out <- calc.estimate.mean(x[ind2, , drop = FALSE], sf, scale.sf,
-                            mu[ind2, , drop = FALSE], nworkers)
+                            mu[ind2, , drop = FALSE], nworkers, estimates.only)
   est[ind2, ] <- out$est
-  se[ind2, ] <- out$se
+  if (!estimates.only) {
+    se[ind2, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind2] <- out[[j+2]]
   }
@@ -498,9 +534,11 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   ind3 <- ind[(n2+1):n3]
   message("Estimating remaining genes...")
   out <- calc.estimate.mean(x[ind3, , drop = FALSE], sf, scale.sf,
-                            mu[ind3, , drop = FALSE], nworkers)
+                            mu[ind3, , drop = FALSE], nworkers, estimates.only)
   est[ind3, ] <- out$est
-  se[ind3, ] <- out$se
+  if (!estimates.only) {
+    se[ind3, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind3] <- out[[j+2]]
   }
@@ -512,9 +550,13 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
 #' @export
 saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
-                           cell.names = colnames(x)) {
+                           cell.names = colnames(x), estimates.only) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  if (!estimates.only) {
+    se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+  } else {
+    se <- NA
+  }
   info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
   names(info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
                    "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs",
@@ -532,9 +574,12 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
   ind1 <- ind[1:n1]
   message("Estimating finish time...")
   t1 <- Sys.time()
-  out <- calc.estimate.null(x[ind1, , drop = FALSE], sf, scale.sf, nworkers)
+  out <- calc.estimate.null(x[ind1, , drop = FALSE], sf, scale.sf, nworkers,
+                            estimates.only)
   est[ind1, ] <- out$est
-  se[ind1, ] <- out$se
+  if (!estimates.only) {
+    se[ind1, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind1] <- out[[j+2]]
   }
@@ -553,9 +598,12 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
 
   ind2 <- ind[(n1+1):n2]
   message("Estimating remaining genes...")
-  out <- calc.estimate.null(x[ind2, , drop = FALSE], sf, scale.sf, nworkers)
+  out <- calc.estimate.null(x[ind2, , drop = FALSE], sf, scale.sf, nworkers,
+                            estimates.only)
   est[ind2, ] <- out$est
-  se[ind2, ] <- out$se
+  if (!estimates.only) {
+    se[ind2, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind2] <- out[[j+2]]
   }
@@ -574,9 +622,12 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
 
   ind3 <- ind[(n2+1):n3]
   message("Estimating remaining genes...")
-  out <- calc.estimate.null(x[ind3, , drop = FALSE], sf, scale.sf, nworkers)
+  out <- calc.estimate.null(x[ind3, , drop = FALSE], sf, scale.sf, nworkers,
+                            estimates.only)
   est[ind3, ] <- out$est
-  se[ind3, ] <- out$se
+  if (!estimates.only) {
+    se[ind3, ] <- out$se
+  }
   for (j in 1:6) {
     info[[j+1]][ind3] <- out[[j+2]]
   }

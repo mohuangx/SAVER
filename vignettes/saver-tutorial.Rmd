@@ -1,0 +1,139 @@
+---
+title: "SAVER Tutorial"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+SAVER (Single-cell Analyses Via Expression Recovery) is a method for denoising single-cell RNA sequencing data by borrowing information across genes and cells. Here, we demonstrate how to use the method. For more information, take a look at the [Github page](https://github.com/mohuangx/SAVER) and the [paper](https://doi.org/10.1038/s41592-018-0033-z).
+
+## Installation
+
+You can install the most recent updates of SAVER from github with:
+
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("mohuangx/SAVER")
+```
+To install the stable release of SAVER:
+
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("mohuangx/SAVER@*release")
+```
+
+## Getting Started
+
+Once we have the package installed, we can load the package. 
+
+```{r}
+library(SAVER)
+packageVersion("SAVER")
+```
+
+In this tutorial, we will run SAVER on the mouse cortex data from [Zeisel (2015)](http://www.sciencemag.org/content/early/2015/02/18/science.aaa1934.abstract).
+
+```{r, eval=FALSE, cache=TRUE}
+data.url <- "https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/cortex/expression_mRNA_17-Aug-2014.txt"
+
+# Need to remove first 10 rows of metadata
+raw.data <- read.table(data.url, header = FALSE, skip = 11, row.names = 1, 
+                check.names = FALSE)
+x <- as.matrix(raw.data[, -1])
+
+cellnames <- read.table(data.url, skip = 7, nrows = 1, row.names = 1, 
+                        stringsAsFactors = FALSE)
+colnames(x) <- cellnames[-1]
+
+dim(x)
+```
+
+```{r}
+x <- matrix(0, 19972, 3005)
+```
+
+
+This dataset contains `r dim(x)[1]` genes and `r dim(x)[2]` cells.
+
+
+### Preprocessing
+
+The input to SAVER is a matrix of gene expression counts with genes along the rows and cells along the columns. SAVER was developed for use on UMI count data but it seems to work well with non-UMI TPM data. Standard quality control such as removing low quality cells and filtering out genes with no expression should be performed prior to running SAVER. 
+
+Here, the Zeisel dataset has already been preprocessed. 
+
+### Running SAVER
+
+Since SAVER is computationally intensive for larger datasets (> 10,000 cells), we recommend running it in parallel on a cluster. We will run SAVER on the Zeisel dataset across 12 cores.
+
+```{r, eval=FALSE, cache=TRUE}
+x.saver <- saver(x, ncores = 12)
+```
+
+`x.saver` is a saver object with the following components:
+
+* `estimate` gives the SAVER estimates.
+* `se` gives the standard error of the estimates
+* `info` gives the more information about the run.
+
+If you are only interested in the estimate, you can run `saver` setting `estimates.only = TRUE`. For example,
+
+```{r}
+x.saver <- saver(x, ncores = 12, estimates.only = TRUE)
+```
+
+
+### Normalization
+
+By default, SAVER takes in an unnormalized count matrix and performs library size normalization during the denoising step. However, if you want to 
+
+
+
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))

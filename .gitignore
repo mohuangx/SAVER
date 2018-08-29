@@ -5,3 +5,5 @@
 .Rproj
 SAVER.Rproj
 
+inst/doc
+vignettes/*cache

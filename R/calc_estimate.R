@@ -40,6 +40,8 @@
 #'
 #' @param calc.maxcor Whether to calculate maximum absolute correlation.
 #'
+#' @param estimates.only Only return SAVER estimates. Default is FALSE.
+#'
 #' @return A list with the following components
 #' \item{\code{est}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
@@ -62,7 +64,7 @@
 
 calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                           pred.gene.names, pred.cells, null.model, nworkers,
-                          calc.maxcor) {
+                          calc.maxcor, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -79,7 +81,11 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       x.names <- rownames(ix)
       x.est.names <- colnames(x.est)
       est <- matrix(0, nrow(ix), ncol(ix))
-      se <- matrix(0, nrow(ix), ncol(ix))
+      if (!estimates.only) {
+        se <- matrix(0, nrow(ix), ncol(ix))
+      } else {
+        se <- NA
+      }
       ct <- rep(0, nrow(ix))
       vt <- rep(0, nrow(ix))
       lambda.max <- rep(0, nrow(ix))
@@ -127,13 +133,19 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
-        se[i, ] <- post[[2]]
+        if (!estimates.only) {
+          se[i, ] <- post[[2]]
+        }
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
   est <- do.call(rbind, lapply(out, `[[`, 1))
-  se <- do.call(rbind, lapply(out, `[[`, 2))
+  if (!estimates.only) {
+    se <- do.call(rbind, lapply(out, `[[`, 2))
+  } else {
+    se <- NA
+  }
   maxcor <- unlist(lapply(out, `[[`, 3))
   lambda.max <- unlist(lapply(out, `[[`, 4))
   lambda.min <- unlist(lapply(out, `[[`, 5))
@@ -147,7 +159,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
 #' @rdname calc_estimate
 #' @import foreach
 #' @export
-calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
+calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itermu <- iterators::iter(mu, by = "row", chunksize = cs)
@@ -161,7 +173,11 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
       mu.means <- rowMeans(imu)
       pred <- sweep(imu, 1, rowMeans(y)/rowMeans(imu), "*")
       est <- matrix(0, nrow(ix), ncol(ix))
-      se <- matrix(0, nrow(ix), ncol(ix))
+      if (!estimates.only) {
+        se <- matrix(0, nrow(ix), ncol(ix))
+      } else {
+        se <- NA
+      }
       ct <- rep(0, nrow(ix))
       vt <- rep(0, nrow(ix))
       lambda.max <- rep(0, nrow(ix))
@@ -172,13 +188,19 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
         post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
-        se[i, ] <- post[[2]]
+        if (!estimates.only) {
+          se[i, ] <- post[[2]]
+        }
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
   est <- do.call(rbind, lapply(out, `[[`, 1))
-  se <- do.call(rbind, lapply(out, `[[`, 2))
+  if (!estimates.only) {
+    se <- do.call(rbind, lapply(out, `[[`, 2))
+  } else {
+    se <- NA
+  }
   maxcor <- unlist(lapply(out, `[[`, 3))
   lambda.max <- unlist(lapply(out, `[[`, 4))
   lambda.min <- unlist(lapply(out, `[[`, 5))
@@ -192,7 +214,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers) {
 #' @rdname calc_estimate
 #' @import foreach
 #' @export
-calc.estimate.null <- function(x, sf, scale.sf, nworkers) {
+calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(x, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -203,7 +225,11 @@ calc.estimate.null <- function(x, sf, scale.sf, nworkers) {
       maxcor <- rep(0, nrow(y))
       pred <- matrix(rowMeans(y), nrow(y), ncol(y))
       est <- matrix(0, nrow(ix), ncol(ix))
-      se <- matrix(0, nrow(ix), ncol(ix))
+      if (!estimates.only) {
+        se <- matrix(0, nrow(ix), ncol(ix))
+      } else {
+        se <- NA
+      }
       ct <- rep(0, nrow(ix))
       vt <- rep(0, nrow(ix))
       lambda.max <- rep(0, nrow(ix))
@@ -214,13 +240,19 @@ calc.estimate.null <- function(x, sf, scale.sf, nworkers) {
         post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
-        se[i, ] <- post[[2]]
+        if (!estimates.only) {
+          se[i, ] <- post[[2]]
+        }
       }
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
   est <- do.call(rbind, lapply(out, `[[`, 1))
-  se <- do.call(rbind, lapply(out, `[[`, 2))
+  if (!estimates.only) {
+    se <- do.call(rbind, lapply(out, `[[`, 2))
+  } else {
+    se <- NA
+  }
   maxcor <- unlist(lapply(out, `[[`, 3))
   lambda.max <- unlist(lapply(out, `[[`, 4))
   lambda.min <- unlist(lapply(out, `[[`, 5))
