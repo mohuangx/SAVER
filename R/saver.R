@@ -124,7 +124,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   } else {
     if (ncores > 1) {
       cl.create <- TRUE
-      cl <- parallel::makeCluster(ncores)
+      cl <- parallel::makeCluster(ncores, outfile = "")
       doSNOW::registerDoSNOW(cl)
       on.exit({
         parallel::stopCluster(cl)

@@ -6,7 +6,7 @@
 \usage{
 saver(x, do.fast = TRUE, ncores = 1, size.factor = NULL, npred = NULL,
   pred.cells = NULL, pred.genes = NULL, pred.genes.only = FALSE,
-  null.model = FALSE, mu = NULL)
+  null.model = FALSE, mu = NULL, estimates.only = FALSE)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -36,9 +36,13 @@ Default is FALSE (returns expression levels of all genes).}
 \item{null.model}{Whether to use mean gene expression as prediction.}
 
 \item{mu}{Matrix of prior means.}
+
+\item{estimates.only}{Only return SAVER estimates. Default is FALSE.}
 }
 \value{
-A list with the following components
+If `estimates.only = TRUE`, then a matrix of SAVER estimtes.
+
+If `estimates.only = FALSE`, a list with the following components
 \item{\code{estimate}}{Recovered (normalized) expression.}
 \item{\code{se}}{Standard error of estimates.}
 \item{\code{info}}{Information about dataset.}

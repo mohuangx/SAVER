@@ -7,11 +7,12 @@
 \title{Calculate estimate}
 \usage{
 calc.estimate(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
-  pred.gene.names, pred.cells, null.model, nworkers, calc.maxcor)
+  pred.gene.names, pred.cells, null.model, nworkers, calc.maxcor,
+  estimates.only)
 
-calc.estimate.mean(x, sf, scale.sf, mu, nworkers)
+calc.estimate.mean(x, sf, scale.sf, mu, nworkers, estimates.only)
 
-calc.estimate.null(x, sf, scale.sf, nworkers)
+calc.estimate.null(x, sf, scale.sf, nworkers, estimates.only)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -38,6 +39,8 @@ model with lowest cross-validation error.}
 \item{nworkers}{Number of cores registered to parallel backend.}
 
 \item{calc.maxcor}{Whether to calculate maximum absolute correlation.}
+
+\item{estimates.only}{Only return SAVER estimates. Default is FALSE.}
 
 \item{mu}{Matrix of prior means}
 

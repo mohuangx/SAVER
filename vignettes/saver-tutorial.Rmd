@@ -1,7 +1,9 @@
 ---
 title: "SAVER Tutorial"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: TRUE
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -41,30 +43,22 @@ library(SAVER)
 packageVersion("SAVER")
 ```
 
-In this tutorial, we will run SAVER on the mouse cortex data from [Zeisel (2015)](http://www.sciencemag.org/content/early/2015/02/18/science.aaa1934.abstract).
+In this tutorial, we will run SAVER on the [mouse cortex data](https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/cortex/expression_mRNA_17-Aug-2014.txt) from [Zeisel (2015)](http://www.sciencemag.org/content/early/2015/02/18/science.aaa1934.abstract).
 
 ```{r, eval=FALSE, cache=TRUE}
-data.url <- "https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/cortex/expression_mRNA_17-Aug-2014.txt"
+data.path <- "../data/expression_mRNA_17-Aug-2014.txt"
 
 # Need to remove first 10 rows of metadata
-raw.data <- read.table(data.url, header = FALSE, skip = 11, row.names = 1, 
+raw.data <- read.table(data.path, header = FALSE, skip = 11, row.names = 1, 
                 check.names = FALSE)
-x <- as.matrix(raw.data[, -1])
+cortex <- as.matrix(raw.data[, -1])
 
-cellnames <- read.table(data.url, skip = 7, nrows = 1, row.names = 1, 
+cellnames <- read.table(data.path, skip = 7, nrows = 1, row.names = 1, 
                         stringsAsFactors = FALSE)
-colnames(x) <- cellnames[-1]
+colnames(cortex) <- cellnames[-1]
 
-dim(x)
+dim(cortex)
 ```
-
-```{r}
-x <- matrix(0, 19972, 3005)
-```
-
-
-This dataset contains `r dim(x)[1]` genes and `r dim(x)[2]` cells.
-
 
 ### Preprocessing
 
@@ -74,13 +68,14 @@ Here, the Zeisel dataset has already been preprocessed.
 
 ### Running SAVER
 
-Since SAVER is computationally intensive for larger datasets (> 10,000 cells), we recommend running it in parallel on a cluster. We will run SAVER on the Zeisel dataset across 12 cores.
+The main function to run SAVER is the `saver` function. Since SAVER is computationally intensive for large datasets, we recommend running it in parallel on a cluster either by creating your own parallel environment or by specifying `ncores`. We will run SAVER on the Zeisel dataset across 12 cores.
 
 ```{r, eval=FALSE, cache=TRUE}
-x.saver <- saver(x, ncores = 12)
+cortex.saver <- saver(cortex, ncores = 12)
+str(cortex.saver)
 ```
 
-`x.saver` is a saver object with the following components:
+`cortex.saver` is a saver object with the following components:
 
 * `estimate` gives the SAVER estimates.
 * `se` gives the standard error of the estimates
@@ -88,52 +83,78 @@ x.saver <- saver(x, ncores = 12)
 
 If you are only interested in the estimate, you can run `saver` setting `estimates.only = TRUE`. For example,
 
-```{r}
-x.saver <- saver(x, ncores = 12, estimates.only = TRUE)
+```{r, eval=FALSE}
+cortex.saver <- saver(cortex, ncores = 12, estimates.only = TRUE)
 ```
 
+### Using SAVER estimates
+
+The SAVER estimates represent the posterior means of the recovered gene expression. They can be used as input to many of the common downstream analysis methods such as [Seurat](https://satijalab.org/seurat/) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). 
+
+## Additional Settings
 
 ### Normalization
 
-By default, SAVER takes in an unnormalized count matrix and performs library size normalization during the denoising step. However, if you want to 
+By default, SAVER takes in an unnormalized count matrix and performs library size normalization during the denoising step. However, if your data is already normalized or normalization is not desired, you can set `size.factor = 1`. In addition, if you want to use custom cell size factors, you can set `size.factor` to be a vector of size factors. 
 
+### Predicting certain genes
 
+SAVER has two main steps: the first is the prediction step and the second is a shrinkage step. The prediction step is the time-consuming part of SAVER. If you are only interested in a handful of genes, you can specify those genes and generate predictions for those genes only and choose to return the entire data matrix or for those genes only. For example,
 
+```{r, eval=FALSE}
+# Identify the indices of the genes of interest
+genes <- c("Thy1", "Mbp", "Stim2", "Psmc6", "Rps19")
+genes.ind <- which(rownames(cortex) %in% genes)
 
-## Styles
+# Generate predictions for those genes and return entire dataset
+cortex.saver.genes <- saver(cortex, pred.genes = genes.ind, 
+                            estimates.only = TRUE)
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+# Generate predictions for those genes and return only those genes
+cortex.saver.genes.only <- saver(cortex, pred.genes = genes.ind, 
+                                 pred.genes.only = TRUE, estimates.only = TRUE)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+### Using other predictions
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+The main contribution of SAVER is the shrinkage step after generating the predictions. The shrinkage step allows the algorithm to adaptively evaluate the quality of the predictions and weigh the estimates either towards the predictions or the observed value. SAVER performs a Lasso Poisson regression for each gene using other genes as covariates to generate the predictions. However, if you want to use other predictions such as [MAGIC](https://github.com/KrishnaswamyLab/MAGIC) or [DCA](https://github.com/theislab/dca), you can input the results in matrix format into the `mu` parameter of the `saver` function.
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+### Creating your own parallel backend
 
-## More Examples
+By default, if you specify `ncores` without already having a parallel backend set up, `saver` will make a default cluster using the `makeCluster` function in the parallel package and register a SNOW parallel backend via the `registerDoSNOW` function in the doSNOW package. However, if you want to set up a more complicated backend, such as using MPI across nodes, you can do so and run `saver` without specifying the `ncores` option.   
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+### Combining SAVER objects
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+Running SAVER on large datasets may run into memory issues, especially when parallelized across cores where each core has limited memory. One solution would be to register a parallel backend using SOCK or MPI to parallelize across nodes. Another solution would be to split the genes into multiple runs using `pred.genes` and `pred.genes.only`. For example, say we have a dataset `x` with 10,000 genes. We can split this up into 4 runs on different machines and combine using the `combine.saver` function. We recommend setting `do.fast = FALSE` when splitting the dataset.
+
+```{r, eval=FALSE}
+saver1 <- saver(x, pred.genes = 1:2500, pred.genes.only = TRUE, 
+                do.fast = FALSE)
+saver2 <- saver(x, pred.genes = 2501:5000, pred.genes.only = TRUE,
+                do.fast = FALSE)
+saver3 <- saver(x, pred.genes = 5001:7500, pred.genes.only = TRUE,
+                do.fast = FALSE)
+saver4 <- saver(x, pred.genes = 7501:10000, pred.genes.only = TRUE,
+                do.fast = FALSE)
+
+saver.all <- combine.saver(list(saver1, saver2, saver3, saver4))
 ```
 
-Also a quote using `>`:
+### Sampling example
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+Oftentimes for downstream analysis, you may want to sample from the posterior distributions to account for estimation uncertainty. This is similar to performing multiple imputation to obtain multiple imputed datasets. To sample from the posterior distributions, we use the function `sample.saver`, which takes in the `saver` result and outputs sampled datasets. For example,
+
+```{r, eval=FALSE}
+samp1 <- sample.saver(saver1, rep = 1, seed = 50)
+samp5 <- sample.saver(saver1, rep = 5, seed = 50)
+```
+
+### Correlation example
+
+Because the SAVER estimates contain uncertainty, correlations between genes and cells cannot be directly calculated using the SAVER estimates. To adjust for the uncertainty, we provide the functions `cor.genes` and `cor.cells` to construct gene-to-gene and cell-to-cell correlation matrices respectively for the SAVER output. These functions take in the `saver` result and outputs the gene-to-gene or cell-to-cell correlation matrix. For example,
+
+```{r, eval=FALSE}
+saver1.cor.gene <- cor.genes(saver1)
+saver1.cor.cell <- cor.cells(saver1)
+```
+

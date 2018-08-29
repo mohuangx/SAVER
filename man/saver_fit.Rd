@@ -8,13 +8,14 @@
 \usage{
 saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes, pred.cells,
   null.model, ngenes = nrow(x), ncells = ncol(x),
-  gene.names = rownames(x), cell.names = colnames(x))
+  gene.names = rownames(x), cell.names = colnames(x), estimates.only)
 
 saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
-  ncells = ncol(x), gene.names = rownames(x), cell.names = colnames(x))
+  ncells = ncol(x), gene.names = rownames(x), cell.names = colnames(x),
+  estimates.only)
 
 saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x), ncells = ncol(x),
-  gene.names = rownames(x), cell.names = colnames(x))
+  gene.names = rownames(x), cell.names = colnames(x), estimates.only)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -44,6 +45,8 @@ cells and the columns correspond to genes.}
 \item{gene.names}{Name of genes.}
 
 \item{cell.names}{Name of cells.}
+
+\item{estimates.only}{Only return SAVER estimates. Default is FALSE.}
 }
 \value{
 A list with the following components
@@ -57,7 +60,7 @@ Fits SAVER object
 \details{
 The SAVER method starts by estimating the prior mean and variance for the
 true expression level for each gene and cell. The prior mean is obtained
-through predictions from a LASSO Poisson regression for each gene
+through predictions from a Lasso Poisson regression for each gene
 implemented using the \code{glmnet} package. Then, the variance is estimated
 through maximum likelihood assuming constant variance, Fano factor, or
 coefficient of variation variance structure for each gene. The posterior
