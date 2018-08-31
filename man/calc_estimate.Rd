@@ -32,6 +32,8 @@ model with lowest cross-validation error.}
 
 \item{scale.sf}{Scale of size factor.}
 
+\item{pred.gene.names}{Names of genes to perform regression prediction.}
+
 \item{pred.cells}{Index of cells to perform regression prediction.}
 
 \item{null.model}{Whether to use mean gene expression as prediction.}
@@ -43,8 +45,6 @@ model with lowest cross-validation error.}
 \item{estimates.only}{Only return SAVER estimates. Default is FALSE.}
 
 \item{mu}{Matrix of prior means}
-
-\item{pred.genes.names}{Names of genes to perform regression prediction.}
 }
 \value{
 A list with the following components

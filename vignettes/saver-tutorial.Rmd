@@ -5,15 +5,24 @@ output:
   rmarkdown::html_vignette:
     toc: TRUE
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{SAVER Tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r eval_saver, include = FALSE}
+# Whether or not to evaluate saver. The generated vignette was run setting it
+# to be TRUE but since running requires multiple cores, this was set to be 
+# FALSE for purposes of submission to CRAN.
+eval.saver <- FALSE
+```
+
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = eval.saver
 )
 ```
 
@@ -38,14 +47,14 @@ devtools::install_github("mohuangx/SAVER@*release")
 
 Once we have the package installed, we can load the package. 
 
-```{r}
+```{r, eval = TRUE}
 library(SAVER)
 packageVersion("SAVER")
 ```
 
 In this tutorial, we will run SAVER on the [mouse cortex data](https://storage.googleapis.com/linnarsson-lab-www-blobs/blobs/cortex/expression_mRNA_17-Aug-2014.txt) from [Zeisel (2015)](http://www.sciencemag.org/content/early/2015/02/18/science.aaa1934.abstract).
 
-```{r, eval=FALSE, cache=TRUE}
+```{r}
 data.path <- "../data/expression_mRNA_17-Aug-2014.txt"
 
 # Need to remove first 10 rows of metadata
@@ -62,7 +71,7 @@ dim(cortex)
 
 ### Preprocessing
 
-The input to SAVER is a matrix of gene expression counts with genes along the rows and cells along the columns. SAVER was developed for use on UMI count data but it seems to work well with non-UMI TPM data. Standard quality control such as removing low quality cells and filtering out genes with no expression should be performed prior to running SAVER. 
+The input to SAVER is a matrix of gene expression counts with genes along the rows and cells along the columns. SAVER was developed for use on UMI count data but it seems to work well with non-UMI TPM data. Standard quality control such as removing low quality cells and filtering out genes with low expression should be performed prior to running SAVER. 
 
 Here, the Zeisel dataset has already been preprocessed. 
 
@@ -70,14 +79,14 @@ Here, the Zeisel dataset has already been preprocessed.
 
 The main function to run SAVER is the `saver` function. Since SAVER is computationally intensive for large datasets, we recommend running it in parallel on a cluster either by creating your own parallel environment or by specifying `ncores`. We will run SAVER on the Zeisel dataset across 12 cores.
 
-```{r, eval=FALSE, cache=TRUE}
+```{r}
 cortex.saver <- saver(cortex, ncores = 12)
 str(cortex.saver)
 ```
 
 `cortex.saver` is a saver object with the following components:
 
-* `estimate` gives the SAVER estimates.
+* `estimate` gives the library size normalized SAVER estimates.
 * `se` gives the standard error of the estimates
 * `info` gives the more information about the run.
 
@@ -89,7 +98,7 @@ cortex.saver <- saver(cortex, ncores = 12, estimates.only = TRUE)
 
 ### Using SAVER estimates
 
-The SAVER estimates represent the posterior means of the recovered gene expression. They can be used as input to many of the common downstream analysis methods such as [Seurat](https://satijalab.org/seurat/) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). 
+The SAVER estimates represent the library size normalized posterior means of the recovered gene expression. They can be used as input to many of the common downstream analysis methods such as [Seurat](https://satijalab.org/seurat/) and [Monocle](http://cole-trapnell-lab.github.io/monocle-release/). 
 
 ## Additional Settings
 

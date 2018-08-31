@@ -30,7 +30,7 @@
 #'
 #' @param mu Matrix of prior means
 #'
-#' @param pred.genes.names Names of genes to perform regression prediction.
+#' @param pred.gene.names Names of genes to perform regression prediction.
 #'
 #' @param pred.cells Index of cells to perform regression prediction.
 #'

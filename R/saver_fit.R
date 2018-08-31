@@ -41,6 +41,8 @@
 #'
 #' @param estimates.only Only return SAVER estimates. Default is FALSE.
 #'
+#' @param mu Matrix of prior means.
+#'
 #' @return A list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression}
 #' \item{\code{se}}{Standard error of estimates}
@@ -241,7 +243,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     info[[9]] <- coefs
     cutoff2 <- max(info$cutoff, -coefs[1]/coefs[2])
 
-    n4 <- min(max(ceiling((npred-n3)/2), nworkers) + n3, npred)
+    n4 <- min(max(ceiling((npred-n3)/4), nworkers) + n3, npred)
     ind4 <- ind[(n3+1):n4]
 
     message("Predicting remaining genes...")
@@ -371,7 +373,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
-    n2 <- min(ceiling((npred-n1)/2) + n1, npred)
+    n2 <- min(ceiling((npred-n1)/4) + n1, npred)
     ind2 <- ind[(n1+1):n2]
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
@@ -500,7 +502,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
     return(list(estimate = est, se = se, info = info))
   }
 
-  n2 <- min(ceiling((ngenes-n1)/2 + n1), ngenes)
+  n2 <- min(ceiling((ngenes-n1)/4 + n1), ngenes)
   t2 <- Sys.time()
   d1 <- difftime(t2, t1, units = "secs")/n1
   tdiff <- d1*(n2-n1)
@@ -589,7 +591,7 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
     return(list(estimate = est, se = se, info = info))
   }
 
-  n2 <- min(ceiling((ngenes-n1)/2 + n1), ngenes)
+  n2 <- min(ceiling((ngenes-n1)/4 + n1), ngenes)
   t2 <- Sys.time()
   d1 <- difftime(t2, t1, units = "secs")/n1
   tdiff <- d1*(n2-n1)

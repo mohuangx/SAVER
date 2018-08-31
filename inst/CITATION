@@ -1,0 +1,31 @@
+citHeader("To cite SAVER in publications use:")
+
+citEntry(entry = "Article",
+         title = "SAVER: gene expression recovery for single-cell RNA sequencing",
+         author = personList(as.person("Mo Huang"),
+                             as.person("Jingshu Wang"),
+                             as.person("Eduardo Torre"),
+                             as.person("Hannah Dueck"),
+                             as.person("Sydney Shaffer"),
+                             as.person("Roberto Bonasio"),
+                             as.person("John I Murray"),
+                             as.person("Arjun Raj"),
+                             as.person("Mingyao Li"),
+                             as.person("Nancy R Zhang")),
+         journal = "Nature Methods",
+         volume = "15",
+         number = "7",
+         pages = "539--542",
+         year = "2018",
+         doi = "10.1038/s41592-018-0033-z",
+         issn = "1548-7105",
+         url = "https://doi.org/10.1038/s41592-018-0033-z",
+
+         textVersion =
+         paste("Huang, M., Wang, J., Torre, E., Dueck, H., Shaffer, S.,",
+               "Bonasio, R., ..., Zhang, N. R. (2018).",
+               "SAVER: gene expression recovery for single-cell RNA sequencing.",
+               "Nature Methods, 15(7), 539–542.",
+               "https://doi.org/10.1038/s41592-018-0033-z")
+)
+
