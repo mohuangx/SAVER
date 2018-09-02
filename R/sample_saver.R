@@ -26,6 +26,7 @@
 #' saver1 <- saver(linnarsson, npred = 5)
 #' samp1 <- sample.saver(saver1, seed = 50)
 #'
+#' @importFrom stats rgamma rnbinom
 #' @export
 
 sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
@@ -47,11 +48,11 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
   if (rep == 1) {
     if (efficiency.known) {
       samp <- t(sapply(1:ngenes, function(i)
-        rnbinom(ncells, mu = x$estimate[i, ], 
+        rnbinom(ncells, mu = x$estimate[i, ],
                 size = x$estimate[i, ]^2/x$se[i, ]^2)))
     } else {
       samp <- t(sapply(1:ngenes, function(i)
-        rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2, 
+        rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2,
                x$estimate[i, ]/x$se[i, ]^2)))
       samp <- round(samp, 3)
     }
@@ -62,11 +63,11 @@ sample.saver <- function(x, rep = 1, efficiency.known = FALSE,
     for (j in 1:rep) {
       if (efficiency.known) {
         samp[[j]] <- t(sapply(1:ngenes, function(i)
-          rnbinom(ncells, mu = x$estimate[i, ], 
+          rnbinom(ncells, mu = x$estimate[i, ],
                   size = x$estimate[i, ]^2/x$se[i, ]^2)))
       } else {
         samp[[j]] <- t(sapply(1:ngenes, function(i)
-          rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2, 
+          rgamma(ncells, x$estimate[i, ]^2/x$se[i, ]^2,
                  x$estimate[i, ]/x$se[i, ]^2)))
         samp[[j]] <- round(samp[[j]], 3)
       }

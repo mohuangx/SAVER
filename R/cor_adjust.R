@@ -21,6 +21,7 @@
 #' saver1 <- saver(linnarsson, npred = 5)
 #' gene.cor <- cor.genes(saver1)
 #'
+#' @importFrom stats cor
 #' @export
 #' @rdname cor_adjust
 cor.genes <- function(x, cor.mat = NULL) {

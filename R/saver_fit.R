@@ -49,6 +49,7 @@
 #' \item{\code{info}}{Information about fit}
 #'
 #' @rdname saver_fit
+#' @importFrom stats lm
 #' @export
 #'
 

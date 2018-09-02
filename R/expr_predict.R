@@ -20,16 +20,17 @@
 #' all cells.
 #'
 #' @param seed Sets the seed for reproducible results.
-#' 
+#'
 #' @param lambda.max Maximum value of lambda which gives null model.
-#' 
+#'
 #' @param lambda.min Value of lambda from which the prediction model is
 #' used
 #'
 #' @return A vector of predicted gene expression.
 #'
+#' @importFrom stats sd
 #' @export
-expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL, 
+expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL,
                          lambda.max = NULL, lambda.min = NULL) {
   if (!is.null(seed))
     set.seed(seed)

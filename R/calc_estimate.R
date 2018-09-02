@@ -68,6 +68,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  ix <- NULL; ind <- NULL
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
@@ -164,6 +165,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itermu <- iterators::iter(mu, by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  ix <- NULL; ind <- NULL; imu <- NULL
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, imu = itermu, ind = itercount,
                      .packages = "SAVER", .errorhandling="pass") %dopar% {
@@ -218,6 +220,7 @@ calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
+  ix <- NULL; ind <- NULL
   out <- suppressWarnings(
     foreach::foreach(ix = iterx, ind = itercount, .packages = "SAVER",
                      .errorhandling="pass") %dopar% {
