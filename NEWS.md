@@ -1,4 +1,4 @@
-## SAVER 1.1.0 (August 29, 2018)
+## SAVER 1.1.0 (September 2, 2018)
 
 * Improve finish time estimation
 * Allow input of prior predictions
