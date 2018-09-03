@@ -18,7 +18,7 @@ devtools::install_github("mohuangx/SAVER@*release")
 ```
 
 ## Reference
-For more information about the method, check out the [tutorial](https://mohuangx.github.io/SAVER/articles/saver-tutorial.html) and the [paper](https://doi.org/10.1038/s41592-018-0033-z).
+For more information about the method, check out the [website](https://mohuangx.github.io/SAVER/),  [tutorial](https://mohuangx.github.io/SAVER/articles/saver-tutorial.html), and [paper](https://doi.org/10.1038/s41592-018-0033-z).
 
 
 
