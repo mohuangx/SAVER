@@ -489,7 +489,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   message("Estimating finish time...")
   t1 <- Sys.time()
   out <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,
-                            mu[ind1, , drop = FALSE], nworkers, estimates.only)
+                            mu[ind1, , drop = FALSE], nworkers, estimates.only, debug = FALSE)
   est[ind1, ] <- out$est
   if (!estimates.only) {
     se[ind1, ] <- out$se
@@ -513,7 +513,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   ind2 <- ind[(n1+1):n2]
   message("Estimating remaining genes...")
   out <- calc.estimate.mean(x[ind2, , drop = FALSE], sf, scale.sf,
-                            mu[ind2, , drop = FALSE], nworkers, estimates.only)
+                            mu[ind2, , drop = FALSE], nworkers, estimates.only, debug = FALSE)
   est[ind2, ] <- out$est
   if (!estimates.only) {
     se[ind2, ] <- out$se
