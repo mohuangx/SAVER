@@ -160,7 +160,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
 #' @rdname calc_estimate
 #' @import foreach
 #' @export
-calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
+calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only, debug = TRUE) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itermu <- iterators::iter(mu, by = "row", chunksize = cs)
@@ -197,6 +197,9 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  if (debug) {
+    return(out)
+  }
   est <- do.call(rbind, lapply(out, `[[`, 1))
   if (!estimates.only) {
     se <- do.call(rbind, lapply(out, `[[`, 2))
