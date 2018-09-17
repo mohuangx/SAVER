@@ -538,7 +538,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   message("Estimating remaining genes...")
   out <- calc.estimate.mean(x[ind3, , drop = FALSE], sf, scale.sf,
                             mu[ind3, , drop = FALSE], nworkers, estimates.only)
-  return(out)
+  return(list(ind3, out))
   est[ind3, ] <- out$est
   if (!estimates.only) {
     se[ind3, ] <- out$se
