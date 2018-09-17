@@ -38,9 +38,15 @@ calc.post <- function(y, mu, sf, scale.sf) {
     prior.beta <- rep(calc.b(y, mu, sf)[1], n)
     prior.alpha <- mu*prior.beta
   } else{
-    a <- calc.a(y, mu, sf)
-    b <- calc.b(y, mu, sf)
-    k <- calc.k(y, mu, sf)
+    a <- tryCatch(calc.a(y, mu, sf), error = function(cond) {
+      return(c(0, Inf))
+    })
+    b <- tryCatch(calc.b(y, mu, sf), error = function(cond) {
+      return(c(0, Inf))
+    })
+    k <- tryCatch(calc.k(y, mu, sf), error = function(cond) {
+      return(c(0, Inf))
+    })
     var.method <- which.min(c(a[2], b[2], k[2]))
     if (var.method == 1) {
       prior.alpha <- a[1]
