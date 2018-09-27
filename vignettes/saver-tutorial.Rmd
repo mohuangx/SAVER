@@ -130,7 +130,7 @@ The main contribution of SAVER is the shrinkage step after generating the predic
 
 ### Creating your own parallel backend
 
-By default, if you specify `ncores` without already having a parallel backend set up, `saver` will make a default cluster using the `makeCluster` function in the parallel package and register a SNOW parallel backend via the `registerDoSNOW` function in the doSNOW package. However, if you want to set up a more complicated backend, such as using MPI across nodes, you can do so and run `saver` without specifying the `ncores` option.   
+By default, if you specify `ncores` without already having a parallel backend set up, `saver` will make a default cluster using the `makeCluster` function in the parallel package and register a parallel backend via the `registerDoParallel` function in the doParallel package. However, if you want to set up a more complicated backend, such as using MPI across nodes, you can do so and run `saver` without specifying the `ncores` option.   
 
 ### Combining SAVER objects
 

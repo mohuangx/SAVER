@@ -125,7 +125,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
     if (ncores > 1) {
       cl.create <- TRUE
       cl <- parallel::makeCluster(ncores, outfile = "")
-      doSNOW::registerDoSNOW(cl)
+      doParallel::registerDoParallel(cl)
       on.exit({
         parallel::stopCluster(cl)
         foreach::registerDoSEQ()

@@ -2,7 +2,7 @@ Package: SAVER
 Type: Package
 Version: 1.1.1
 Title: Single-cell RNA-seq Gene Expression Recovery
-Description: This package implements a regularized regression prediction and 
+Description: An implementation of a regularized regression prediction and 
     empirical Bayes method to recover the true gene expression profile in 
     noisy and sparse single-cell RNA-seq data. See Huang M, et al (2018) 
     <doi:10.1038/s41592-018-0033-z> for more details.
@@ -23,7 +23,7 @@ Imports:
     foreach,
     methods,
     iterators,
-    doSNOW,
+    doParallel,
     Matrix
 RoxygenNote: 6.1.0
 URL: https://github.com/mohuangx/SAVER

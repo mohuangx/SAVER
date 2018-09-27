@@ -211,7 +211,7 @@ cortex.saver.genes.only &lt;-<span class="st"> </span><span class="kw">saver</sp
 </div>
 <div id="creating-your-own-parallel-backend" class="section level3">
 <h3>Creating your own parallel backend</h3>
-<p>By default, if you specify <code>ncores</code> without already having a parallel backend set up, <code>saver</code> will make a default cluster using the <code>makeCluster</code> function in the parallel package and register a SNOW parallel backend via the <code>registerDoSNOW</code> function in the doSNOW package. However, if you want to set up a more complicated backend, such as using MPI across nodes, you can do so and run <code>saver</code> without specifying the <code>ncores</code> option.</p>
+<p>By default, if you specify <code>ncores</code> without already having a parallel backend set up, <code>saver</code> will make a default cluster using the <code>makeCluster</code> function in the parallel package and register a parallel backend via the <code>registerDoParallel</code> function in the doParallel package. However, if you want to set up a more complicated backend, such as using MPI across nodes, you can do so and run <code>saver</code> without specifying the <code>ncores</code> option.</p>
 </div>
 <div id="combining-saver-objects" class="section level3">
 <h3>Combining SAVER objects</h3>
