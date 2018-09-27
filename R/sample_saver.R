@@ -21,10 +21,10 @@
 #' \code{rep} > 1, a list of matrices is returned
 #'
 #' @examples
-#' data("linnarsson")
+#' data("linnarsson_saver")
 #'
-#' saver1 <- saver(linnarsson, npred = 5)
-#' samp1 <- sample.saver(saver1, seed = 50)
+#' samp1 <- sample.saver(linnarsson_saver, seed = 50)
+#' 
 #'
 #' @importFrom stats rgamma rnbinom
 #' @export

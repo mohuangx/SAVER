@@ -16,10 +16,9 @@
 #' @return An adjusted correlation matrix.
 #'
 #' @examples
-#' data("linnarsson")
-#'
-#' saver1 <- saver(linnarsson, npred = 5)
-#' gene.cor <- cor.genes(saver1)
+#' data("linnarsson_saver")
+#' 
+#' gene.cor <- cor.genes(linnarsson_saver)
 #'
 #' @importFrom stats cor
 #' @export

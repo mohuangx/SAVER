@@ -70,22 +70,26 @@
 #'
 #' @examples
 #' data("linnarsson")
+#' 
+#' \dontrun{
+#' system.time(linnarsson_saver <- saver(linnarsson, ncores = 12))
+#' }
 #'
 #' # predictions for top 5 highly expressed genes
-#' saver1 <- saver(linnarsson, npred = 5)
+#' \dontrun{
+#' saver2 <- saver(linnarsson, npred = 5)
+#' }
 #'
 #' # predictions for certain genes
+#' \dontrun{
 #' genes <- c("Thy1", "Mbp", "Stim2", "Psmc6", "Rps19")
 #' genes.ind <- which(rownames(linnarsson) %in% genes)
-#' saver2 <- saver(linnarsson, pred.genes = genes.ind)
+#' saver3 <- saver(linnarsson, pred.genes = genes.ind)
+#' }
 #'
 #' # return only certain genes
-#' saver3 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
-#'
-#' # Parallel
 #' \dontrun{
-#' system.time(saver(linnarsson, npred = 20))
-#' system.time(saver(linnarsson, npred = 20, ncores = 2))
+#' saver4 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 #' }
 #'
 #' @import foreach

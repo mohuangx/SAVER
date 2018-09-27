@@ -23,10 +23,8 @@ SAVER model.
 }
 \examples{
 data("linnarsson")
+data("linnarsson_saver")
 
-saver1 <- saver(linnarsson, pred.genes = 1:5, pred.genes.only = TRUE)
-
-mu <- get.mu(linnarsson[1:5, ], saver1)
-mu[1:5, 1:5]
+mu <- get.mu(linnarsson, linnarsson_saver)
 
 }

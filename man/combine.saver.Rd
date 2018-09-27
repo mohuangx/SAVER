@@ -21,9 +21,12 @@ If SAVER was applied to a dataset for chunks of genes (by specifying
 the individual SAVER objects into one SAVER object.
 }
 \examples{
+data("linnarsson")
 
+\dontrun{
 a <- saver(linnarsson, pred.genes = 1:5, pred.genes.only = TRUE)
 b <- saver(linnarsson, pred.genes = 6:10, pred.genes.only = TRUE)
 ab <- combine.saver(list(a, b))
+}
 
 }

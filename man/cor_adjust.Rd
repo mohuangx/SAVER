@@ -29,9 +29,8 @@ and cell-to-cell correlations of the SAVER estimates to reflect the
 estimation uncertainty.
 }
 \examples{
-data("linnarsson")
+data("linnarsson_saver")
 
-saver1 <- saver(linnarsson, npred = 5)
-gene.cor <- cor.genes(saver1)
+gene.cor <- cor.genes(linnarsson_saver)
 
 }

@@ -31,9 +31,9 @@ negative binomial sampling is performed; otherwise, gamma sampling is
 performed.
 }
 \examples{
-data("linnarsson")
+data("linnarsson_saver")
 
-saver1 <- saver(linnarsson, npred = 5)
-samp1 <- sample.saver(saver1, seed = 50)
+samp1 <- sample.saver(linnarsson_saver, seed = 50)
+
 
 }
