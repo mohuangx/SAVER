@@ -41,7 +41,7 @@ Default is FALSE (returns expression levels of all genes).}
 \item{estimates.only}{Only return SAVER estimates. Default is FALSE.}
 }
 \value{
-If `estimates.only = TRUE`, then a matrix of SAVER estimtes.
+If `estimates.only = TRUE`, then a matrix of SAVER estimates.
 
 If `estimates.only = FALSE`, a list with the following components
 \item{\code{estimate}}{Recovered (normalized) expression.}

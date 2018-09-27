@@ -11,7 +11,7 @@
 #' @param x A \code{saver} object.
 #'
 #' @param cor.mat If a correlation matrix of the SAVER estimates was already
-#' obtained, then it can be provied as an input to avoid recomputation.
+#' obtained, then it can be provided as an input to avoid recomputation.
 #'
 #' @return An adjusted correlation matrix.
 #'

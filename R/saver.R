@@ -42,7 +42,7 @@
 #' @param estimates.only Only return SAVER estimates. Default is FALSE.
 #'
 #'
-#' @return If `estimates.only = TRUE`, then a matrix of SAVER estimtes.
+#' @return If `estimates.only = TRUE`, then a matrix of SAVER estimates.
 #'
 #' If `estimates.only = FALSE`, a list with the following components
 #' \item{\code{estimate}}{Recovered (normalized) expression.}
