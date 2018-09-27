@@ -1,3 +1,8 @@
+## SAVER 1.1.1 (September 26, 2018)
+
+* Fix bug when inputted mu values are far from observed
+* Add `get.mu` function to get prior mean predictions.
+
 ## SAVER 1.1.0 (September 2, 2018)
 
 * Improve finish time estimation

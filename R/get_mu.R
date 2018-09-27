@@ -19,6 +19,7 @@
 #' mu <- get.mu(linnarsson[1:5, ], saver1)
 #' mu[1:5, 1:5]
 #' 
+#' @export
 
 get.mu <- function(x, saver.obj) {
   mu <- (saver.obj$estimate^2/saver.obj$se^2 - x)/
