@@ -530,7 +530,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   n3 <- ngenes
   t3 <- Sys.time()
   d2 <- difftime(t3, t1, units = "secs")/n2
-  tdiff <- d1*(n3-n2)
+  tdiff <- d2*(n3-n2)
   message("Finished ", n2, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
 
@@ -619,7 +619,7 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
   n3 <- ngenes
   t3 <- Sys.time()
   d2 <- difftime(t3, t1, units = "secs")/n2
-  tdiff <- d1*(n3-n2)
+  tdiff <- d2*(n3-n2)
   message("Finished ", n2, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
 
