@@ -109,7 +109,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 
     n2 <- min(max(100, nworkers), npred)
     t2 <- Sys.time()
-    d1 <- difftime(t2, t1, units = "secs")/n1
+    d1 <- mean(info$pred.time[ind[1:n1]] + info$var.time[ind[1:n1]])/nworkers
     perc.pred <- 0.5
     n3 <- min(max(ceiling(n2/perc.pred), nworkers) + n2, npred)
     tdiff <- d1*(n2-n1) + d1*(n3-n2)*perc.pred +
@@ -163,7 +163,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     ind3 <- ind[(n2+1):n3]
 
     t3 <- Sys.time()
-    d2 <- difftime(t3, t1, units = "secs")/n2
+    d2 <- mean(info$pred.time[ind[1:n2]] + info$var.time[ind[1:n2]])/nworkers
     tdiff <- d2*(n3-n2)*perc.pred + d2*(npred-n3)*perc.pred/20 +
       (ngenes-npred)*mean(info$var.time[ind[1:n2]])/nworkers
     units(tdiff) <- "secs"
@@ -208,7 +208,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     perc.pred <- mean(info$maxcor[ind[1:n3]] > cutoff)
 
     t4 <- Sys.time()
-    d3 <- difftime(t4, t3, units = "secs")/(n3-n2)
+    d3 <- mean(info$pred.time[ind[1:n3]] + info$var.time[ind[1:n3]])/nworkers
     tdiff <- d3*(npred-n3)/20 +
       (ngenes-npred)*mean(info$var.time[ind[1:n3]])/nworkers
     units(tdiff) <- "secs"
@@ -347,7 +347,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     }
 
     t2 <- Sys.time()
-    d1 <- difftime(t2, t1, units = "secs")/n1
+    d1 <- mean(info$pred.time[ind[1:n1]] + info$var.time[ind[1:n1]])/nworkers
     tdiff <- d1*(npred-n1) +
       (ngenes-npred)*mean(info$var.time[ind[1:n1]])/nworkers
     message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
@@ -505,7 +505,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
 
   n2 <- min(ceiling((ngenes-n1)/4 + n1), ngenes)
   t2 <- Sys.time()
-  d1 <- difftime(t2, t1, units = "secs")/n1
+  d1 <- mean(info$var.time[ind[1:n1]])/nworkers
   tdiff <- d1*(ngenes-n1)
   message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
@@ -594,7 +594,7 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
 
   n2 <- min(ceiling((ngenes-n1)/4 + n1), ngenes)
   t2 <- Sys.time()
-  d1 <- difftime(t2, t1, units = "secs")/n1
+  d1 <- mean(info$var.time[ind[1:n1]])/nworkers
   tdiff <- d1*(ngenes-n1)
   message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
