@@ -115,6 +115,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     tdiff <- d1*(n2-n1) + d1*(n3-n2)*perc.pred +
       d1/n1*(npred-n3)*perc.pred/20 +
       (ngenes-npred)*mean(info$var.time[ind[1:n1]])/3/nworkers
+    tdiff <- as.difftime(tdiff, units = "secs")
     message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
@@ -166,7 +167,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     d2 <- mean(info$pred.time[ind[1:n2]] + info$var.time[ind[1:n2]])/nworkers
     tdiff <- d2*(n3-n2)*perc.pred + d2*(npred-n3)*perc.pred/20 +
       (ngenes-npred)*mean(info$var.time[ind[1:n2]])/3/nworkers
-    units(tdiff) <- "secs"
+    tdiff <- as.difftime(tdiff, units = "secs")
     message("Finished ", n2, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
@@ -211,7 +212,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     d3 <- mean(info$pred.time[ind[1:n3]] + info$var.time[ind[1:n3]])/nworkers
     tdiff <- d3*(npred-n3)/20 +
       (ngenes-npred)*mean(info$var.time[ind[1:n3]])/3/nworkers
-    units(tdiff) <- "secs"
+    tdiff <- as.difftime(tdiff, units = "secs")
     message("Finished ", n3, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
@@ -350,6 +351,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     d1 <- mean(info$pred.time[ind[1:n1]] + info$var.time[ind[1:n1]])/nworkers
     tdiff <- d1*(npred-n1) +
       (ngenes-npred)*mean(info$var.time[ind[1:n1]])/3/nworkers
+    tdiff <- as.difftime(tdiff, units = "secs")
     message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
@@ -507,6 +509,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   t2 <- Sys.time()
   d1 <- mean(info$var.time[ind[1:n1]])/nworkers
   tdiff <- d1*(ngenes-n1)
+  tdiff <- as.difftime(tdiff, units = "secs")
   message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
 
@@ -596,6 +599,7 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
   t2 <- Sys.time()
   d1 <- mean(info$var.time[ind[1:n1]])/nworkers
   tdiff <- d1*(ngenes-n1)
+  tdiff <- as.difftime(tdiff, units = "secs")
   message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
           Sys.time() + tdiff)
 
