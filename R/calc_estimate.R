@@ -197,6 +197,9 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  if (length(out[[1]]) != 8) {
+    stop(out[[1]])
+  }
   est <- do.call(rbind, lapply(out, `[[`, 1))
   if (!estimates.only) {
     se <- do.call(rbind, lapply(out, `[[`, 2))
