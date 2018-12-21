@@ -141,6 +141,9 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  if (length(out[[1]]) != 8) {
+    stop(out[[1]])
+  }
   est <- do.call(rbind, lapply(out, `[[`, 1))
   if (!estimates.only) {
     se <- do.call(rbind, lapply(out, `[[`, 2))
@@ -253,6 +256,9 @@ calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
       list(est, se, maxcor, lambda.max, lambda.min, sd.cv, ct, vt)
     }
   )
+  if (length(out[[1]]) != 8) {
+    stop(out[[1]])
+  }
   est <- do.call(rbind, lapply(out, `[[`, 1))
   if (!estimates.only) {
     se <- do.call(rbind, lapply(out, `[[`, 2))
