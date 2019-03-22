@@ -8,7 +8,8 @@ clean.data <- function(x) {
     }
   }
   np <- dim(x)
-  if(np[1]*np[2] > 2^31-1){
+  size <- as.numeric(np[1])*as.numeric(np[2])
+  if(size > 2^31-1){
     inds <- split(1:np[2], ceiling(1:np[2]/1000))
     for(i in 1:length(inds)){
       x[, inds[[i]]][x[, inds[[i]]] < 0.001] <- 0
