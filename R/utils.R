@@ -7,8 +7,15 @@ clean.data <- function(x) {
       warning("Make sure x is numeric.")
     }
   }
-  x[x < 0.001] <- 0
   np <- dim(x)
+  if(np[1]*np[2] > 2^31-1){
+    inds <- split(1:np[2], ceiling(1:np[2]/1000))
+    for(i in 1:length(inds)){
+      x[, inds[[i]]][x[, inds[[i]]] < 0.001] <- 0
+    }
+  } else {
+    x[x < 0.001] <- 0
+  }
   if (is.null(np) | (np[2] <= 1))
     stop("x should be a matrix with 2 or more columns")
   if (min(Matrix::colSums(x)) == 0) {
