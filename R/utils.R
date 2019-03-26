@@ -50,6 +50,22 @@ check.mu <- function(x, mu) {
   mu
 }
 
+update.output <- function(f, ind, start, stop, out, x, sf, scale.sf, mu, 
+                          nworkers, estimates.only) {
+  n <- stop-start+1
+  ind1 <- ind[start:stop]
+  results <- f(x[ind1, , drop = FALSE], sf, scale.sf,
+               mu[ind1, , drop = FALSE], nworkers, estimates.only)
+  out$estimate[ind1, ] <- results$est
+  if (!estimates.only) {
+    out$se[ind1, ] <- results$se
+  }
+  for (j in 1:6) {
+    out$info[[j+1]][ind1] <- results[[j+2]]
+  }
+  return(out)
+}
+
 
 calc.size.factor <- function(x, size.factor, ncells) {
   if (is.null(size.factor)) {
