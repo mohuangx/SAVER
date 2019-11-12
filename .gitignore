@@ -7,3 +7,6 @@ SAVER.Rproj
 
 inst/doc
 vignettes/*cache
+.DS_Store
+*.o
+*.so

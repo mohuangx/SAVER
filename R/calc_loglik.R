@@ -33,8 +33,8 @@ calc.loglik.a <- function(a, y, mu, sf) {
   }
   func1 <- n/a*log(1/a)
   func2 <- -sum(1/a*log(mu))
-  func3 <- -n*lgamma(1/a)
-  func4 <- sum(lgamma(y+1/a))
+  func3 <- -n*gammaln(1/a)
+  func4 <- sum(gammaln(y+1/a))
   func5 <- -sum((y+1/a)*log(sf+1/(a*mu)))
   return(-sum(func1, func2, func3, func4, func5))
 }
@@ -50,9 +50,30 @@ calc.loglik.b <- function(b, y, mu, sf) {
     sf <- rep(sf, n)
   }
   func1 <- sum(mu/b*log(1/b))
-  func2 <- -sum(lgamma(mu/b))
-  func3 <- sum(lgamma(y+mu/b))
+  func2 <- -sum(gammaln(mu/b))
+  func3 <- sum(gammaln(y+mu/b))
   func4 <- -sum((y+mu/b)*log(sf+1/b))
+  return(-sum(func1, func2, func3, func4))
+}
+
+#' @rdname calc_loglik
+#' @export
+calc.loglik.b2 <- function(b, y, mu, sf) {
+  n <- length(y)
+  if (length(mu) == 1) {
+    mu <- rep(mu, n)
+  }
+  if (length(sf) == 1) {
+    sf <- rep(sf, n)
+  }
+  t1 <- 1 / b
+  t2 <- mu * t1
+  t3 <- y + t2
+  
+  func1 <- sum(t2*log(t1))
+  func2 <- -sum(gammaln(t2))
+  func3 <- sum(gammaln(t3))
+  func4 <- -sum((t3)*log(sf+t1))
   return(-sum(func1, func2, func3, func4))
 }
 
@@ -68,8 +89,8 @@ calc.loglik.k <- function(k, y, mu, sf) {
   }
   func3 <- sum(mu^2*log(mu)/k)
   func4 <- -sum(mu^2*log(k)/k)
-  func5 <- -sum(lgamma(mu^2/k))
-  func6 <- sum(lgamma(y+mu^2/k))
+  func5 <- -sum(gammaln(mu^2/k))
+  func6 <- sum(gammaln(y+mu^2/k))
   func7 <- -sum((y+mu^2/k)*log(sf+mu/k))
   return(-sum(func3, func4, func5, func6, func7))
 }
