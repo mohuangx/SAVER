@@ -6,9 +6,20 @@
 \alias{calc.estimate.null}
 \title{Calculate estimate}
 \usage{
-calc.estimate(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
-  pred.gene.names, pred.cells, null.model, nworkers, calc.maxcor,
-  estimates.only)
+calc.estimate(
+  x,
+  x.est,
+  cutoff = 0,
+  coefs = NULL,
+  sf,
+  scale.sf,
+  pred.gene.names,
+  pred.cells,
+  null.model,
+  nworkers,
+  calc.maxcor,
+  estimates.only
+)
 
 calc.estimate.mean(x, sf, scale.sf, mu, nworkers, estimates.only)
 

@@ -19,11 +19,7 @@ eval.saver <- FALSE
 
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  eval = eval.saver
-)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = eval.saver)
 ```
 
 SAVER (Single-cell Analyses Via Expression Recovery) is a method for denoising single-cell RNA sequencing data by borrowing information across genes and cells. Here, we demonstrate how to use the method. For more information, take a look at the [Github page](https://github.com/mohuangx/SAVER) and the [paper](https://doi.org/10.1038/s41592-018-0033-z).
