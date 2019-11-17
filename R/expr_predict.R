@@ -28,7 +28,7 @@
 #'
 #' @return A vector of predicted gene expression.
 #'
-#' @importFrom stats sd
+#' @importFrom stats sd predict
 #' @export
 expr.predict <- function(x, y, pred.cells = 1:length(y), seed = NULL,
                          lambda.max = NULL, lambda.min = NULL) {

@@ -1,7 +1,7 @@
 [![Travis-CI Build Status](https://travis-ci.org/mohuangx/SAVER.svg?branch=master)](https://travis-ci.org/mohuangx/SAVER)
 [![CRAN Version](https://www.r-pkg.org/badges/version/SAVER)](https://cran.r-project.org/package=SAVER)
 
-# SAVER 1.1.1
+# SAVER 1.1.2
 
 SAVER (Single-cell Analysis Via Expression Recovery) implements a regularized regression prediction and empirical Bayes method to recover the true gene expression profile in noisy and sparse single-cell RNA-seq data.
 

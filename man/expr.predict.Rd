@@ -4,8 +4,14 @@
 \alias{expr.predict}
 \title{Calculates SAVER prediction.}
 \usage{
-expr.predict(x, y, pred.cells = 1:length(y), seed = NULL,
-  lambda.max = NULL, lambda.min = NULL)
+expr.predict(
+  x,
+  y,
+  pred.cells = 1:length(y),
+  seed = NULL,
+  lambda.max = NULL,
+  lambda.min = NULL
+)
 }
 \arguments{
 \item{x}{A log-normalized expression count matrix of genes to be used in the

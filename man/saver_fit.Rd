@@ -6,17 +6,47 @@
 \alias{saver.fit.null}
 \title{Fits SAVER}
 \usage{
-saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes, pred.cells,
-  null.model, ngenes = nrow(x), ncells = ncol(x),
-  gene.names = rownames(x), cell.names = colnames(x), estimates.only)
+saver.fit(
+  x,
+  x.est,
+  do.fast,
+  ncores,
+  sf,
+  scale.sf,
+  pred.genes,
+  pred.cells,
+  null.model,
+  ngenes = nrow(x),
+  ncells = ncol(x),
+  gene.names = rownames(x),
+  cell.names = colnames(x),
+  estimates.only
+)
 
-saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
-  ncells = ncol(x), gene.names = rownames(x),
-  cell.names = colnames(x), estimates.only)
+saver.fit.mean(
+  x,
+  ncores,
+  sf,
+  scale.sf,
+  mu,
+  ngenes = nrow(x),
+  ncells = ncol(x),
+  gene.names = rownames(x),
+  cell.names = colnames(x),
+  estimates.only
+)
 
-saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
-  ncells = ncol(x), gene.names = rownames(x),
-  cell.names = colnames(x), estimates.only)
+saver.fit.null(
+  x,
+  ncores,
+  sf,
+  scale.sf,
+  ngenes = nrow(x),
+  ncells = ncol(x),
+  gene.names = rownames(x),
+  cell.names = colnames(x),
+  estimates.only
+)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and

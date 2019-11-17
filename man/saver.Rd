@@ -4,10 +4,19 @@
 \alias{saver}
 \title{Runs SAVER}
 \usage{
-saver(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
-  npred = NULL, pred.cells = NULL, pred.genes = NULL,
-  pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
-  estimates.only = FALSE)
+saver(
+  x,
+  do.fast = TRUE,
+  ncores = 1,
+  size.factor = NULL,
+  npred = NULL,
+  pred.cells = NULL,
+  pred.genes = NULL,
+  pred.genes.only = FALSE,
+  null.model = FALSE,
+  mu = NULL,
+  estimates.only = FALSE
+)
 }
 \arguments{
 \item{x}{An expression count matrix. The rows correspond to genes and
@@ -95,7 +104,7 @@ saver2 <- saver(linnarsson, npred = 5)
 # predictions for certain genes
 \dontrun{
 genes <- c("Thy1", "Mbp", "Stim2", "Psmc6", "Rps19")
-genes.ind <- which(rownames(linnarsson) \%in\% genes)
+genes.ind <- which(rownames(linnarsson) %in% genes)
 saver3 <- saver(linnarsson, pred.genes = genes.ind)
 }
 

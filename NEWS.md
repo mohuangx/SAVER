@@ -1,3 +1,7 @@
+## SAVER 1.1.2 (November 12, 2019)
+
+* Update to make compatible with glmnet 3.0.
+
 ## SAVER 1.1.1 (September 26, 2018)
 
 * Fix bug when inputted mu values are far from observed
