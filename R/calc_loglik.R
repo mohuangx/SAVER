@@ -39,26 +39,11 @@ calc.loglik.a <- function(a, y, mu, sf) {
   return(-sum(func1, func2, func3, func4, func5))
 }
 
-#' @rdname calc_loglik
-#' @export
-calc.loglik.b <- function(b, y, mu, sf) {
-  n <- length(y)
-  if (length(mu) == 1) {
-    mu <- rep(mu, n)
-  }
-  if (length(sf) == 1) {
-    sf <- rep(sf, n)
-  }
-  func1 <- sum(mu/b*log(1/b))
-  func2 <- -sum(gammaln(mu/b))
-  func3 <- sum(gammaln(y+mu/b))
-  func4 <- -sum((y+mu/b)*log(sf+1/b))
-  return(-sum(func1, func2, func3, func4))
-}
+
 
 #' @rdname calc_loglik
 #' @export
-calc.loglik.b2 <- function(b, y, mu, sf) {
+calc.loglik.b <- function(b, y, mu, sf) {
   n <- length(y)
   if (length(mu) == 1) {
     mu <- rep(mu, n)
@@ -73,7 +58,7 @@ calc.loglik.b2 <- function(b, y, mu, sf) {
   func1 <- sum(t2*log(t1))
   func2 <- -sum(gammaln(t2))
   func3 <- sum(gammaln(t3))
-  func4 <- -sum((t3)*log(sf+t1))
+  func4 <- -sum(t3*log(sf+t1))
   return(-sum(func1, func2, func3, func4))
 }
 

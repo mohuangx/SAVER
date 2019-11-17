@@ -69,29 +69,29 @@ calc.b <- function(y, mu, sf) {
   if (sum(mu) == 0) {
     return(c(0, 0))
   }
-  b.vec <- optimize(calc.loglik.b, interval = c(0, var(y/sf)/mean(y/sf)), y = y, mu = mu,
+  b.vec <- optimize(calc_loglik_b, interval = c(0, var(y/sf)/mean(y/sf)), y = y, mu = mu,
                     sf = sf)
   b <- b.vec$minimum
   b.loglik <- b.vec$objective
-  min.b <- -calc.loglik.b(1e-05, y, mu, sf)
-  mle.b <- -calc.loglik.b(b, y, mu, sf)
-  max.b <- -calc.loglik.b(var(y/sf)/mean(y/sf), y, mu, sf)
+  min.b <- -calc_loglik_b(1e-05, y, mu, sf)
+  mle.b <- -calc_loglik_b(b, y, mu, sf)
+  max.b <- -calc_loglik_b(var(y/sf)/mean(y/sf), y, mu, sf)
   if (mle.b - min.b < 0.5) {
     if (mle.b-max.b > 10) {
-      b.max <- uniroot(function(x) calc.loglik.b(x, y, mu, sf) + mle.b - 10,
+      b.max <- uniroot(function(x) calc_loglik_b(x, y, mu, sf) + mle.b - 10,
                        c(1e-05, var(y/sf)/mean(y/sf)))$root
     } else {
       b.max <- var(y/sf)/mean(y/sf)
     }
     samp <- (exp((exp(ppoints(100))-1)/2)-1)*b.max
-    loglik <- mapply(calc.loglik.b, b = samp,
+    loglik <- mapply(calc_loglik_b, b = samp,
                      MoreArgs = list(y = y,
                                      mu = mu,
                                      sf = sf))
     loglik2 <- exp(-loglik-min(-loglik))
     loglik3 <- loglik2/sum(loglik2)
     b <- mean(sample(samp, 10000, replace = TRUE, prob = loglik3))
-    b.loglik <- calc.loglik.b(b, y, mu, sf)
+    b.loglik <- calc_loglik_b(b, y, mu, sf)
   }
   return(c(1/b, b.loglik))
 }

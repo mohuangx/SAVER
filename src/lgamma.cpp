@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Quanli Wang
+ * Copyright (C) 2019 Quanli Wang
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */ 
 
-#include <cmath>
 
 #include <Rcpp.h>
+using namespace std;
 using namespace Rcpp;
 
 double lgamma(double x)
@@ -55,7 +55,7 @@ double lgamma(double x)
           -2.777777777777681622553e-03, 8.333333333333333331554247e-02, 
 		  5.7083835261e-03};
 	if ( (x > 0) && (x <= 2.2204e-016)) {  //x < eps
-		return  -log(x);
+		return  -std::log(x);
 	} else if ((x > 2.2204e-016) && ( x <= 0.5)) {
 		double xden = 1;
 		double xnum = 0;  
@@ -63,7 +63,7 @@ double lgamma(double x)
 			xnum = xnum * x + p1[i];
 			xden = xden * x + q1[i];
 		}
-		return -log(x) + (x * (d1 + x * (xnum / xden)));
+		return -std::log(x) + (x * (d1 + x * (xnum / xden)));
 	} else if((x > 0.5) && (x <= 0.6796875)) {
 		double xm1 = (x - 0.5) - 0.5;
 		double xden = 1;
@@ -72,7 +72,7 @@ double lgamma(double x)
 			xnum = xnum * xm1 + p2[i];
 			xden = xden * xm1 + q2[i];
 		}
-		return -log(x) + xm1 * (d2 + xm1 * (xnum / xden));
+		return -std::log(x) + xm1 * (d2 + xm1 * (xnum / xden));
 	} else if ((x > 0.6796875) && (x <= 1.5)) {
 		double xm1 = (x - 0.5) - 0.5;
 		double xden = 1;
@@ -107,7 +107,7 @@ double lgamma(double x)
 		  r = r / ysq + c[i];
 	  }
       r = r / x;
-      double corr = log(x);
+      double corr = std::log(x);
       double spi = 0.9189385332046727417803297;
       return r + spi - 0.5 * corr + x * ( corr - 1);
 	}

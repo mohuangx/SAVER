@@ -10,3 +10,6 @@ vignettes/*cache
 .DS_Store
 *.o
 *.so
+calc.b.RData
+calc.loglik.b.RData
+calc.post.RData
