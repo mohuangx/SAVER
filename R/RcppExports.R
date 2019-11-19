@@ -9,6 +9,10 @@ calc_loglik_b <- function(b, y, mu, sf) {
     .Call(`_SAVER_calc_loglik_b`, b, y, mu, sf)
 }
 
+calc_loglik_k <- function(k, y, mu, sf) {
+    .Call(`_SAVER_calc_loglik_k`, k, y, mu, sf)
+}
+
 gammaln <- function(x) {
     .Call(`_SAVER_gammaln`, x)
 }

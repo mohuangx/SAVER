@@ -33,6 +33,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// calc_loglik_k
+double calc_loglik_k(double k, NumericVector y, NumericVector mu, NumericVector sf);
+RcppExport SEXP _SAVER_calc_loglik_k(SEXP kSEXP, SEXP ySEXP, SEXP muSEXP, SEXP sfSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type k(kSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sf(sfSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_loglik_k(k, y, mu, sf));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gammaln
 NumericVector gammaln(NumericVector x);
 RcppExport SEXP _SAVER_gammaln(SEXP xSEXP) {
@@ -48,6 +62,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_SAVER_calc_loglik_a", (DL_FUNC) &_SAVER_calc_loglik_a, 4},
     {"_SAVER_calc_loglik_b", (DL_FUNC) &_SAVER_calc_loglik_b, 4},
+    {"_SAVER_calc_loglik_k", (DL_FUNC) &_SAVER_calc_loglik_k, 4},
     {"_SAVER_gammaln", (DL_FUNC) &_SAVER_gammaln, 1},
     {NULL, NULL, 0}
 };
