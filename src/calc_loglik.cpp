@@ -16,10 +16,99 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
  */ 
 
+/*
+#' Calculates marginal likelihood
+#'
+#' Calculates the marginal likelihood given the prediction under constant
+#' coefficient of variation (a), Fano factor (b), and variance (k).
+#'
+#' \code{calc.loglik.a} returns the shifted negative log-likelihood under
+#' constant coefficient of variation.
+#' \code{calc.loglik.b} returns the shifted negative log-likelihood under
+#' constant Fano factor.
+#' \code{calc.loglik.k} returns the shifted negative log-likelihood under
+#' constant variance.
+#'
+#' @param a,b,k Prior parameter.
+#'
+#' @param y A vector of observed gene counts.
+#'
+#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#'
+#' @param sf Vector of normalized size factors.
+#'
+#' @return A shifted negative marginal log-likelihood.
+#'
+*/
 
-#include <Rcpp.h>
-using namespace std;
-using namespace Rcpp;
+#include "lgamma.h"
+
+/*
+ calc.loglik.a <- function(a, y, mu, sf) {
+  n <- length(y)
+  t1 <- 1 / a
+  func1 <- n*t1*log(t1)
+  func3 <- -n*gammaln(t1)
+  
+  if (length(mu) == 1) {
+    mu <- rep(mu, n)
+  }
+  
+  func2 <- -t1*sum(log(mu))
+  func4 <- sum(gammaln(y+t1))
+  
+  if (length(sf) == 1) {
+    sf <- rep(sf, n)
+  }
+  func5 <- -sum((y+t1)*log(sf+t1/mu))
+  
+  return(-sum(func1, func2, func3, func4, func5))
+}
+ */
+
+// [[Rcpp::export]]
+double calc_loglik_a(double a, NumericVector y, NumericVector mu, NumericVector sf) {
+    int n = y.length();
+    double t1 = 1.0 / a;
+    double log_t1 = std::log(t1);
+    
+    double func1 = 0;
+    double func2 = 0;
+    double func3 = 0;
+    double func4 = 0;
+    double func5 = 0;
+    
+    func1 = t1 * log_t1 * n;
+    func3 = -lgamma(t1) * n;
+    
+    if (mu.length() == 1) {
+        func2 = -log(mu[0]) * t1 * n;
+        double t2 = log(sf[0]+t1 / mu[0]);
+        for (int i = 0; i < n; i++) {
+            double y_plus_t1 = y[i] + t1;
+            func4 += lgamma(y_plus_t1);
+            if (sf.length() > 0) {
+                func5 -= y_plus_t1 * log(sf[i]+t1 / mu[0]);
+            } else {
+                func5 -= y_plus_t1 * t2;
+            }
+        }
+    } else {
+        for (int i = 0; i < n; i++) {
+            func2 -= log(mu[i]);
+            double y_plus_t1 = y[i] + t1;
+            func4 += lgamma(y_plus_t1);
+            if (sf.length() > 1) {
+                func5 -= y_plus_t1 * log(sf[i]+t1 / mu[i]);
+            } else {
+                func5 -= y_plus_t1 * log(sf[0]+t1 / mu[i]);
+            }
+        }
+        func2 *= t1;
+        
+    }
+    return -(func1+func2+func3+func4+func5);
+}
 
 // [[Rcpp::export]]
 double calc_loglik_b(double b, NumericVector y, NumericVector mu, NumericVector sf) {
@@ -38,7 +127,7 @@ double calc_loglik_b(double b, NumericVector y, NumericVector mu, NumericVector 
         for (int i = 0; i < n; i++) {
             double t3 = y[i] + t2;
             func3 += lgamma(t3);
-            if (sf.length() > 0) {
+            if (sf.length() > 1) {
                 func4 -= t3*std::log(sf[i]+t1);
             } else {
                 func4 -= t3*log_t_sf;
@@ -52,7 +141,7 @@ double calc_loglik_b(double b, NumericVector y, NumericVector mu, NumericVector 
             func2 -= lgamma(t2);
             double t3 = y[i] + t2;
             func3 += lgamma(t3);
-            if (sf.length() > 0) {
+            if (sf.length() > 1) {
                 func4 -= t3*std::log(sf[i]+t1);
             } else {
                 func4 -= t3*log_t_sf;

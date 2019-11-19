@@ -17,9 +17,7 @@
  */ 
 
 
-#include <Rcpp.h>
-using namespace std;
-using namespace Rcpp;
+#include "lgamma.h"
 
 double lgamma(double x)
 {
