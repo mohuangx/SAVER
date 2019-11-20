@@ -34,12 +34,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_loglik_k
-double calc_loglik_k(double k, NumericVector y, NumericVector mu, NumericVector sf);
+NumericVector calc_loglik_k(NumericVector k, NumericVector y, NumericVector mu, NumericVector sf);
 RcppExport SEXP _SAVER_calc_loglik_k(SEXP kSEXP, SEXP ySEXP, SEXP muSEXP, SEXP sfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type k(kSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type k(kSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type sf(sfSEXP);

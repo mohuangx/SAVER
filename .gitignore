@@ -13,3 +13,4 @@ vignettes/*cache
 calc.b.RData
 calc.loglik.b.RData
 calc.post.RData
+*.Rprofvis

@@ -151,73 +151,76 @@ double calc_loglik_b(double b, NumericVector y, NumericVector mu, NumericVector 
     return -(func1+func2+func3+func4);
 }
 
-/*
- calc.loglik.k <- function(k, y, mu, sf) {
-  t1 <- 1 / k
-  n <- length(y)
-  if (length(mu) == 1) {
-    mu <- rep(mu, n)
-  }
-  
-  func3 <- sum(mu^2*log(mu)*t1)
-  func4 <- sum(mu^2*log(t1)*t1)
-  func5 <- -sum(lgamma(mu^2*t1))
-  
-  func6 <- sum(lgamma(y+mu^2*t1))
-  
-  if (length(sf) == 1) {
-    sf <- rep(sf, n)
-  }
-  func7 <- -sum((y+mu^2*t1)*log(sf+mu*t1))
-  
-  return(-sum(func3, func4, func5, func6, func7))
-}
- */
-
 // [[Rcpp::export]]
-double calc_loglik_k(double k, NumericVector y, NumericVector mu, NumericVector sf) {
+NumericVector calc_loglik_k(NumericVector k, NumericVector y, NumericVector mu, NumericVector sf) {
     int n = y.length();
-    double t1 = 1.0 / k;
-    double log_t1 = std::log(t1);
     
-    double func3 = 0;
-    double func4 = 0;
-    double func5 = 0;
-    double func6 = 0;
-    double func7 = 0;
+    int n_k = k.length();
+    NumericVector t1(n_k);
+    NumericVector log_t1(n_k);
+    for (int i = 0; i < n_k; i++) {
+        t1[i] = 1.0 / k[i];
+        log_t1[i] =  std::log(t1[i]);
+    }
+    NumericVector result(n_k);
     
     if (mu.length() == 1) {
         double mu_square = mu[0] * mu[0];
-        double t3 = mu_square * t1;
-        double t2 = t3 * n;
-        func3 = t2 * log(mu[0]);
-        func4 = t2 * log_t1;
-        func5 = -lgamma(t3) * n;
-        double t4 = log(sf[0]+t1 * mu[0]);
-        for (int i = 0; i < n; i++) {
-            double y_plus_t3 = y[i] + t3;
-            func6 += lgamma(y_plus_t3);
-            if (sf.length() > 1) {
-                func7 -= y_plus_t3 * log(sf[i]+t1 * mu[0]);
-            } else {
-                func7 -= y_plus_t3 * t4;
+        double log_mu = log(mu[0]);
+        for (int k_index = 0; k_index < n_k; k_index++) {
+            double func3 = 0;
+            double func4 = 0;
+            double func5 = 0;
+            double func6 = 0;
+            double func7 = 0;
+            double t3 = mu_square * t1[k_index];
+            double t2 = t3 * n;
+            func3 = t2 * log_mu;
+            func4 = t2 * log_t1[k_index];
+            func5 = -lgamma(t3) * n;
+            double t1_mu = t1[k_index] * mu[0];
+            double t4 = log(sf[0]+t1_mu);
+            for (int i = 0; i < n; i++) {
+                double y_plus_t3 = y[i] + t3;
+                func6 += lgamma(y_plus_t3);
+                if (sf.length() > 1) {
+                    func7 -= y_plus_t3 * log(sf[i]+t1_mu);
+                } else {
+                    func7 -= y_plus_t3 * t4;
+                }
             }
+            result[k_index] = -(func3+func4+func5+func6+func7);
         }
     } else {
+        double* mu_square = new double[n];
+        double* log_mu = new double[n];
         for (int i = 0; i < n; i++) {
-            double mu_square = mu[i] * mu[i];
-            double t3 = mu_square * t1;
-            func3 += t3 * log(mu[i]);
-            func4 += t3 * log_t1;
-            func5 -= lgamma(t3);
-            double y_plus_t3 = y[i] + t3;
-            func6 += lgamma(y_plus_t3);
-            if (sf.length() > 1) {
-                func7 -= y_plus_t3 * log(sf[i]+t1 * mu[i]);
-            } else {
-                func7 -= y_plus_t3 * log(sf[0]+t1 * mu[i]);
-            }
+            mu_square[i] = mu[i] * mu[i];
+            log_mu[i] = log(mu[i]);
         }
+        for (int k_index = 0; k_index < n_k; k_index++) {
+            double func3 = 0;
+            double func4 = 0;
+            double func5 = 0;
+            double func6 = 0;
+            double func7 = 0;
+            for (int i = 0; i < n; i++) {
+                double t3 = mu_square[i] * t1[k_index];
+                func3 += t3 * log_mu[i];
+                func4 += t3 * log_t1[k_index];
+                func5 -= lgamma(t3);
+                double y_plus_t3 = y[i] + t3;
+                func6 += lgamma(y_plus_t3);
+                if (sf.length() > 1) {
+                    func7 -= y_plus_t3 * log(sf[i]+t1[k_index] * mu[i]);
+                } else {
+                    func7 -= y_plus_t3 * log(sf[0]+t1[k_index] * mu[i]);
+                }
+            }
+            result[k_index] = -(func3+func4+func5+func6+func7);
+        }
+        delete [] mu_square;
+        delete [] log_mu;
     }
-    return -(func3+func4+func5+func6+func7);
+    return result;
 }
