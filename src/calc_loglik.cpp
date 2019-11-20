@@ -43,29 +43,6 @@
 
 #include "lgamma.h"
 
-/*
- calc.loglik.a <- function(a, y, mu, sf) {
-  n <- length(y)
-  t1 <- 1 / a
-  func1 <- n*t1*log(t1)
-  func3 <- -n*gammaln(t1)
-  
-  if (length(mu) == 1) {
-    mu <- rep(mu, n)
-  }
-  
-  func2 <- -t1*sum(log(mu))
-  func4 <- sum(gammaln(y+t1))
-  
-  if (length(sf) == 1) {
-    sf <- rep(sf, n)
-  }
-  func5 <- -sum((y+t1)*log(sf+t1/mu))
-  
-  return(-sum(func1, func2, func3, func4, func5))
-}
- */
-
 // [[Rcpp::export]]
 double calc_loglik_a(double a, NumericVector y, NumericVector mu, NumericVector sf) {
     int n = y.length();
@@ -110,45 +87,65 @@ double calc_loglik_a(double a, NumericVector y, NumericVector mu, NumericVector 
     return -(func1+func2+func3+func4+func5);
 }
 
+
+
 // [[Rcpp::export]]
-double calc_loglik_b(double b, NumericVector y, NumericVector mu, NumericVector sf) {
-    double t1 = 1.0 / b;
-    double log_t1 = std::log(t1);
+NumericVector calc_loglik_b(NumericVector b, NumericVector y, NumericVector mu, NumericVector sf) {
     int n = y.length();
-    double func1 = 0;
-    double func2 = 0;
-    double func3 = 0;
-    double func4 = 0;
+    int n_b = b.length();
+    NumericVector log_t1(n_b);
+    NumericVector t1(n_b);
+    
+    for (int i = 0; i < n_b; i++) {
+        t1[i] = 1.0 / b[i];
+        log_t1[i] =  std::log(t1[i]);
+    }
+    NumericVector result(n_b);
+    
     if (mu.length() == 1) {
-        double t2 = mu[0] * t1;
-        func1 = t2 * log_t1 * n;
-        func2 -= lgamma(t2) * n;
-        double log_t_sf = log(sf[0]+t1);
-        for (int i = 0; i < n; i++) {
-            double t3 = y[i] + t2;
-            func3 += lgamma(t3);
-            if (sf.length() > 1) {
-                func4 -= t3*std::log(sf[i]+t1);
-            } else {
-                func4 -= t3*log_t_sf;
+        for (int b_index = 0; b_index < n_b; b_index++) {
+            double func1 = 0;
+            double func2 = 0;
+            double func3 = 0;
+            double func4 = 0;
+            double t2 = mu[0] * t1[b_index];
+            func1 = t2 * log_t1[b_index] * n;
+            func2 -= lgamma(t2) * n;
+            double log_t_sf = log(sf[0]+t1[b_index]);
+            for (int i = 0; i < n; i++) {
+                double t3 = y[i] + t2;
+                func3 += lgamma(t3);
+                if (sf.length() > 1) {
+                    func4 -= t3*std::log(sf[i]+t1[b_index]);
+                } else {
+                    func4 -= t3*log_t_sf;
+                }
             }
+            result[b_index] = -(func1+func2+func3+func4);
         }
     } else {
-        double log_t_sf = log(sf[0]+t1);
-        for (int i = 0; i < n; i++) {
-            double t2 = mu[i] * t1;
-            func1 += t2 * log_t1;
-            func2 -= lgamma(t2);
-            double t3 = y[i] + t2;
-            func3 += lgamma(t3);
-            if (sf.length() > 1) {
-                func4 -= t3*std::log(sf[i]+t1);
-            } else {
-                func4 -= t3*log_t_sf;
+        for (int b_index = 0; b_index < n_b; b_index++) {
+            double log_t_sf = log(sf[0]+t1[b_index]);
+            double func1 = 0;
+            double func2 = 0;
+            double func3 = 0;
+            double func4 = 0;
+            for (int i = 0; i < n; i++) {
+                double t2 = mu[i] * t1[b_index];
+                func1 += t2 * log_t1[b_index];
+                func2 -= lgamma(t2);
+                double t3 = y[i] + t2;
+                func3 += lgamma(t3);
+                if (sf.length() > 1) {
+                    func4 -= t3*std::log(sf[i]+t1[b_index]);
+                } else {
+                    func4 -= t3*log_t_sf;
+                }
             }
+            result[b_index] = -(func1+func2+func3+func4);
         }
     }
-    return -(func1+func2+func3+func4);
+    return result;
 }
 
 // [[Rcpp::export]]
