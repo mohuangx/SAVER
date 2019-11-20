@@ -6,12 +6,12 @@
 using namespace Rcpp;
 
 // calc_loglik_a
-double calc_loglik_a(double a, NumericVector y, NumericVector mu, NumericVector sf);
+NumericVector calc_loglik_a(NumericVector a, NumericVector y, NumericVector mu, NumericVector sf);
 RcppExport SEXP _SAVER_calc_loglik_a(SEXP aSEXP, SEXP ySEXP, SEXP muSEXP, SEXP sfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type a(aSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type sf(sfSEXP);

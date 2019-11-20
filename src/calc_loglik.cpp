@@ -44,50 +44,70 @@
 #include "lgamma.h"
 
 // [[Rcpp::export]]
-double calc_loglik_a(double a, NumericVector y, NumericVector mu, NumericVector sf) {
+NumericVector calc_loglik_a(NumericVector a, NumericVector y, NumericVector mu, NumericVector sf) {
     int n = y.length();
-    double t1 = 1.0 / a;
-    double log_t1 = std::log(t1);
-    
-    double func1 = 0;
-    double func2 = 0;
-    double func3 = 0;
-    double func4 = 0;
-    double func5 = 0;
-    
-    func1 = t1 * log_t1 * n;
-    func3 = -lgamma(t1) * n;
+    int n_a = a.length();
+    NumericVector log_t1(n_a);
+    NumericVector t1(n_a);
+    for (int i = 0; i < n_a; i++) {
+        t1[i] = 1.0 / a[i];
+        log_t1[i] =  std::log(t1[i]);
+    }
+    NumericVector result(n_a);
     
     if (mu.length() == 1) {
-        func2 = -log(mu[0]) * t1 * n;
-        double t2 = log(sf[0]+t1 / mu[0]);
-        for (int i = 0; i < n; i++) {
-            double y_plus_t1 = y[i] + t1;
-            func4 += lgamma(y_plus_t1);
-            if (sf.length() > 1) {
-                func5 -= y_plus_t1 * log(sf[i]+t1 / mu[0]);
-            } else {
-                func5 -= y_plus_t1 * t2;
+        for (int a_index = 0; a_index < n_a; a_index++) {
+            double func1 = 0;
+            double func2 = 0;
+            double func3 = 0;
+            double func4 = 0;
+            double func5 = 0;
+            
+            func1 = t1[a_index] * log_t1[a_index] * n;
+            func3 = -lgamma(t1[a_index]) * n;
+            func2 = -log(mu[0]) * t1[a_index] * n;
+            double t2 = log(sf[0]+t1[a_index] / mu[0]);
+            for (int i = 0; i < n; i++) {
+                double y_plus_t1 = y[i] + t1[a_index];
+                func4 += lgamma(y_plus_t1);
+                if (sf.length() > 1) {
+                    func5 -= y_plus_t1 * log(sf[i]+t1[a_index] / mu[0]);
+                } else {
+                    func5 -= y_plus_t1 * t2;
+                }
             }
+            result[a_index] = -(func1+func2+func3+func4+func5);
         }
     } else {
+        double* log_mu = new double[n];
         for (int i = 0; i < n; i++) {
-            func2 -= log(mu[i]);
-            double y_plus_t1 = y[i] + t1;
-            func4 += lgamma(y_plus_t1);
-            if (sf.length() > 1) {
-                func5 -= y_plus_t1 * log(sf[i]+t1 / mu[i]);
-            } else {
-                func5 -= y_plus_t1 * log(sf[0]+t1 / mu[i]);
-            }
+            log_mu[i] = log(mu[i]);
         }
-        func2 *= t1;
-        
+        for (int a_index = 0; a_index < n_a; a_index++) {
+            double func1 = 0;
+            double func2 = 0;
+            double func3 = 0;
+            double func4 = 0;
+            double func5 = 0;
+            func1 = t1[a_index] * log_t1[a_index] * n;
+            func3 = -lgamma(t1[a_index]) * n;
+            for (int i = 0; i < n; i++) {
+                func2 -= log_mu[i];
+                double y_plus_t1 = y[i] + t1[a_index];
+                func4 += lgamma(y_plus_t1);
+                if (sf.length() > 1) {
+                    func5 -= y_plus_t1 * log(sf[i]+t1[a_index] / mu[i]);
+                } else {
+                    func5 -= y_plus_t1 * log(sf[0]+t1[a_index] / mu[i]);
+                }
+            }
+            func2 *= t1[a_index];
+            result[a_index] = -(func1+func2+func3+func4+func5);
+        }
+        delete [] log_mu;
     }
-    return -(func1+func2+func3+func4+func5);
+    return result;
 }
-
-
 
 // [[Rcpp::export]]
 NumericVector calc_loglik_b(NumericVector b, NumericVector y, NumericVector mu, NumericVector sf) {
