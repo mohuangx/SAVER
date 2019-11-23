@@ -23,7 +23,7 @@
 #' @rdname optimize_variance
 #' @export
 
-calc.abk <- function(y, mu, sf, type) {
+calc.abk <- function(y, mu, sf, type, samp) {
   n <- length(y)
   if (sum(mu) == 0) {
     return(c(0, 0))
@@ -41,6 +41,7 @@ calc.abk <- function(y, mu, sf, type) {
   v.vec <- optimize(f, interval = c(0, interval_max), y = y, mu = mu,sf = sf)
   v <- v.vec$minimum
   loglik <- v.vec$objective
+  
   min.v <- -f(1e-05, y, mu, sf)
   mle.v <- -f(v, y, mu, sf)
   if (mle.v - min.v < 0.5) {
@@ -50,7 +51,7 @@ calc.abk <- function(y, mu, sf, type) {
     } else {
       v.max <- interval_max
     }
-    samp <- (exp((exp(ppoints(100))-1)/2)-1)*v.max
+    samp <- samp*v.max
     loglik <- f(samp, y, mu, sf)
     loglik2 <- exp(-loglik-min(-loglik))
     loglik3 <- loglik2/sum(loglik2)
@@ -58,9 +59,11 @@ calc.abk <- function(y, mu, sf, type) {
     loglik <- f(v, y, mu, sf)
   }
   
+  
   if (type == "a" || type == "b") {
-    return(c(1/v, loglik))
+     return(c(1/v, loglik))
   } else {
      return(c(v, loglik))
   }
+  
 }

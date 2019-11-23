@@ -24,6 +24,7 @@
 #' @importFrom stats qgamma
 #' @export
 calc.post <- function(y, mu, sf, scale.sf) {
+  samp <- (exp((exp(ppoints(100))-1)/2)-1)
   n <- length(y)
   if (length(mu) == 1) {
     mu <- rep(mu, n)
@@ -35,16 +36,16 @@ calc.post <- function(y, mu, sf, scale.sf) {
     return(list(estimate = rep(0, n), se = rep(0, n)))
   }
   if (var(mu) == 0) {
-    prior.beta <- rep(calc.abk(y, mu, sf, "b")[1], n)
+    prior.beta <- rep(calc.abk(y, mu, sf, "b", samp)[1], n)
     prior.alpha <- mu*prior.beta
   } else{
-    a <- tryCatch(calc.abk(y, mu, sf, "a"), error = function(cond) {
+    a <- tryCatch(calc.abk(y, mu, sf, "a", samp), error = function(cond) {
       return(c(0, Inf))
     })
-    b <- tryCatch(calc.abk(y, mu, sf, "b"), error = function(cond) {
+    b <- tryCatch(calc.abk(y, mu, sf, "b", samp), error = function(cond) {
       return(c(0, Inf))
     })
-    k <- tryCatch(calc.abk(y, mu, sf, "k"), error = function(cond) {
+    k <- tryCatch(calc.abk(y, mu, sf, "k", samp), error = function(cond) {
       return(c(0, Inf))
     })
     var.method <- which.min(c(a[2], b[2], k[2]))

@@ -5,6 +5,21 @@
 
 using namespace Rcpp;
 
+// calc_abk
+NumericVector calc_abk(NumericVector y, NumericVector mu, NumericVector sf, std::string type, NumericVector samp);
+RcppExport SEXP _SAVER_calc_abk(SEXP ySEXP, SEXP muSEXP, SEXP sfSEXP, SEXP typeSEXP, SEXP sampSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type sf(sfSEXP);
+    Rcpp::traits::input_parameter< std::string >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type samp(sampSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_abk(y, mu, sf, type, samp));
+    return rcpp_result_gen;
+END_RCPP
+}
 // calc_loglik_a
 NumericVector calc_loglik_a(NumericVector a, NumericVector y, NumericVector mu, NumericVector sf);
 RcppExport SEXP _SAVER_calc_loglik_a(SEXP aSEXP, SEXP ySEXP, SEXP muSEXP, SEXP sfSEXP) {
@@ -60,6 +75,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SAVER_calc_abk", (DL_FUNC) &_SAVER_calc_abk, 5},
     {"_SAVER_calc_loglik_a", (DL_FUNC) &_SAVER_calc_loglik_a, 4},
     {"_SAVER_calc_loglik_b", (DL_FUNC) &_SAVER_calc_loglik_b, 4},
     {"_SAVER_calc_loglik_k", (DL_FUNC) &_SAVER_calc_loglik_k, 4},
