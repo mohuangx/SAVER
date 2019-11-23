@@ -1,3 +1,30 @@
+/*
+#' Optimizes variance
+#'
+#' Finds the prior parameter that maximizes the marginal likelihood given
+#' the prediction.
+#'
+#' \code{calc.a} returns a prior alpha parameter assuming constant
+#' coefficient of variation. \code{calc.b} returns a prior beta parameter
+#' assuming constant Fano factor. \code{calc.k} returns a prior variance
+#' parameter assuming constant variance.
+#'
+#' @param y A vector of observed gene counts.
+#'
+#' @param mu A vector of predictions from \code{\link{expr.predict}}.
+#'
+#' @param sf Vector of normalized size factors.
+#'
+#' @return A vector with the optimized parameter and the negative
+#' log-likelihood.
+#'
+#'
+#' @importFrom  stats optimize ppoints uniroot var
+#'
+#' @rdname optimize_variance
+#' @export
+*/
+
 #include "lgamma.h"
 
 typedef NumericVector (*funcPtr)(NumericVector, NumericVector, NumericVector, NumericVector);
@@ -82,6 +109,7 @@ NumericVector calc_abk(NumericVector y, NumericVector mu, NumericVector sf, std:
         double v_max = interval_max;
         if (mle_v- max_v > 10.0) {
             Function uniroot = stats["uniroot"];
+            interval[0] = 1e-05;
             List uniroot_result = uniroot(Rcpp::_["f"] = Rcpp::InternalFunction(f_Shift), Rcpp::_["interval"] =  interval, y, mu, sf, mle_v - 10);
             v_max = uniroot_result["root"];
         } 
