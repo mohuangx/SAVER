@@ -21,3 +21,7 @@ gammaln <- function(x) {
     .Call(`_SAVER_gammaln`, x)
 }
 
+set_zero_if_below <- function(x, t) {
+    .Call(`_SAVER_set_zero_if_below`, x, t)
+}
+

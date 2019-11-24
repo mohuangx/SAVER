@@ -514,26 +514,32 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   
   ngenes.left <- ngenes-n1
   total.elem <- ngenes.left*ncells
-  
   nsplit <- max(4, ceiling(total.elem/(2^31-1)))
-  
   split.ind <- ceiling(seq(n1, ngenes, length.out = nsplit+1))
   
   t1 <- Sys.time()
   for (i in 1:(length(split.ind)-1)) {
-    out <- update.output(calc.estimate.mean, ind, split.ind[i]+1, 
-                         split.ind[i+1], out, x, sf, scale.sf, mu, 
-                         nworkers, estimates.only)
+    out <- update.output(ind, split.ind[i]+1, split.ind[i+1], out, x, sf, scale.sf, mu, nworkers, estimates.only)
     t2 <- Sys.time()
     d1 <- difftime(t2, t1, units = "secs")/(split.ind[i+1]-n1)
     tdiff <- d1*(ngenes-split.ind[i+1])
     tdiff <- as.difftime(tdiff, units = "secs")
-    message("Finished ", split.ind[i+1], "/", ngenes, 
-            " genes. Approximate finish time: ",
-            Sys.time() + tdiff)
+    message("Finished ", split.ind[i+1], "/", ngenes, " genes. Approximate finish time: ", Sys.time() + tdiff)
   }
-
   out$info[[10]] <- Sys.time() - st
+  return(out)
+}
+
+update.output <- function(ind, start, stop, out, x, sf, scale.sf, mu, nworkers, estimates.only) {
+  ind1 <- ind[start:stop]
+  results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf, mu[ind1, , drop = FALSE], nworkers, estimates.only)
+  out$estimate[ind1, ] <- results$est
+  if (!estimates.only) {
+    out$se[ind1, ] <- results$se
+  }
+  for (j in 1:6) {
+    out$info[[j+1]][ind1] <- results[[j+2]]
+  }
   return(out)
 }
 

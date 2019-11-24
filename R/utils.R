@@ -1,33 +1,29 @@
-
-clean.data <- function(x) {
-  if (!(grepl("matrix", class(x), ignore.case = TRUE))) {
-    x <- Matrix::Matrix(as.matrix(x))
-    message("Converting x to matrix.")
-    if (!is.numeric(x)) {
-      warning("Make sure x is numeric.")
+clean.data <- function(x, threhold) {
+    if (!is(x, "Matrix")) {
+        x <- Matrix::Matrix(as.matrix(x))
+        message("Converting x to matrix.")
+        if (!is.numeric(x)) {
+            warning("Make sure x is numeric.")
+        }
     }
-  }
-  np <- dim(x)
-  size <- as.numeric(np[1])*as.numeric(np[2])
-  if(size > 2^31-1){
-    inds <- split(1:np[2], ceiling(1:np[2]/1000))
-    for(i in 1:length(inds)){
-      x[, inds[[i]]][x[, inds[[i]]] < 0.001] <- 0
+    np <- dim(x)
+    if (is.null(np) | (np[2] <= 1))
+        stop("x should be a matrix with 2 or more columns")
+    
+    if (!is(x, "dgCMatrix")) {
+        x <-  as(x, "dgCMatrix")
     }
-  } else {
-    x[x < 0.001] <- 0
-  }
-  if (is.null(np) | (np[2] <= 1))
-    stop("x should be a matrix with 2 or more columns")
-  if (min(Matrix::colSums(x)) == 0) {
-    nzerocells <- sum(Matrix::colSums(x) == 0)
-    x <- x[, Matrix::colSums(x) != 0]
-    message("Removing ", nzerocells, " cell(s) with zero expression.")
-  }
-  if (is.null(rownames(x))) {
-    rownames(x) <- 1:np[1]
-  }
-  x
+    x <- set_zero_if_below(x,threhold) 
+    
+    if (min(Matrix::colSums(x)) == 0) {
+        nzerocells <- sum(Matrix::colSums(x) == 0)
+        x <- x[, Matrix::colSums(x) != 0]
+        message("Removing ", nzerocells, " cell(s) with zero expression.")
+    }
+    if (is.null(rownames(x))) {
+        rownames(x) <- 1:np[1]
+    }
+    x
 }
 
 check.mu <- function(x, mu) {
@@ -49,23 +45,6 @@ check.mu <- function(x, mu) {
   }
   mu
 }
-
-update.output <- function(f, ind, start, stop, out, x, sf, scale.sf, mu, 
-                          nworkers, estimates.only) {
-  n <- stop-start+1
-  ind1 <- ind[start:stop]
-  results <- f(x[ind1, , drop = FALSE], sf, scale.sf,
-               mu[ind1, , drop = FALSE], nworkers, estimates.only)
-  out$estimate[ind1, ] <- results$est
-  if (!estimates.only) {
-    out$se[ind1, ] <- results$se
-  }
-  for (j in 1:6) {
-    out$info[[j+1]][ind1] <- results[[j+2]]
-  }
-  return(out)
-}
-
 
 calc.size.factor <- function(x, size.factor, ncells) {
   if (is.null(size.factor)) {

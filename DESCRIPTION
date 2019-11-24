@@ -25,8 +25,9 @@ Imports:
     iterators,
     doParallel,
     Matrix,
-    Rcpp (>= 1.0.0)
-LinkingTo: Rcpp
+    Rcpp,
+    RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.0.0
 URL: https://github.com/mohuangx/SAVER
 BugReports: https://github.com/mohuangx/SAVER/issues

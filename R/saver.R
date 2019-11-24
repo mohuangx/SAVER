@@ -102,7 +102,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   if (!is.null(mu)) {
     mu <- check.mu(x, mu)
   }
-  x <- clean.data(x)
+  x <- clean.data(x,0.001)
   np <- dim(x)
   ngenes <- as.integer(np[1])
   ncells <- as.integer(np[2])
