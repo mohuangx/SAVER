@@ -91,7 +91,11 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
   } else {
     ind <- sample(1:ngenes, ngenes)
   }
-  if (do.fast & !null.model) {
+  if (do.fast & !null.model) { 
+    # Perform predictions using approximation tricks
+    
+    
+    # Predict n1 genes using full Lasso to estimate finish time.
     n1 <- min(max(8, nworkers), npred)
     ind1 <- ind[1:n1]
     message("Estimating finish time...")
@@ -120,7 +124,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
-
+    # If n1 is already equal to number of genes to be predicted, run
+    # saver.fit.null on remaining genes if any
     if (n1 == npred) {
       if (n1 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -142,6 +147,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Predict up to n2 genes using full Lasso
     ind2 <- ind[(n1+1):n2]
     message("Calculating max cor cutoff...")
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
@@ -156,10 +162,16 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       info[[j+1]][ind2] <- out[[j+2]]
     }
 
+    # Estimate relationship between quality of Lasso prediction and
+    # the maximum absolute correlation for that gene. If the maximum absolute
+    # correlation for a future gene is less than the cutoff, then don't perform
+    # Lasso prediction and use mean as mu
     fit <- lm(sqrt(info$sd.cv[ind[1:n2]]) ~ info$maxcor[ind[1:n2]])
     cutoff <- (0.5 - fit$coefficients[1])/fit$coefficients[2]
     info$cutoff <- unname(cutoff)
-    perc.pred <- mean(info$maxcor[ind[1:n2]] > cutoff)
+    perc.pred <- mean(info$maxcor[ind[1:n2]] > cutoff) 
+    # perc.pred is the percentage of genes thus far whose maximum abs corelation
+    # is higher than the cutoff.
 
     n3 <- min(max(ceiling(n2/perc.pred), nworkers) + n2, npred)
     ind3 <- ind[(n2+1):n3]
@@ -172,7 +184,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n2, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
-
+    # If npred genes have already been predicted, run saver.fit.null on 
+    # remaining genes if any
     if (n2 == npred) {
       if (n2 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -194,6 +207,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Predict up to n3 genes using full Lasso with maximum absolute cutoff
+    # threshold
     message("Calculating lambda coefficients...")
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff, coefs = NULL,
                          sf, scale.sf, gene.names[pred.genes], pred.cells,
@@ -217,7 +232,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n3, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
-
+    # If npred genes have already been predicted, run saver.fit.null on 
+    # remaining genes if any
     if (n3 == npred) {
       if (n3 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -239,16 +255,23 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Estimate relationship between penalty lambda chosen in full 
+    # cross-validated Lasso and maximum absolute correlation. Once this
+    # relationship is estimated, the maximum absolute correlation is used to
+    # predict the penalty lambda. Thus, the full cross-validated Lasso will not
+    # be needed and the Lasso regression will be evaluated at the predicted
+    # lambda.
     pred <- which(info$maxcor > cutoff)
     lambda.max <- info$lambda.max[pred]
     lambda.min <- info$lambda.min[pred]
     coefs <- lm(log(lambda.max/lambda.min)^2 ~ info$maxcor[pred])$coefficients
     info[[9]] <- coefs
-    cutoff2 <- max(info$cutoff, -coefs[1]/coefs[2])
+    cutoff2 <- max(info$cutoff, -coefs[1]/coefs[2]) # Generate new cutoff
 
+    # Predict up to n4 genes using maxcor cutoff and estimated lambda (no full
+    # cross-validated Lasso). This is to get a better estimate of finish time.
     n4 <- min(max(ceiling((npred-n3)/4), nworkers) + n3, npred)
     ind4 <- ind[(n3+1):n4]
-
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind4, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
@@ -271,6 +294,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n4, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
+    # If npred genes have already been predicted, run saver.fit.null on 
+    # remaining genes if any
     if (n4 == npred) {
       if (n4 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -291,9 +316,10 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Predict rest of npred genes using maxcor cutoff and estimated lambda (no full
+    # cross-validated Lasso)
     n5 <- npred
     ind5 <- ind[(n4+1):n5]
-
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind5, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
@@ -312,6 +338,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     tdiff <- (ngenes-npred)*mean(info$var.time[ind[1:n5]])/3/nworkers
     tdiff <- as.difftime(tdiff, units = "secs")
 
+    # Run saver.fit.null on remaining genes if any
     if (n5 != ngenes) {
       message("Finished ", n5, "/", ngenes, " genes. Approximate finish time: ",
               Sys.time() + tdiff)
@@ -332,6 +359,9 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     info[[10]] <- Sys.time() - st
     return(list(estimate = est, se = se, info = info))
   } else {
+    # Run full Lasso on all npred genes.
+    
+    # Predict up to n1 genes to estimate finish time.
     n1 <- min(max(8, nworkers), npred)
     ind1 <- ind[1:n1]
     message("Estimating finish time...")
@@ -348,6 +378,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       info[[j+1]][ind1] <- out[[j+2]]
     }
 
+    
     t2 <- Sys.time()
     d1 <- mean(info$pred.time[ind[1:n1]] + info$var.time[ind[1:n1]])/nworkers
     tdiff <- d1*(npred-n1) +
@@ -356,6 +387,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
+    # If npred genes have already been predicted, run saver.fit.null on 
+    # remaining genes if any
     if (n1 == npred) {
       if (n1 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -377,6 +410,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Predict up to n2 genes using full Lasso. n2 is chosen to be about
+    # 1/4 of data to get better estimate of finish time.
     n2 <- min(ceiling((npred-n1)/4) + n1, npred)
     ind2 <- ind[(n1+1):n2]
     message("Predicting remaining genes...")
@@ -399,6 +434,8 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     message("Finished ", n2, "/", ngenes, " genes. Approximate finish time: ",
             Sys.time() + tdiff)
 
+    # If npred genes have already been predicted, run saver.fit.null on 
+    # remaining genes if any
     if (n2 == npred) {
       if (n2 != ngenes) {
         ind6 <- ind[(npred+1):ngenes]
@@ -420,9 +457,9 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       return(list(estimate = est, se = se, info = info))
     }
 
+    # Predict all npred genes using full Lasso
     n3 <- npred
     ind3 <- ind[(n2+1):n3]
-
     message("Predicting remaining genes...")
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
@@ -440,6 +477,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     tdiff <- (ngenes-npred)*mean(info$var.time[ind[1:n3]])/3/nworkers
     tdiff <- as.difftime(tdiff, units = "secs")
 
+    # Run saver.fit.null on remaining genes if any
     if (n3 != ngenes) {
       message("Finished ", n3, "/", ngenes, " genes. Approximate finish time: ",
               Sys.time() + tdiff)
