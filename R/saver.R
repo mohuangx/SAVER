@@ -98,7 +98,7 @@
 saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
-                  estimates.only = FALSE) {
+                  estimates.only = FALSE, output.folder = NULL) {
   cd <- clean.data(x,0.001)
   x <- cd$x
   nzerocells <- cd$nzerocells
@@ -142,13 +142,12 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   } else if (null.model) {
     out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,
-                          estimates.only)
+                          estimates.only, output.folder)
   } else {
     # assign pred.cells and pred.genes
     pred.cells <- get.pred.cells(pred.cells, ncells)
     pred.genes <- get.pred.genes(x, pred.genes, npred, ngenes)
     npred <- length(pred.genes)
-
 
     good.genes <- which(Matrix::rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
     x.est <- t(as.matrix(log(sweep(x[good.genes, ] + 1, 2, sf, "/"))))
