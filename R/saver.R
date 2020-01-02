@@ -99,18 +99,16 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
                   estimates.only = FALSE) {
-  if (!is.null(mu)) {
-    mu <- check.mu(x, mu)
-  }
-  x <- clean.data(x,0.001)
-  np <- dim(x)
-  ngenes <- as.integer(np[1])
-  ncells <- as.integer(np[2])
+  cd <- clean.data(x,0.001)
+  x <- cd$x
+  nzerocells <- cd$nzerocells
+  ngenes <- dim(x)[1]
+  ncells <- dim(x)[2]
 
   message(ngenes, " genes, ", ncells, " cells")
 
   # assign size factor
-  sf.out <- calc.size.factor(x, size.factor, ncells)
+  sf.out <- calc.size.factor(x, size.factor)
   sf <- sf.out[[1]]
   scale.sf <- sf.out[[2]]
 
@@ -121,8 +119,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   cl.create <- FALSE
   if (foreach::getDoParWorkers() > 1) {
     if (ncores > 1 & foreach::getDoParWorkers() != ncores) {
-      message(paste("Parallel backend already registered and is inconsistent",
-                    "with ncores."))
+      message(paste("Parallel backend already registered and is inconsistent with ncores."))
     }
     ncores <- getDoParWorkers()
   } else {
@@ -141,7 +138,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   if (!is.null(mu)) {
     out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,
-                          estimates.only)
+                          estimates.only,nzerocells)
   } else if (null.model) {
     out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,

@@ -25,6 +25,7 @@ Imports:
     iterators,
     doParallel,
     Matrix,
+    data.table,
     Rcpp,
     RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo

@@ -466,80 +466,78 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 #' @export
 saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
-                           cell.names = colnames(x), estimates.only) {
-  out <- list()
-  out$estimate <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  if (!estimates.only) {
-    out$se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
-  } else {
-    out$se <- NA
-  }
-  out$info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
-  names(out$info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
-                   "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs",
-                   "total.time")
-  out$info$size.factor <- scale.sf*sf
+                           cell.names = colnames(x), estimates.only, nzerocells) {
+  
+    mu.file.mode = FALSE
+    if (is.character(mu)) {
+        if (!file.exists(mu)) {
+            stop("Make sure mu file exists.")
+        }
+        mu.file.mode = TRUE
+    } else {
+          mu <- check.mu(x, mu, nzerocells)  #check mu only if it is not a path
+    }
+    
+    out <- list()
+    out$info <- c(list(0), rep(list(rep(0, ngenes)), 6), list(0), list(0), list(0))
+    names(out$info) <- c("size.factor", "maxcor", "lambda.max", "lambda.min",
+                       "sd.cv", "pred.time", "var.time", "cutoff", "lambda.coefs",
+                       "total.time")
+    out$info$size.factor <- scale.sf*sf
 
+    if (!mu.file.mode) { #right now, tie output partial results to mu input is file or not
+        out$estimate <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+        if (!estimates.only) {
+            out$se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
+        } else {
+            out$se <- NA
+        }
+    }
+  
   nworkers <- ncores
   message("Running SAVER given prior means with ", nworkers, " worker(s)")
-
+  split.ind <- get.split.ind(nworkers,ngenes,ncells)
+  
+  
+  
   st <- Sys.time()
   message("Start time: ", st)
-  ind <- sample(1:ngenes, ngenes)
-
-  n1 <- min(max(100, nworkers), ngenes)
-  ind1 <- ind[1:n1]
+  
   message("Estimating finish time...")
   t1 <- Sys.time()
-  results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,
-                            mu[ind1, , drop = FALSE], nworkers, estimates.only)
-  out$estimate[ind1, ] <- results$est
-  if (!estimates.only) {
-    out$se[ind1, ] <- results$se
-  }
-  for (j in 1:6) {
-    out$info[[j+1]][ind1] <- results[[j+2]]
-  }
-
-  if (n1 == ngenes) {
-    out$info[[10]] <- Sys.time() - st
-    return(out)
-  }
-  
-  d1 <- mean(out$info$var.time[ind[1:n1]])/nworkers
-  tdiff <- d1*(ngenes-n1)
-  tdiff <- as.difftime(tdiff, units = "secs")
-  message("Finished ", n1, "/", ngenes, " genes. Approximate finish time: ",
-          Sys.time() + tdiff)
-  
-  ngenes.left <- ngenes-n1
-  total.elem <- ngenes.left*ncells
-  nsplit <- max(4, ceiling(total.elem/(2^31-1)))
-  split.ind <- ceiling(seq(n1, ngenes, length.out = nsplit+1))
-  
-  t1 <- Sys.time()
   for (i in 1:(length(split.ind)-1)) {
-    out <- update.output(ind, split.ind[i]+1, split.ind[i+1], out, x, sf, scale.sf, mu, nworkers, estimates.only)
-    t2 <- Sys.time()
-    d1 <- difftime(t2, t1, units = "secs")/(split.ind[i+1]-n1)
-    tdiff <- d1*(ngenes-split.ind[i+1])
-    tdiff <- as.difftime(tdiff, units = "secs")
-    message("Finished ", split.ind[i+1], "/", ngenes, " genes. Approximate finish time: ", Sys.time() + tdiff)
+      ind1 <- (split.ind[i]+1):split.ind[i+1]
+      if (mu.file.mode) {
+          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf, read.mu.by.trunk(mu,ind1,nzerocells), nworkers, estimates.only)
+      } else {
+          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,  mu[ind1, , drop = FALSE], nworkers, estimates.only)
+      }
+      
+      if (!mu.file.mode) {
+          out$estimate[ind1, ] <- results$est
+          if (!estimates.only) {
+            out$se[ind1, ] <- results$se
+          }
+      } else {
+          output.base <- dirname(mu)
+          est <- results$est
+          save(est, file = file.path(output.base, paste0("est_", i, ".RData")))
+          if (!estimates.only) { 
+              se <- results$se
+              save(se, file = file.path(output.base, paste0("se_", i, ".RData")))
+          }
+      }
+      
+      for (j in 1:6) {
+        out$info[[j+1]][ind1] <- results[[j+2]]
+      }
+      t2 <- Sys.time()
+      d1 <- difftime(t2, t1, units = "secs")/split.ind[i+1]
+      tdiff <- d1*(ngenes-split.ind[i+1])
+      tdiff <- as.difftime(tdiff, units = "secs")
+      message("Finished ", split.ind[i+1], "/", ngenes, " genes. Approximate finish time: ", Sys.time() + tdiff)
   }
-  out$info[[10]] <- Sys.time() - st
-  return(out)
-}
-
-update.output <- function(ind, start, stop, out, x, sf, scale.sf, mu, nworkers, estimates.only) {
-  ind1 <- ind[start:stop]
-  results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf, mu[ind1, , drop = FALSE], nworkers, estimates.only)
-  out$estimate[ind1, ] <- results$est
-  if (!estimates.only) {
-    out$se[ind1, ] <- results$se
-  }
-  for (j in 1:6) {
-    out$info[[j+1]][ind1] <- results[[j+2]]
-  }
+  out$info[["total.time"]] <- Sys.time() - st
   return(out)
 }
 

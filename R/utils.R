@@ -14,19 +14,19 @@ clean.data <- function(x, threhold) {
         x <-  as(x, "dgCMatrix")
     }
     x <- set_zero_if_below(x,threhold) 
-    
-    if (min(Matrix::colSums(x)) == 0) {
-        nzerocells <- sum(Matrix::colSums(x) == 0)
-        x <- x[, Matrix::colSums(x) != 0]
+    col.sums <- Matrix::colSums(x)
+    if (min(col.sums) == 0) {
+        nzerocells <- sum(col.sums == 0)
+        x <- x[, col.sums != 0]
         message("Removing ", nzerocells, " cell(s) with zero expression.")
     }
     if (is.null(rownames(x))) {
         rownames(x) <- 1:np[1]
     }
-    x
+    return(list(x = x, nzerocells = col.sums>0))
 }
 
-check.mu <- function(x, mu) {
+check.mu <- function(x, mu,nzerocells) {
   if (!is.matrix(mu)) {
     mu <- as.matrix(mu)
     message("Converting mu to matrix.")
@@ -39,29 +39,30 @@ check.mu <- function(x, mu) {
   if (sum(np == npmu) != 2) {
     stop("x and mu must have same dimensions")
   }
-  if (min(Matrix::colSums(x)) == 0) {
-    nzerocells <- sum(Matrix::colSums(x) == 0)
-    mu <- mu[, Matrix::colSums(x) != 0]
+  if (!all(nzerocells)) {
+    mu <- mu[, nzerocells]
   }
   mu
 }
 
-calc.size.factor <- function(x, size.factor, ncells) {
-  if (is.null(size.factor)) {
-    sf <- Matrix::colSums(x)/mean(Matrix::colSums(x))
-    scale.sf <- 1
-  } else if (length(size.factor) == ncells) {
-    sf <- size.factor/mean(size.factor)
-    scale.sf <- mean(size.factor)
-  } else if (size.factor == 1) {
-    sf <- rep(1, ncells)
-    scale.sf <- 1
-  } else if (min(size.factor) <= 0) {
-    stop("Size factor must be greater than 0")
-  } else {
-    stop("Not a valid size factor")
-  }
-  list(unname(sf), scale.sf)
+calc.size.factor <- function(x, size.factor) {
+    ncells <- dim(x)[2]
+    if (is.null(size.factor)) {
+        sf <- Matrix::colSums(x)
+        sf <- sf / mean(sf)
+        scale.sf <- 1
+    } else if (length(size.factor) == ncells) {
+        scale.sf <- mean(size.factor)
+        sf <- size.factor/scale.sf
+    } else if (size.factor == 1) {
+        sf <- rep(1, ncells)
+        scale.sf <- 1
+    } else if (min(size.factor) <= 0) {
+        stop("Size factor must be greater than 0")
+    } else {
+        stop("Not a valid size factor")
+    }
+    list(unname(sf), scale.sf)
 }
 
 get.pred.cells <- function(pred.cells, ncells) {
@@ -210,3 +211,22 @@ combine.saver.old <- function(saver.list) {
   out
 }
 
+get.split.ind <- function(nworkers,ngenes,ncells) {
+    n1 <- min(max(100, nworkers), ngenes)
+    ngenes.left <- ngenes-n1
+    total.elem <- ngenes.left*ncells
+    nsplit <- max(4, ceiling(total.elem/(2^31-1)))
+    split.ind <- ceiling(seq(n1, ngenes, length.out = nsplit+1))
+    split.ind <- c(0,split.ind)
+    return(split.ind)
+}
+
+read.mu.by.trunk <- function(f,index, nzerocells) {
+    start <- min(index)
+    end <- max(index)
+    trunk <- as.matrix(fread(f, sep=',', header=FALSE, data.table=FALSE, na.strings="", skip = start - 1, nrows =  end -  start + 1 ))
+    if (!all(nzerocells)) {
+    trunk <- trunk[, nzerocells]
+  }
+    return(trunk)
+}
