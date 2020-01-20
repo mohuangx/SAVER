@@ -64,7 +64,7 @@
 
 calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
                           pred.gene.names, pred.cells, null.model, nworkers,
-                          calc.maxcor, estimates.only) {
+                          calc.maxcor, estimates.only, num.intervals = 50) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -131,7 +131,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
         ct[i] <- as.numeric(Sys.time()-ptc)
         sd.cv[i] <- pred.out[[4]]
         ptc <- Sys.time()
-        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf)
+        post <- calc.post(ix[i, ], pred.out[[1]], sf, scale.sf,num.intervals)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
         if (!estimates.only) {
@@ -163,7 +163,7 @@ calc.estimate <- function(x, x.est, cutoff = 0, coefs = NULL, sf, scale.sf,
 #' @rdname calc_estimate
 #' @import foreach
 #' @export
-calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
+calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only, num.intervals = 50) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itermu <- iterators::iter(mu, by = "row", chunksize = cs)
@@ -190,7 +190,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
       sd.cv <- rep(0, nrow(ix))
       for (i in 1:nrow(ix)) {
         ptc <- Sys.time()
-        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
+        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf,num.intervals)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
         if (!estimates.only) {
@@ -222,7 +222,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only) {
 #' @rdname calc_estimate
 #' @import foreach
 #' @export
-calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
+calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only, num.intervals = 50) {
   cs <- min(ceiling(nrow(x)/nworkers), get.chunk(nrow(x), nworkers))
   iterx <- iterators::iter(as.matrix(x), by = "row", chunksize = cs)
   itercount <- iterators::icount(ceiling(iterx$length/iterx$chunksize))
@@ -246,7 +246,7 @@ calc.estimate.null <- function(x, sf, scale.sf, nworkers, estimates.only) {
       sd.cv <- rep(0, nrow(ix))
       for (i in 1:nrow(ix)) {
         ptc <- Sys.time()
-        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf)
+        post <- calc.post(ix[i, ], pred[i, ], sf, scale.sf, num.intervals)
         vt[i] <- as.numeric(Sys.time()-ptc)
         est[i, ] <- post[[1]]
         if (!estimates.only) {

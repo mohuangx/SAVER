@@ -23,8 +23,8 @@
 #'
 #' @importFrom stats qgamma
 #' @export
-calc.post <- function(y, mu, sf, scale.sf) {
-  samp <- (exp((exp(ppoints(100))-1)/2)-1)
+calc.post <- function(y, mu, sf, scale.sf, num.intervals = 50) {
+  samp <- (exp((exp(ppoints(num.intervals))-1)/2)-1)
   n <- length(y)
   if (length(mu) == 1) {
     mu <- rep(mu, n)

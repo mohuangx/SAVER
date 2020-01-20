@@ -57,7 +57,7 @@
 saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                       pred.cells, null.model, ngenes = nrow(x),
                       ncells = ncol(x), gene.names = rownames(x),
-                      cell.names = colnames(x), estimates.only) {
+                      cell.names = colnames(x), estimates.only, num.intervals = 50) {
   est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
   if (!estimates.only) {
     se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
@@ -103,7 +103,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind1, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                          pred.cells, null.model, nworkers, calc.maxcor = TRUE,
-                         estimates.only)
+                         estimates.only, num.intervals)
     est[ind1, ] <- out$est
     if (!estimates.only){
       se[ind1, ] <- out$se
@@ -134,7 +134,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
                              null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                             estimates.only)
+                             estimates.only, num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -153,7 +153,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                          pred.cells, null.model, nworkers, calc.maxcor = TRUE,
-                         estimates.only)
+                         estimates.only,num.intervals)
     est[ind2, ] <- out$est
     if (!estimates.only) {
       se[ind2, ] <- out$se
@@ -194,7 +194,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
                              null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                             estimates.only)
+                             estimates.only,num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -213,7 +213,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff, coefs = NULL,
                          sf, scale.sf, gene.names[pred.genes], pred.cells,
                          null.model, nworkers, calc.maxcor = TRUE,
-                         estimates.only)
+                         estimates.only,num.intervals)
     est[ind3, ] <- out$est
     if (!estimates.only) {
       se[ind3, ] <- out$se
@@ -242,7 +242,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
                              null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                             estimates.only)
+                             estimates.only,num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -276,7 +276,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind4, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
                          null.model, nworkers, calc.maxcor = TRUE,
-                         estimates.only)
+                         estimates.only,num.intervals)
 
     est[ind4, ] <- out$est
     if (!estimates.only) {
@@ -303,7 +303,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
         out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                              coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                              pred.cells, null.model = TRUE, nworkers,
-                             calc.maxcor = FALSE, estimates.only)
+                             calc.maxcor = FALSE, estimates.only,num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -324,7 +324,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind5, , drop = FALSE], x.est, cutoff2, coefs, sf,
                          scale.sf, gene.names[pred.genes], pred.cells,
                          null.model, nworkers, calc.maxcor = TRUE,
-                         estimates.only)
+                         estimates.only,num.intervals)
 
     est[ind5, ] <- out$est
     if (!estimates.only) {
@@ -347,7 +347,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
       out <- calc.estimate(x[ind6, , drop = FALSE], x.est, cutoff = 0,
                            coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                            pred.cells, null.model = TRUE, nworkers,
-                           calc.maxcor = FALSE, estimates.only)
+                           calc.maxcor = FALSE, estimates.only,num.intervals)
       est[ind6, ] <- out$est
       if (!estimates.only) {
         se[ind6, ] <- out$se
@@ -369,7 +369,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind1, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                          pred.cells, null.model, nworkers, calc.maxcor = FALSE,
-                         estimates.only)
+                         estimates.only,num.intervals)
     est[ind1, ] <- out$est
     if (!estimates.only) {
       se[ind1, ] <- out$se
@@ -397,7 +397,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
                              null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                             estimates.only)
+                             estimates.only,num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -418,7 +418,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind2, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                          pred.cells, null.model, nworkers, calc.maxcor = FALSE,
-                         estimates.only)
+                         estimates.only,num.intervals)
     est[ind2, ] <- out$est
     if (!estimates.only) {
       se[ind2, ] <- out$se
@@ -444,7 +444,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                              coefs = NULL, sf, scale.sf,
                              gene.names[pred.genes], pred.cells,
                              null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                             estimates.only)
+                             estimates.only,num.intervals)
         est[ind6, ] <- out$est
         if (!estimates.only) {
           se[ind6, ] <- out$se
@@ -464,7 +464,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
     out <- calc.estimate(x[ind3, , drop = FALSE], x.est, cutoff = 0,
                          coefs = NULL, sf, scale.sf, gene.names[pred.genes],
                          pred.cells, null.model, nworkers, calc.maxcor = FALSE,
-                         estimates.only)
+                         estimates.only,num.intervals)
     est[ind3, ] <- out$est
     if (!estimates.only) {
       se[ind3, ] <- out$se
@@ -487,7 +487,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                            coefs = NULL, sf, scale.sf,
                            gene.names[pred.genes], pred.cells,
                            null.model = TRUE, nworkers, calc.maxcor = FALSE,
-                           estimates.only)
+                           estimates.only,num.intervals)
       est[ind6, ] <- out$est
       if (!estimates.only) {
         se[ind6, ] <- out$se
@@ -505,14 +505,19 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 #' @export
 saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
-                           cell.names = colnames(x), estimates.only, nzerocells) {
+                           cell.names = colnames(x), estimates.only, nzerocells, 
+                           output.folder = NULL, num.intervals = 50) {
   
     mu.file.mode = FALSE
-    if (is.character(mu)) {
-        if (!file.exists(mu)) {
-            stop("Make sure mu file exists.")
-        }
+    if (!is.null(output.folder)) {
         mu.file.mode = TRUE
+        if (is.character(mu)) {
+            if (!file.exists(mu)) {
+                stop("Make sure mu file exists.")
+            }
+        } else {
+            stop("When outputing fitting results to files, mu must be provided as a file.")
+        }
     } else {
           mu <- check.mu(x, mu, nzerocells)  #check mu only if it is not a path
     }
@@ -524,7 +529,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                        "total.time")
     out$info$size.factor <- scale.sf*sf
 
-    if (!mu.file.mode) { #right now, tie output partial results to mu input is file or not
+    if (!mu.file.mode) {
         out$estimate <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
         if (!estimates.only) {
             out$se <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
@@ -546,9 +551,9 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   for (i in 1:(length(split.ind)-1)) {
       ind1 <- (split.ind[i]+1):split.ind[i+1]
       if (mu.file.mode) {
-          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf, read.mu.by.trunk(mu,ind1,nzerocells), nworkers, estimates.only)
+          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf, read.mu.by.trunk(mu,ind1,nzerocells), nworkers, estimates.only,num.intervals)
       } else {
-          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,  mu[ind1, , drop = FALSE], nworkers, estimates.only)
+          results <- calc.estimate.mean(x[ind1, , drop = FALSE], sf, scale.sf,  mu[ind1, , drop = FALSE], nworkers, estimates.only,num.intervals)
       }
       
       if (!mu.file.mode) {
@@ -583,7 +588,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
 #' @export
 saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
-                           cell.names = colnames(x), estimates.only, output.folder = NULL) {
+                           cell.names = colnames(x), estimates.only, output.folder = NULL, num.intervals = 50) {
     if (is.null(output.folder)) {
         est <- matrix(0, ngenes, ncells, dimnames = list(gene.names, cell.names))
         if (!estimates.only) {
@@ -611,7 +616,7 @@ saver.fit.null <- function(x, ncores, sf, scale.sf, ngenes = nrow(x),
     
     for (i in 1:(length(split.ind)-1)) {
         ind1 <- (split.ind[i]+1):split.ind[i+1]
-        results <- calc.estimate.null(x[ind1, , drop = FALSE], sf, scale.sf, nworkers, estimates.only)
+        results <- calc.estimate.null(x[ind1, , drop = FALSE], sf, scale.sf, nworkers, estimates.only,num.intervals)
         
         if (is.null(output.folder)) {
             est[ind1, ] <- results$est

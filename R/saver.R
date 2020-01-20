@@ -98,7 +98,7 @@
 saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
-                  estimates.only = FALSE, output.folder = NULL) {
+                  estimates.only = FALSE, output.folder = NULL, num.intervals = 50) {
   cd <- clean.data(x,0.001)
   x <- cd$x
   nzerocells <- cd$nzerocells
@@ -138,11 +138,11 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   if (!is.null(mu)) {
     out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,
-                          estimates.only,nzerocells)
+                          estimates.only,nzerocells,output.folder,num.intervals)
   } else if (null.model) {
     out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,
-                          estimates.only, output.folder)
+                          estimates.only, output.folder,num.intervals)
   } else {
     # assign pred.cells and pred.genes
     pred.cells <- get.pred.cells(pred.cells, ncells)
@@ -161,7 +161,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
     out <- saver.fit(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
                      pred.cells, null.model, ngenes = nrow(x),
                      ncells = ncol(x), gene.names, cell.names,
-                     estimates.only)
+                     estimates.only,num.intervals)
   }
   message("Done!")
   message("Finish time: ", Sys.time())
