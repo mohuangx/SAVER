@@ -211,11 +211,15 @@ combine.saver.old <- function(saver.list) {
   out
 }
 
-get.split.ind <- function(nworkers,ngenes,ncells) {
+get.split.ind <- function(nworkers,ngenes,ncells,trunk.size = NULL) {
     n1 <- min(max(100, nworkers), ngenes)
     ngenes.left <- ngenes-n1
-    total.elem <- ngenes.left*ncells
-    nsplit <- max(4, ceiling(total.elem/(2^31-1)))
+    if (is.null(trunk.size)) {
+        total.elem <- ngenes.left*ncells
+        nsplit <- max(4, ceiling(total.elem/(2^31-1)))
+    } else {
+        nsplit <- ceiling(ngenes.left / trunk.size)
+    }
     split.ind <- ceiling(seq(n1, ngenes, length.out = nsplit+1))
     split.ind <- c(0,split.ind)
     return(split.ind)

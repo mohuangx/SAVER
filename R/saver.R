@@ -98,7 +98,7 @@
 saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
                   npred = NULL, pred.cells = NULL, pred.genes = NULL,
                   pred.genes.only = FALSE, null.model = FALSE, mu = NULL,
-                  estimates.only = FALSE, output.folder = NULL, num.intervals = 50) {
+                  estimates.only = FALSE, output.folder = NULL, num.intervals = 50, trunk.size = NULL) {
   cd <- clean.data(x,0.001)
   x <- cd$x
   nzerocells <- cd$nzerocells
@@ -138,7 +138,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
   if (!is.null(mu)) {
     out <- saver.fit.mean(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,
-                          estimates.only,nzerocells,output.folder,num.intervals)
+                          estimates.only,nzerocells,output.folder,num.intervals,trunk.size)
   } else if (null.model) {
     out <- saver.fit.null(x, ncores, sf, scale.sf, ngenes = nrow(x),
                           ncells = ncol(x), gene.names, cell.names,

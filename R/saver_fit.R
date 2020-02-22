@@ -506,7 +506,7 @@ saver.fit <- function(x, x.est, do.fast, ncores, sf, scale.sf, pred.genes,
 saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
                            ncells = ncol(x), gene.names = rownames(x),
                            cell.names = colnames(x), estimates.only, nzerocells, 
-                           output.folder = NULL, num.intervals = 50) {
+                           output.folder = NULL, num.intervals = 50, trunk.size = NULL) {
   
     mu.file.mode = FALSE
     if (!is.null(output.folder)) {
@@ -540,7 +540,7 @@ saver.fit.mean <- function(x, ncores, sf, scale.sf, mu, ngenes = nrow(x),
   
   nworkers <- ncores
   message("Running SAVER given prior means with ", nworkers, " worker(s)")
-  split.ind <- get.split.ind(nworkers,ngenes,ncells)
+  split.ind <- get.split.ind(nworkers,ngenes,ncells, trunk.size)
   
   
   
