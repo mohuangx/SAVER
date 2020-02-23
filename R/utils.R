@@ -13,7 +13,11 @@ clean.data <- function(x, threhold) {
     if (!is(x, "dgCMatrix")) {
         x <-  as(x, "dgCMatrix")
     }
+    genes <- rownames(x)
+    samples <- colnames(x)
     x <- set_zero_if_below(x,threhold) 
+    colnames(x) <- samples
+    rownames(x) <- genes
     col.sums <- Matrix::colSums(x)
     if (min(col.sums) == 0) {
         nzerocells <- sum(col.sums == 0)
