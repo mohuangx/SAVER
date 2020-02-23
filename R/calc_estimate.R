@@ -176,6 +176,7 @@ calc.estimate.mean <- function(x, sf, scale.sf, mu, nworkers, estimates.only, nu
       maxcor <- rep(0, nrow(y))
       gene.means <- rowMeans(y)
       mu.means <- rowMeans(imu)
+      imu[mu.means == 0, ] <- gene.means[mu.means == 0]
       pred <- sweep(imu, 1, rowMeans(y)/rowMeans(imu), "*")
       est <- matrix(0, nrow(ix), ncol(ix))
       if (!estimates.only) {
