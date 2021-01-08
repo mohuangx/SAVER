@@ -70,7 +70,7 @@
 #'
 #' @examples
 #' data("linnarsson")
-#' 
+#'
 #' \dontrun{
 #' system.time(linnarsson_saver <- saver(linnarsson, ncores = 12))
 #' }
@@ -153,7 +153,7 @@ saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
     npred <- length(pred.genes)
 
 
-    good.genes <- which(Matrix::rowMeans(sweep(x, 2, sf, "/")) >= 0.1)
+    good.genes <- which(Matrix::rowMeans(x) >= 0.1)
     x.est <- t(as.matrix(log(sweep(x[good.genes, ] + 1, 2, sf, "/"))))
     if (pred.genes.only) {
       x <- x[pred.genes, , drop = FALSE]
