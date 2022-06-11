@@ -4,7 +4,9 @@
 \name{linnarsson_saver}
 \alias{linnarsson_saver}
 \title{SAVER recovered mouse brain single-cell RNA-seq dataset}
-\format{An object of class \code{saver} of length 3.}
+\format{
+An object of class \code{saver} of length 3.
+}
 \usage{
 linnarsson_saver
 }

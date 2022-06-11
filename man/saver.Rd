@@ -104,7 +104,7 @@ saver2 <- saver(linnarsson, npred = 5)
 # predictions for certain genes
 \dontrun{
 genes <- c("Thy1", "Mbp", "Stim2", "Psmc6", "Rps19")
-genes.ind <- which(rownames(linnarsson) %in% genes)
+genes.ind <- which(rownames(linnarsson) \%in\% genes)
 saver3 <- saver(linnarsson, pred.genes = genes.ind)
 }
 
