@@ -92,7 +92,7 @@
 #' saver4 <- saver(linnarsson, pred.genes = genes.ind, pred.genes.only = TRUE)
 #' }
 #'
-#' @import foreach
+#' @import foreach methods
 #'
 #' @export
 saver <- function(x, do.fast = TRUE, ncores = 1, size.factor = NULL,
