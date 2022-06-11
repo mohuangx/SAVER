@@ -1,6 +1,6 @@
 
 clean.data <- function(x) {
-  if (!(grepl("matrix", class(x), ignore.case = TRUE))) {
+  if (!(any(grepl("matrix", class(x), ignore.case = TRUE)))) {
     x <- Matrix::Matrix(as.matrix(x))
     message("Converting x to matrix.")
     if (!is.numeric(x)) {
@@ -50,7 +50,7 @@ check.mu <- function(x, mu) {
   mu
 }
 
-update.output <- function(f, ind, start, stop, out, x, sf, scale.sf, mu, 
+update.output <- function(f, ind, start, stop, out, x, sf, scale.sf, mu,
                           nworkers, estimates.only) {
   n <- stop-start+1
   ind1 <- ind[start:stop]
