@@ -1,9 +1,8 @@
 ## Submission
-This is a submission of an update (1.1.2) to the SAVER package. 
+This is a submission of an update (1.1.3) to the SAVER package. 
 
 ## Test environments
-* local Windows 7 install, R 3.6.1
-* ubuntu 16.04.6 (on travis-ci), R 3.6.1
+* local Windows 10 install, R 4.2.0
 
 ## R CMD check results
 

@@ -1,3 +1,7 @@
+## SAVER 1.1.3 (June 11, 2022)
+
+* Fix error for R version 4.2.0.
+
 ## SAVER 1.1.2 (November 12, 2019)
 
 * Update to make compatible with glmnet 3.0.
