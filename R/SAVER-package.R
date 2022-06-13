@@ -4,7 +4,7 @@
 #' single-cell RNA sequencing (scRNA-seq). Borrowing information across all
 #' genes and cells, SAVER provides estimates for true expression levels as well
 #' as posterior distributions to account for estimation uncertainty. See
-#' \href{https://doi.org/10.1038/s41592-018-0033-z}{Huang et al (2018)} for
+#' Huang et al (2018) \doi{10.1038/s41592-018-0033-z} for
 #' more details.
 #'
 #' @author Mo Huang (Maintainer), \email{mohuangx@@gmail.com}
