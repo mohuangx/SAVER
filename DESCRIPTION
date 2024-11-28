@@ -14,7 +14,7 @@ Authors@R: c(
         role = "aut")
     )
 Maintainer: Mo Huang <mohuangx@gmail.com>
-License: GPL-2
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.0.1)
